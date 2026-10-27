@@ -16,6 +16,17 @@ The CLI works independently of an AI agent. Installing the skill is optional and
 
 Installation may access the network to resolve Python dependencies. Deterministic source review works offline after installation. Optional model calls and explicit dependency/image provisioning need their own connectivity. No API key is required for deterministic execution. Browser workflows require a prepared Docker image containing matching Playwright/Chromium and application dependencies; installing the Python extra on the host alone is insufficient.
 
+## Install from PyPI
+
+With Python 3.11+ and your intended environment active:
+
+```sh
+python -m pip install local-appsec-lab
+appsec-lab doctor
+```
+
+On Windows, use `py -3 -m pip install local-appsec-lab` or your virtual environment's Python. Keep the interpreter available after installing managed skill copies. Pin a specific release with `local-appsec-lab==0.2.0` when reproducibility is needed. Docker, model hosts, scanners and application dependencies remain separate prerequisites.
+
 ## Install from source
 
 ```sh
@@ -46,7 +57,7 @@ py -3 -m venv .venv
 
 Use `python` instead of `py -3` if that is your installed Python 3.11+ command. These Windows commands do not require virtual-environment activation or a PowerShell execution-policy change. In subsequent examples, use the explicit environment interpreter/executable when the environment is not active.
 
-`doctor` reports dependency/isolation availability; a missing runtime backend does not prevent source-only review. No registry release is assumed. If you have a locally built wheel, install its exact path with `python -m pip install /path/to/local_appsec_lab-0.2.0-py3-none-any.whl`.
+`doctor` reports dependency/isolation availability; a missing runtime backend does not prevent source-only review. The project also supports source and exact-wheel installation. If you have a locally built wheel, install its exact path with `python -m pip install /path/to/local_appsec_lab-0.2.0-py3-none-any.whl`.
 
 ## Agent skill installation
 

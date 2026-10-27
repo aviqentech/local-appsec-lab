@@ -8,6 +8,15 @@ The engine inventories source, runs bounded source and Python data-flow analysis
 
 ## Install
 
+Install the published package in your chosen Python environment:
+
+```sh
+python -m pip install local-appsec-lab
+appsec-lab doctor
+```
+
+Or install from source using the commands below.
+
 Prerequisites: **Python 3.11+**, `venv` and `pip`; Git for cloning. Active execution also needs a supported OS isolation backend and a prepared runtime. Browser/database workflows require Docker with **Linux containers**. See the [full prerequisites and installation guide](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/installation.md).
 
 ```sh
@@ -29,7 +38,7 @@ py -3 -m venv .venv
 .\.venv\Scripts\appsec-lab.exe doctor
 ```
 
-Use the explicit Windows executable in subsequent examples when the environment is not active. Source installation is supported; a PyPI release is not assumed.
+Use the explicit Windows executable in subsequent examples when the environment is not active. The PyPI package and source checkout provide the same CLI and portable skill.
 
 ## Use it
 
