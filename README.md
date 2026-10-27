@@ -2,7 +2,7 @@
 
 A local application security engine and portable Agent Skill from [AVIQEN](https://github.com/aviqentech), licensed under Apache-2.0.
 
-**Version 0.2.0 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
+**Version 0.2.1 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
 
 The engine inventories source, runs bounded source and Python data-flow analysis, coordinates specialist AI workers with fresh verification and remediation workers, provisions supported locked dependencies and disposable Compose services, and tests actual local applications through scoped HTTP and Chromium. It produces JSON, Markdown, offline HTML and SARIF reports. Deterministic assessments require no model subscription or API key.
 

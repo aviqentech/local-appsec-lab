@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.1 — 2026-10-27
+
+Released from PR #2, source `30a5160e0444cf8c10958d4b616e1c941c2d4c72`.
+
 - Automatically publish a new patch release after merged-main PRs pass CI, with
   synchronized versions, immutable artifact checks and fresh PyPI installation tests.
 
