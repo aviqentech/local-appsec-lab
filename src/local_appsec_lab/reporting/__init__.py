@@ -51,6 +51,7 @@ def sarif(report: Report) -> dict:
                 "state": finding.state,
                 "severity": finding.severity,
                 "confidence": finding.confidence,
+                "cvss": finding.cvss,
             },
         }
         if finding.source:
@@ -146,6 +147,13 @@ def markdown(report: Report) -> str:
                 "```",
                 f"Remediation: {esc(f.remediation)}",
                 f"Regression: {esc(f.regression)}",
+                "CVSS v4 (explicit vector only): " + esc(json.dumps(f.cvss))
+                if f.cvss
+                else "CVSS v4: not assigned; no supported vector supplied.",
+                "Engineering guidance:",
+                "```json",
+                json.dumps(redact(f.remediation_details), indent=2),
+                "```",
                 f"Limitations: {esc('; '.join(f.limitations))}",
                 "",
             ]
@@ -174,7 +182,15 @@ def html_report(report: Report) -> str:
     cards = []
     for f in report.findings:
         evidence = json.dumps(
-            redact({"evidence": f.evidence, "verification": f.verification}), indent=2
+            redact(
+                {
+                    "evidence": f.evidence,
+                    "verification": f.verification,
+                    "cvss": f.cvss,
+                    "engineering_guidance": f.remediation_details,
+                }
+            ),
+            indent=2,
         )
         cards.append(
             f'<article data-state="{f.state}" data-severity="{f.severity}"><p class="tag">{f.severity.upper()} · {f.state} · {esc(f.id)}</p><h2>{esc(f.title)}</h2><p>{esc(f.description)}</p><dl><dt>Location</dt><dd>{esc(f.source.path + ":" + str(f.source.line) if f.source else f.endpoint or f.service)}</dd><dt>Root cause</dt><dd>{esc(f.root_cause)}</dd><dt>Expected</dt><dd>{esc(f.expected)}</dd><dt>Observed</dt><dd>{esc(f.observed)}</dd><dt>Remediation</dt><dd>{esc(f.remediation)}</dd><dt>Regression</dt><dd>{esc(f.regression)}</dd><dt>Limitations</dt><dd>{esc("; ".join(f.limitations))}</dd></dl><details><summary>Evidence and independent verification</summary><pre>{esc(evidence)}</pre></details></article>'

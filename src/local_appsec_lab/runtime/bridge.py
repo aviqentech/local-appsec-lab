@@ -16,6 +16,13 @@ import threading
 
 
 def main():
+    # The app shares this network namespace, but must not read or forge the
+    # observer's pipes through /proc/<pid>/fd even when its numeric UID matches.
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(4, 0, 0, 0, 0) != 0:  # PR_SET_DUMPABLE=0
+        raise RuntimeError("Cannot protect the trusted observation process")
     command, port = json.loads(sys.argv[1]), int(sys.argv[2])
     if command[0] in {"python", "python3"}:
         command[0] = sys.executable
@@ -71,7 +78,9 @@ def main():
                     connection.request(
                         request.get("method", "GET"),
                         path,
-                        body=request.get("body"),
+                        body=base64.b64decode(request["body_base64"], validate=True)
+                        if request.get("body_base64")
+                        else request.get("body"),
                         headers=request.get("headers", {}),
                     )
                     response = connection.getresponse()

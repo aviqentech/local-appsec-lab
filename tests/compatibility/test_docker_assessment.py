@@ -12,6 +12,7 @@ from local_appsec_lab.configuration import load
 from local_appsec_lab.discovery import inspect
 from local_appsec_lab.engine import scan
 from local_appsec_lab.findings import RunStore
+from local_appsec_lab.isolation import docker_control, local_image
 from local_appsec_lab.network import Budget
 from local_appsec_lab.runtime import Runtime
 
@@ -22,8 +23,8 @@ def runtime_image():
     if not image:
         pytest.skip("Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image")
     assert shutil.which("docker"), "The requested Docker test requires Docker"
-    result = subprocess.run(["docker", "image", "inspect", image], capture_output=True, timeout=10)
-    assert result.returncode == 0, "The requested test image must already be cached"
+    base, env = docker_control()
+    local_image(base, env, image)
     return image
 
 
@@ -76,3 +77,43 @@ def test_container_cannot_reach_host_loopback(runtime_image, fixture_project, fr
             runtime.stop()
             store.close()
         assert runtime.cleaned and not runtime.scratch.exists()
+
+
+@pytest.mark.docker
+def test_application_cannot_open_observer_protocol(runtime_image, fixture_project, free_port):
+    from local_appsec_lab.configuration import Config
+
+    root = fixture_project("multi-service")
+    (root / "server.py").write_text("""import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
+try:
+    fd = os.open('/proc/' + str(os.getppid()) + '/fd/1', os.O_WRONLY)
+except PermissionError:
+    denied = True
+else:
+    os.close(fd)
+    denied = False
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200 if denied else 500)
+        self.end_headers()
+        self.wfile.write(b'observer-protected' if denied else b'failed')
+HTTPServer(('127.0.0.1', int(os.environ['PORT'])), Handler).serve_forever()
+""")
+    config = Config(
+        execution={
+            "backend": "docker",
+            "image": runtime_image,
+            "command": ["python", "server.py"],
+            "port": free_port,
+        }
+    )
+    store = RunStore(root / ".appsec-lab")
+    runtime = Runtime(root, store.state, "observer-boundary", config, inspect(root))
+    try:
+        client = runtime.start(Budget(config.limits))
+        assert client.request("/health").body == b"observer-protected"
+    finally:
+        runtime.stop()
+        store.close()
+    assert runtime.cleaned

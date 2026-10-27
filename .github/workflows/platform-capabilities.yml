@@ -1,0 +1,49 @@
+name: Platform capabilities
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux-bubblewrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install '.[dev]'
+      - run: sudo apt-get update && sudo apt-get install -y bubblewrap
+      - name: Unprivileged namespace capability
+        run: APPSEC_TEST_BWRAP=1 python -m pytest tests/compatibility/test_bubblewrap.py -q -rs --junitxml=bwrap-unprivileged.xml
+      - name: Disposable trusted root controller, sandbox child without capabilities
+        run: sudo env APPSEC_TEST_BWRAP=1 "$(command -v python)" -m pytest tests/compatibility/test_bubblewrap.py -q -rs --basetemp=/tmp/appsec-bwrap-owned-tests --junitxml=bwrap-controller.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bubblewrap-capabilities
+          path: bwrap-*.xml
+  windows-engine:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Record Docker Linux-engine prerequisite, without changing host configuration
+        shell: pwsh
+        run: |
+          $result = @{ platform = 'Windows'; execution_verified = $false; prerequisite = 'local Docker Linux engine'; status = 'unavailable' }
+          if (Get-Command docker -ErrorAction SilentlyContinue) {
+            $engine = docker info --format '{{.OSType}}' 2>$null
+            if ($LASTEXITCODE -eq 0) { $result.engine = "$engine"; $result.status = 'capability_only' }
+          }
+          $result | ConvertTo-Json | Set-Content windows-engine-capability.json
+          Get-Content windows-engine-capability.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-engine-capability
+          path: windows-engine-capability.json

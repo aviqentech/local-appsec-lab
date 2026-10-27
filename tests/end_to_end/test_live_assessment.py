@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_real_application_full_workflow(runtime_ready, fixture_project, free_port, fixture):
     root = fixture_project(fixture)
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     result, outputs = scan(root, root, config, "local-active", True)
     assert result.metrics["services_started"] == 1
@@ -45,6 +46,7 @@ def test_real_application_full_workflow(runtime_ready, fixture_project, free_por
 def test_fix_reverification_preserves_disagreement(runtime_ready, fixture_project, free_port):
     root = fixture_project()
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     result, _ = scan(root, root, config, "local-active", True)
     finding = next(f for f in result.findings if f.state == "confirmed")
@@ -73,6 +75,7 @@ def test_cli_cancellation_cleans_owned_runtime(runtime_ready, fixture_project, f
 
     root = fixture_project()
     data = yaml.safe_load((root / "appsec-lab.yaml").read_text())
+    data["execution"]["backend"] = "macos"
     data["execution"]["port"] = free_port
     data["limits"]["requests_per_second"] = 1
     (root / "appsec-lab.yaml").write_text(yaml.safe_dump(data))

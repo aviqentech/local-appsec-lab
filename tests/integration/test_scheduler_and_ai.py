@@ -140,8 +140,15 @@ def test_http_provider_contract_with_mock_only(tmp_path, monkeypatch):
         def __exit__(self, *args):
             pass
 
+        consumed = False
+
         def read(self, n):
-            return json.dumps({"choices": [{"message": {"content": '{"findings":[]}'}}]}).encode()
+            if self.consumed:
+                return b""
+            self.consumed = True
+            return json.dumps(
+                {"choices": [{"message": {"content": '{"findings":[], "proposed_checks":[]}'}}]}
+            ).encode()
 
     class Opener:
         def open(self, request, timeout):

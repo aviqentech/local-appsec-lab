@@ -10,6 +10,15 @@ from local_appsec_lab.isolation import sandbox_probe
 ROOT = Path(__file__).resolve().parent.parent
 
 
+@pytest.fixture(autouse=True)
+def private_cache_key(tmp_path, monkeypatch):
+    import uuid
+
+    monkeypatch.setenv(
+        "APPSEC_CACHE_KEY_FILE", str(tmp_path.parent / ("analysis-" + uuid.uuid4().hex + ".key"))
+    )
+
+
 @pytest.fixture
 def fixture_project(tmp_path):
     def copy(name="javascript-api"):
@@ -35,7 +44,9 @@ def free_port():
 def runtime_ready():
     if platform.system() != "Darwin":
         pytest.skip("Live macOS runtime suite; Docker has a separate integration test")
-    if not sandbox_probe()["available"]:
+    from local_appsec_lab.configuration import Config
+
+    if not sandbox_probe(Config(execution={"backend": "macos"}))["available"]:
         pytest.skip("OS sandbox unavailable inside nested sandbox")
     if not shutil.which("node"):
         pytest.skip("Node runtime missing")

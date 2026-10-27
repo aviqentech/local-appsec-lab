@@ -1,0 +1,9 @@
+services:
+  api:
+    image: local-appsec-lab-browser:0.2.0
+    command: [python, server.py]
+    environment:
+      DATABASE_URL: postgresql://synthetic:synthetic-only@database:5432/synthetic
+    depends_on: [database]
+  database:
+    image: postgres:17-alpine

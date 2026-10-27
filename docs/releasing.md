@@ -1,6 +1,6 @@
 # Release process
 
-The publication repository is `aviqentech/local-appsec-lab`. Publishing the GitHub source repository does not publish a Python package or prove production readiness. Version 0.1.0 must remain labeled experimental.
+The publication repository is `aviqentech/local-appsec-lab`. Publishing the GitHub source repository does not publish a Python package or prove production readiness. Version 0.2.0 must remain labeled experimental.
 
 ## Prepare a source publication
 
@@ -24,7 +24,7 @@ python -m pytest -q
 python -m build
 ```
 
-Inspect both `dist/local_appsec_lab-0.1.0.tar.gz` and the wheel. They must contain their license/notice and bundled resources, and exclude `.appsec-lab`, `.venv`, credentials, bytecode and private evidence. Install a wheel into a clean temporary environment and verify CLI help plus managed skill installation/doctor/uninstall before distributing a binary release.
+Inspect both `dist/local_appsec_lab-0.2.0.tar.gz` and the wheel. They must contain their license/notice and bundled resources, and exclude `.appsec-lab`, `.venv`, credentials, bytecode and private evidence. Install a wheel into a clean temporary environment and verify CLI help plus managed skill installation/doctor/uninstall before distributing a binary release.
 
 ## Tagged or registry releases
 

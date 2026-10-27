@@ -14,7 +14,7 @@ The CLI works independently of an AI agent. Installing the skill is optional and
 | Agent skill | Above, a compatible installed host, and permission to write the selected skill directory |
 | Development | `.[dev]`; Node for JavaScript runtime fixtures; Docker for container tests |
 
-Installation may access the network to resolve Python dependencies. Deterministic source review works offline after installation. Optional model calls and explicit dependency/image provisioning need their own connectivity. No API key is required for deterministic execution. The browser extra is a dependency option only; browser workflow execution is not implemented.
+Installation may access the network to resolve Python dependencies. Deterministic source review works offline after installation. Optional model calls and explicit dependency/image provisioning need their own connectivity. No API key is required for deterministic execution. Browser workflows require a prepared Docker image containing matching Playwright/Chromium and application dependencies; installing the Python extra on the host alone is insufficient.
 
 ## Install from source
 
@@ -46,7 +46,7 @@ py -3 -m venv .venv
 
 Use `python` instead of `py -3` if that is your installed Python 3.11+ command. These Windows commands do not require virtual-environment activation or a PowerShell execution-policy change. In subsequent examples, use the explicit environment interpreter/executable when the environment is not active.
 
-`doctor` reports dependency/isolation availability; a missing runtime backend does not prevent source-only review. No registry release is assumed. If you have a locally built wheel, install its exact path with `python -m pip install /path/to/local_appsec_lab-0.1.0-py3-none-any.whl`.
+`doctor` reports dependency/isolation availability; a missing runtime backend does not prevent source-only review. No registry release is assumed. If you have a locally built wheel, install its exact path with `python -m pip install /path/to/local_appsec_lab-0.2.0-py3-none-any.whl`.
 
 ## Agent skill installation
 
@@ -75,7 +75,7 @@ python -m local_appsec_lab.install --project /path/to/application --target codex
 
 The installed copy contains `SKILL.md`, supporting references, a copied engine, `scripts/appsec_lab.py`, and `scripts/python.json` recording the interpreter path. Keep that interpreter and its dependencies available. Moving/deleting the virtual environment requires installing again with a working interpreter. The installer does not modify the host's settings to enable features or promise interactive skill discovery.
 
-Use the host's skill picker or documented skill invocation. Intended definitions include `/local-appsec-lab` for Claude Code/Cursor, `$local-appsec-lab` for Codex, and skill selection in Gemini CLI. These invocation paths have not been validated interactively; consult the [official host references](integrations.md). Missing native delegation does not prevent using the CLI directly.
+Use the host's skill picker or documented skill invocation. Intended definitions include `/local-appsec-lab` for Claude Code/Cursor, `$local-appsec-lab` for Codex, and skill selection in Gemini CLI. Codex, Claude and Cursor CLI invocation plus copied-helper inspection/planning were exercised; Gemini and desktop GUI invocation remain separate unverified surfaces. Consult the [official host references](integrations.md). Missing native delegation does not prevent using the CLI directly.
 
 The checkout also supplies `install.py` and `installers/install.sh` / `installers/install.ps1` wrappers. Their flags are the same as the module's; use the intended Python environment. The shell wrapper invokes `python3`, and the PowerShell wrapper invokes `python` from `PATH`.
 
@@ -98,7 +98,7 @@ docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Docke
 
 Select `execution.backend: docker` and `execution.image: local-appsec-lab-test:0.1.0` in the project configuration. The [Docker demo](../examples/configuration/docker-synthetic.yaml) is ready to copy for the Node fixture. The image must contain Python for the trusted HTTP bridge **and** the application's runtime/dependencies. A Node-only image or the default Python-only image is insufficient for the Node demo.
 
-The engine uses `--pull=never`, a read-only root/source, a non-root UID, dropped capabilities, no published ports, a private network namespace, resource limits and bounded writable `/tmp`. It does not install packages, execute setup hooks, build images, seed databases or provision Compose services. Use a reviewed image you prepared explicitly. Windows containers are unsupported.
+The engine uses `--pull=never`, a read-only root/source, a non-root UID, dropped capabilities, no published ports, a private network namespace, resource limits and bounded writable `/tmp`. It never installs packages, runs setup hooks or builds images implicitly. Explicit locked dependency setup and constrained Compose/database provisioning are available as described in [advanced usage](advanced-usage.md). Windows containers are unsupported.
 
 ## Update
 
@@ -134,3 +134,7 @@ python -m local_appsec_lab.install --global --target codex --operation doctor
 ```
 
 The final command checks a target that you actually installed. `skills doctor` lists locations/detection; the installer's `--operation doctor` validates managed file hashes. Review [platform evidence](validation.md) and [troubleshooting](troubleshooting.md) for environment-specific limits.
+
+Native macOS Seatbelt is an explicit reviewed-source option. It cannot block every
+numeric same-user process-argument query; host process environment/arguments may
+be exposed. Use Docker for untrusted application or scanner code.

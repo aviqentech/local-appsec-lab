@@ -87,7 +87,11 @@ class BridgeClient(Client):
         self.runtime = runtime
 
     def request(
-        self, path: str, headers: dict | None = None, method: str = "GET", body: dict | None = None
+        self,
+        path: str,
+        headers: dict | None = None,
+        method: str = "GET",
+        body: dict | bytes | None = None,
     ) -> Response:
         safe_path(path)
         if method not in {"GET", "HEAD"} and (method, path) not in self.allowed_mutations:
@@ -100,7 +104,7 @@ class BridgeClient(Client):
             for k, v in headers.items()
         ):
             raise ScopeError("Unsafe headers")
-        data = json.dumps(body) if body is not None else None
+        data = body if isinstance(body, bytes) else json.dumps(body) if body is not None else None
         if data and len(data) > 4096:
             raise ScopeError("Oversized body")
         self.budget.claim()
@@ -109,7 +113,8 @@ class BridgeClient(Client):
                 "path": path,
                 "headers": headers or {},
                 "method": method,
-                "body": data,
+                "body": None if isinstance(data, bytes) else data,
+                "body_base64": base64.b64encode(data).decode() if isinstance(data, bytes) else None,
                 "limit": self.budget.limits.response_bytes,
                 "timeout": min(3, self.budget.remaining()),
             }
@@ -201,6 +206,7 @@ class Runtime:
                         "Configured port is occupied; no existing service will be tested"
                     ) from exc
         actual_command = command
+        dependencies = None
         if selected == "bubblewrap":
             bridge = source / "_appsec_bridge.py"
             shutil.copyfile(Path(__file__).parent / "bridge.py", bridge)
@@ -213,11 +219,22 @@ class Runtime:
             ]
         if selected == "docker":
             self.docker_base, self.control_env = docker_control()
+            from local_appsec_lab.runtime.setup import prepared
+
+            dependencies = prepared(self.root, self.state, self.config)
+            if dependencies and dependencies[1] == "npm":
+                (cwd / "node_modules").mkdir(exist_ok=True)
             # Host parent remains private; the container's non-root UID must read the source mount.
             for entry in [source, *source.rglob("*")]:
                 entry.chmod(0o755 if entry.is_dir() else 0o644)
         args, self.backend = command_for(
-            self.config, self.scratch, cwd, actual_command, self.name, self.docker_base
+            self.config,
+            self.scratch,
+            cwd,
+            actual_command,
+            self.name,
+            self.docker_base,
+            dependencies,
         )
         # The original environment is deliberately not inherited.
         env = {

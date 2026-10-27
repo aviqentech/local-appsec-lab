@@ -9,3 +9,36 @@ rules:
     severity: WARNING
     message: Review the provenance and sanitization of direct HTML content.
     pattern: $E.innerHTML = $VALUE
+  - id: javascript-request-sql
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data reaches the SQL expression. Bind values separately; validate applicability.
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.query.$KEY
+      - pattern: $REQ.body.$KEY
+      - pattern: $REQ.params.$KEY
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $DB.query($SQL, ...)
+              - pattern: $DB.execute($SQL, ...)
+          - focus-metavariable: $SQL
+    metadata:
+      cwe: CWE-89
+  - id: javascript-request-command
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data reaches a shell command expression. Use an argument array without a shell.
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.query.$KEY
+      - pattern: $REQ.body.$KEY
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: child_process.exec($COMMAND, ...)
+              - pattern: exec($COMMAND, ...)
+          - focus-metavariable: $COMMAND
+    metadata:
+      cwe: CWE-78

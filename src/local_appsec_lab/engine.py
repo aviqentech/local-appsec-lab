@@ -20,9 +20,17 @@ from local_appsec_lab.discovery import inspect
 from local_appsec_lab.discovery.source_links import attach_sources
 from local_appsec_lab.dynamic_tests import run as dynamic_scan
 from local_appsec_lab.dynamic_tests.catalog import catalog
-from local_appsec_lab.errors import AuthorizationError, LabError, RuntimeFailure, ScopeError
+from local_appsec_lab.errors import (
+    AuthorizationError,
+    BudgetExceeded,
+    LabError,
+    RuntimeFailure,
+    ScopeError,
+)
 from local_appsec_lab.findings import RunStore
 from local_appsec_lab.integrations import ToolAdapter
+from local_appsec_lab.intelligence.cache import AnalysisCache
+from local_appsec_lab.intelligence.dataflow import analyze as analyze_dataflow
 from local_appsec_lab.isolation import sandbox_probe, docker_control
 from local_appsec_lab.models import Check, Finding, Report, SEVERITIES, digest, now
 from local_appsec_lab.network import Budget
@@ -42,10 +50,26 @@ def state_path(root: Path, config: Config) -> Path:
 
 
 def plan(root: Path, config: Config) -> dict:
-    inventory = inspect(root)
+    inventory = inspect(root, config.output)
     try:
-        command, service = resolve_command(config, inventory)
-        runtime = {"command": command, "service": service, "supported": True}
+        if config.execution.compose_file:
+            from local_appsec_lab.runtime.compose import definition
+
+            services, selected = definition(root, config)
+            runtime = {
+                "supported": True,
+                "backend": "compose",
+                "selected_service": selected,
+                "services": list(services),
+                "images": [service["image"] for service in services.values()],
+                "network": "internal bridge with isolated gateway; no published ports",
+                "disposable_databases": True,
+                "seeds": config.execution.seeds,
+                "migrations": config.execution.migrations,
+            }
+        else:
+            command, service = resolve_command(config, inventory)
+            runtime = {"command": command, "service": service, "supported": True}
     except RuntimeFailure as exc:
         runtime = {"supported": False, "reason": str(exc)}
     existing = None
@@ -87,7 +111,7 @@ def plan(root: Path, config: Config) -> dict:
         "test_catalog": catalog(),
         "health_path": config.execution.health_path,
         "synthetic_scenarios": redact([s.model_dump() for s in config.scenarios]),
-        "backend_status": sandbox_probe(),
+        "backend_status": sandbox_probe(config),
         "limits": config.limits.model_dump(),
         "cleanup": [
             "stop owned process groups/labelled containers",
@@ -99,10 +123,12 @@ def plan(root: Path, config: Config) -> dict:
         "model_auth_source": "Only the explicit --model-key-env CLI option selects a credential; repository config cannot select one",
         "model_disclosure": "HTTP strategy transmits only the selected, redacted source context to the configured endpoint and requires separate CLI consent"
         if config.ai.strategy == "http"
+        else "Native authenticated CLI workers transmit bounded redacted context after separate consent; vendor usage/cost caps vary"
+        if config.ai.strategy == "native"
         else "No programmatic model requests configured",
         "limitations": [
-            "No automatic package installation or repository lifecycle hooks.",
-            "Compose projects are discovered but require a reviewed single-service entry point or an explicitly authorized existing local instance.",
+            "No implicit package installation or repository lifecycle hooks; locked setup requires explicit authorization and network consent.",
+            "Compose execution uses a constrained generated environment, preloaded images and disposable owned services; arbitrary project semantics are unsupported.",
         ],
     }
 
@@ -111,7 +137,7 @@ def doctor(root: Path, config: Config) -> dict:
     from local_appsec_lab.install import host_locations
 
     try:
-        isolation = sandbox_probe()
+        isolation = sandbox_probe(config)
     except (OSError, subprocess.TimeoutExpired):
         isolation = {"available": False, "remediation": "Check isolation backend permissions"}
     return {
@@ -186,6 +212,9 @@ def scan(
     host_results: str | None = None,
     reverify: Finding | None = None,
     model_key_env: str | None = None,
+    native_host: str | None = None,
+    native_model: str | None = None,
+    native_auth_dir: Path | None = None,
 ) -> tuple[Report, dict]:
     started, clock = now(), time.monotonic()
     run_id = uuid.uuid4().hex
@@ -196,10 +225,31 @@ def scan(
         raise AuthorizationError(
             "HTTP AI review requires --allow-model-requests and explicit token/cost budgets"
         )
-    inventory = inspect(root)
+    if config.ai.strategy == "native" and (not allow_model or not native_host):
+        raise AuthorizationError(
+            "Native review needs --allow-model-requests and an explicit --native-host"
+        )
+    inventory = inspect(root, config.output)
     state = state_path(root, config)
+    if (
+        native_auth_dir
+        and native_auth_dir.resolve().is_relative_to(root)
+        and not native_auth_dir.resolve().is_relative_to(state)
+    ):
+        raise ScopeError(
+            "Native login directories inside the project must be under its excluded state directory"
+        )
     store = RunStore(state)
-    runtime = Runtime(
+    from local_appsec_lab.agents.knowledge import SharedKnowledge
+
+    knowledge = SharedKnowledge(store, run_id, inventory)
+    analysis_cache = AnalysisCache(state, root, inventory)
+    runtime_type = Runtime
+    if config.execution.compose_file:
+        from local_appsec_lab.runtime.compose import ComposeRuntime
+
+        runtime_type = ComposeRuntime
+    runtime = runtime_type(
         root, state, run_id, config, inventory, mode, tuple(approval.categories) if approval else ()
     )
     budget = Budget(config.limits, approval.expires_at if approval else None)
@@ -243,12 +293,32 @@ def scan(
                 scheduler.add(
                     "source:" + role,
                     role,
-                    lambda selected=selected: scan_source(root, inventory, selected),
+                    lambda selected=selected: analysis_cache.source(
+                        selected, lambda: scan_source(root, inventory, selected)
+                    ),
                 )
+        if not config.categories or "input_data_flow" in config.categories:
+            scheduler.add(
+                "dataflow",
+                "data_flow",
+                lambda: analysis_cache.source(
+                    ["__interprocedural_dataflow__"], lambda: analyze_dataflow(root, inventory)
+                ),
+            )
         scheduler.add(
             "dependencies",
             "supply_chain",
-            lambda: dependencies(root, inventory, config.tools.advisory_snapshot),
+            lambda: dependencies(
+                root,
+                inventory,
+                config.tools.advisory_snapshot
+                or (
+                    (Path(config.output) / "advisories/osv.json").as_posix()
+                    if (state / "advisories/osv.json").is_file()
+                    else None
+                ),
+                config.tools.advisory_max_age_days,
+            ),
         )
         for name, enabled in [
             ("semgrep", config.tools.semgrep),
@@ -262,16 +332,49 @@ def scan(
                     "external_tool",
                     lambda adapter=adapter: adapter.run(root, state, config),
                 )
-        tasks = assignments(root, inventory, config)
-        if config.ai.strategy == "http":
-            provider = HTTPProvider(config, allow_model, model_price, model_key_env)
-            strategy = "http-model-and-deterministic-workers"
+        source_results = asyncio.run(scheduler.run())
+        source_jobs = scheduler.snapshot()
+        for found, covered in source_results.values():
+            findings.extend(found)
+            checks.extend(covered if isinstance(covered, list) else [covered])
+        knowledge.publish("source-analysis", findings, checks)
+        scheduler = Scheduler(
+            config.limits.max_concurrent,
+            min(120, config.limits.duration_seconds),
+            config.limits.retries,
+            progress,
+        )
+        tasks = (
+            assignments(root, inventory, config) if config.ai.strategy != "deterministic" else []
+        )
+        for task in tasks:
+            task["shared_knowledge"] = knowledge.context(task["categories"])
+        if config.ai.strategy in {"http", "native"}:
+            if config.ai.strategy == "native":
+                from local_appsec_lab.agents.native import NativeProvider
+
+                provider = NativeProvider(
+                    config,
+                    allow_model,
+                    native_host,
+                    state,
+                    native_model,
+                    native_auth_dir,
+                    model_key_env,
+                    root,
+                )
+            else:
+                provider = HTTPProvider(config, allow_model, model_price, model_key_env)
+            provider.deadline = min(
+                provider.deadline, budget.started + config.limits.duration_seconds
+            )
+            strategy = config.ai.strategy + "-model-and-deterministic-workers"
             for task in tasks:
                 scheduler.add(
                     "model:" + task["id"],
                     task["role"],
                     lambda task=task: provider.review(root, task),
-                    "http-model",
+                    config.ai.strategy + "-model",
                 )
         elif config.ai.strategy == "host":
             strategy = (
@@ -304,7 +407,7 @@ def scan(
                     )
                 )
         results = asyncio.run(scheduler.run())
-        jobs = scheduler.snapshot()
+        jobs = source_jobs + scheduler.snapshot()
         for identifier, result in results.items():
             if identifier.startswith("model:"):
                 findings.extend(result)
@@ -328,6 +431,7 @@ def scan(
             if check.id not in check_index or check.status == "completed":
                 check_index[check.id] = check
         checks = list(check_index.values())
+        knowledge.publish("specialist-analysis", findings, checks)
         if mode != "review":
             approval.validate_scope(root, config, mode, run_id)
             store.status(
@@ -362,6 +466,16 @@ def scan(
                     )
                     findings.extend(observed)
                     checks.extend(dynamic_checks)
+                    from local_appsec_lab.dynamic_tests.fuzz import run as fuzz_scan
+                    from local_appsec_lab.dynamic_tests.workflows import run as workflow_scan
+
+                    for operation in (fuzz_scan, workflow_scan):
+                        arguments = [client, config, mode, approval.categories]
+                        if operation is workflow_scan:
+                            arguments.append(runtime.started)
+                        observed, covered = operation(*arguments)
+                        findings.extend(observed)
+                        checks.extend(covered)
             except (RuntimeFailure, OSError) as exc:
                 runtime_failed = True
                 checks.append(
@@ -390,6 +504,18 @@ def scan(
             findings = [reverify.model_copy(deep=True)]
         attach_sources(root, inventory, findings)
         findings = deduplicate(findings, str(root))
+        if len(findings) > config.limits.max_findings:
+            total = len(findings)
+            findings = findings[: config.limits.max_findings]
+            checks.append(
+                Check(
+                    id="finding-budget",
+                    category="analysis",
+                    status="blocked",
+                    reason=f"Finding budget reached ({config.limits.max_findings}/{total}); narrow the selected categories or project",
+                )
+            )
+        ai_exhausted = False
         for finding in findings:
             if approval and time.time() >= approval.expires_at:
                 finding.state = "blocked"
@@ -402,14 +528,82 @@ def scan(
                     client,
                     mode,
                     tuple(approval.categories) if approval else (),
+                    runtime.started,
                 )
-        if config.browser:
-            checks.append(
-                Check(
-                    id="browser",
-                    category="browser",
-                    status="blocked",
-                    reason="Browser runtime not integrated into the private-network sandbox; no browser execution claimed",
+                if provider and not ai_exhausted and hasattr(provider, "verify") and finding.source:
+                    try:
+                        verdict = provider.verify(root, finding)
+                        finding.verification.append(verdict)
+                        if verdict.get("remediation"):
+                            finding.remediation = verdict["remediation"]
+                        if verdict.get("regression"):
+                            finding.regression = verdict["regression"]
+                        if (
+                            finding.severity in {"high", "critical"}
+                            and verdict.get("conclusion") == "supported"
+                        ):
+                            finding.remediation_details["ai_review"] = provider.remediate(
+                                root, finding
+                            )
+                    except BudgetExceeded as exc:
+                        ai_exhausted = True
+                        checks.append(
+                            Check(
+                                id="ai-verification-budget",
+                                category="ai_verification",
+                                status="blocked",
+                                reason=str(exc),
+                            )
+                        )
+                    except LabError as exc:
+                        checks.append(
+                            Check(
+                                id="ai-verifier:" + finding.id,
+                                category="ai_verification",
+                                status="blocked",
+                                reason=str(exc),
+                            )
+                        )
+        if not reverify and (config.browser or config.browser_workflows):
+            if client and approval:
+                from local_appsec_lab.dynamic_tests.browser import run_browser
+
+                checks.extend(run_browser(runtime, client, config, mode, approval.categories))
+            else:
+                checks.append(
+                    Check(
+                        id="browser",
+                        category="browser",
+                        status="not_tested",
+                        reason="Browser requires an authorized running service",
+                    )
+                )
+        if (
+            not reverify
+            and provider
+            and getattr(provider, "proposals", None)
+            and client
+            and approval
+        ):
+            from local_appsec_lab.dynamic_tests.adaptive import run as explore
+
+            routes = list(inventory["routes"])
+            for check in checks:
+                if check.id.startswith("browser:"):
+                    for observation in check.observations:
+                        routes.extend(
+                            {"path": path, "method": "GET", "source": "browser-navigation"}
+                            for path in observation.get("routes", [])
+                        )
+            checks.extend(
+                explore(
+                    client,
+                    provider.proposals,
+                    routes,
+                    checks,
+                    mode,
+                    approval.categories,
+                    runtime.started,
                 )
             )
         for category in [
@@ -434,6 +628,15 @@ def scan(
                         reason="No applicable implemented check or configured synthetic scenario executed",
                     )
                 )
+        from local_appsec_lab.intelligence.severity import calculate
+        from local_appsec_lab.remediation import enrich
+
+        for finding in findings:
+            if finding.rule in config.cvss_vectors:
+                finding.cvss = calculate(
+                    config.cvss_vectors[finding.rule], "explicit project configuration"
+                )
+            enrich(finding, root, inventory)
     except KeyboardInterrupt:
         cancelled = True
         checks.append(
@@ -450,12 +653,17 @@ def scan(
         )
     finally:
         runtime.stop()
-    known_secrets = tuple(v for v in config.execution.environment.values() if len(v) > 3) + tuple(
-        v
-        for scenario in config.scenarios
-        for headers in (scenario.owner_headers, scenario.actor_headers)
-        for v in headers.values()
-        if len(v) > 3
+    findings = deduplicate(findings, str(root))[: config.limits.max_findings]
+    known_secrets = (
+        tuple(getattr(runtime, "secrets", ()))
+        + tuple(v for v in config.execution.environment.values() if len(v) > 3)
+        + tuple(
+            v
+            for scenario in config.scenarios
+            for headers in (scenario.owner_headers, scenario.actor_headers)
+            for v in headers.values()
+            if len(v) > 3
+        )
     )
     atomic_json(
         state / "runs" / run_id / "diagnostics.json",
@@ -477,24 +685,35 @@ def scan(
             "Deterministic workers and verification are not independent AI reviewers.",
             "No current advisory coverage without a supplied offline snapshot or a successful optional scanner.",
             "State-changing scenarios rely on explicitly configured disposable synthetic fixtures.",
-            "Browser automation, full business-logic inference, CVSS calculation, mobile emulation and automatic Compose provisioning are not implemented.",
+            "Data-flow analysis is bounded and conservative; unsupported dynamic dispatch and languages need specialist review. Mobile emulation and automatic business-policy inference are not provided.",
         ]
     )
     if runtime.backend == "macos":
         limitations.append(
-            "macOS uses a per-port host-loopback sandbox, not a private network namespace. Aggregate RSS/process/storage limits are monitored; Docker provides stronger resource isolation. Daemonizing startup programs are unsupported."
+            "macOS is for reviewed source only: numeric process-argument sysctls can expose same-user host process metadata/environment despite Seatbelt. Use Docker for untrusted code. It uses a per-port host-loopback sandbox, not a private network namespace. Aggregate RSS/process/storage limits are monitored; Docker provides stronger resource isolation. Daemonizing startup programs are unsupported."
         )
     metrics = {
         "source_files_inspected": len(inventory["files"]),
         "dependencies_identified": len(inventory["dependencies"]),
         "services_identified": len(inventory["services"]),
-        "services_started": int(runtime.started),
+        "services_started": getattr(runtime, "services_started", int(runtime.started)),
         "routes_discovered": len(inventory["routes"]),
         "routes_tested": len(
             {c.target for c in checks if c.id.startswith("response:") and c.status == "completed"}
         ),
         "http_requests": budget.requests,
-        "browser_workflows": 0,
+        "browser_workflows": sum(
+            c.id.startswith("browser:") and c.status == "completed" for c in checks
+        ),
+        "stateful_workflows": sum(
+            c.id.startswith("workflow:") and c.status == "completed" for c in checks
+        ),
+        "fuzz_properties": sum(
+            c.id.startswith("fuzz:") and c.status == "completed" for c in checks
+        ),
+        "adaptive_new_coverage": sum(
+            c.id.startswith("adaptive:") and c.status == "completed" for c in checks
+        ),
         "dynamic_checks_completed": sum(
             c.status == "completed"
             and (
@@ -511,7 +730,20 @@ def scan(
         "runtime_startup_failed": runtime_failed,
         "cleanup_completed": runtime.cleaned,
         "model_tokens_reserved": provider.tokens if provider else 0,
-        "model_cost_upper_bound_usd": provider.cost if provider else 0,
+        "model_cost_upper_bound_usd": provider.cost
+        if provider and config.ai.strategy == "http"
+        else None
+        if provider
+        else 0,
+        "model_calls": getattr(provider, "calls", 0),
+        "model_reported_tokens": provider.actual_tokens
+        if provider and provider.usage_reported
+        else None,
+        "model_reported_cost_usd": getattr(provider, "reported_cost", None),
+        "native_hard_token_cap": False if config.ai.strategy == "native" else None,
+        "analysis_cache_hits": analysis_cache.hits,
+        "analysis_cache_misses": analysis_cache.misses,
+        "analysis_cache_verified": bool(analysis_cache.seal_key),
     }
     status = (
         "cancelled"
@@ -546,6 +778,12 @@ def scan(
         limitations=limitations,
     )
     report = Report.model_validate(redact(report.model_dump()))
+    knowledge.publish(
+        "finished",
+        findings,
+        checks,
+        {"backend": runtime.backend, "started": runtime.started, "cleaned": runtime.cleaned},
+    )
     store.save(report)
     directory = private_dir(state / "reports" / run_id)
     outputs = render(report, directory)
@@ -568,7 +806,9 @@ def scan(
 
 def clean(root: Path, config: Config) -> list[dict]:
     state = state_path(root, config)
-    result = []
+    from local_appsec_lab.runtime.leases import recover
+
+    result = recover(state)
     if not (state / "runs").exists():
         return result
     for directory in (state / "runs").iterdir():
@@ -586,7 +826,14 @@ def clean(root: Path, config: Config) -> list[dict]:
             raise ScopeError("Cleanup path is not an owned runtime")
         if not data.get("stopped"):
             pid = data["pid"]
-            if data["backend"] == "docker":
+            if data["backend"] == "compose":
+                from local_appsec_lab.runtime.compose import cleanup_resources
+
+                base, control_env = docker_control()
+                if data.get("docker_base") != base:
+                    raise ScopeError("Docker context changed; refusing cross-daemon cleanup")
+                cleanup_resources(base, control_env, name, data["resources"])
+            elif data["backend"] == "docker":
                 base, control_env = docker_control()
                 recorded = data.get("docker_base")
                 if recorded != base:

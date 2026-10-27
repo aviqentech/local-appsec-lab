@@ -218,6 +218,24 @@
           "default": "builtin",
           "title": "Provenance",
           "type": "string"
+        },
+        "cvss": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cvss"
+        },
+        "remediation_details": {
+          "additionalProperties": true,
+          "title": "Remediation Details",
+          "type": "object"
         }
       },
       "required": [

@@ -16,14 +16,14 @@ def test_install_reinstall_doctor_uninstall(tmp_path, target):
     first = install(base, [target])[0]
     destination = Path(first["path"])
     assert (destination / "SKILL.md").is_file()
-    assert install(base, [target], "update")[0]["version"] == "0.1.0"
+    assert install(base, [target], "update")[0]["version"] == "0.2.0"
     assert install(base, [target], "doctor")[0]["valid"]
     helper = subprocess.run(
         [sys.executable, "-I", str(destination / "scripts/appsec_lab.py"), "--version"],
         capture_output=True,
         text=True,
     )
-    assert helper.returncode == 0 and helper.stdout.strip() == "0.1.0"
+    assert helper.returncode == 0 and helper.stdout.strip() == "0.2.0"
     install(base, [target], "uninstall")
     assert not destination.exists()
 

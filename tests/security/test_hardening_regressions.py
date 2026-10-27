@@ -33,9 +33,12 @@ def boundary_finding():
 def test_model_rule_cannot_dispatch_active_verification(tmp_path):
     (tmp_path / "app.py").write_text("pass")
     task = next(
-        t for t in assignments(tmp_path, inspect(tmp_path), Config()) if t["role"] == "data_flow"
+        t
+        for t in assignments(tmp_path, inspect(tmp_path), Config(categories=["input_data_flow"]))
+        if t["role"] == "data_flow"
     )
     finding = boundary_finding()
+    finding.category = "input_data_flow"
     finding.source = Source(path="app.py", line=1, end_line=1)
     result = validate_results(tmp_path, task, [finding.model_dump()])[0]
     assert result.rule.startswith("model:data_flow:boundary:")
@@ -198,6 +201,7 @@ def test_repo_config_cannot_select_model_credential():
 def test_cleanup_surviving_child_after_leader_exit(runtime_ready, fixture_project, free_port):
     root = fixture_project()
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     source = root / "server.js"
     source.write_text("""const http=require('node:http');const cp=require('node:child_process');
@@ -228,6 +232,7 @@ def test_passive_runtime_never_grants_mutation_capability(
 ):
     root = fixture_project()
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     config.scenarios.append(
         Scenario(

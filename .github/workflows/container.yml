@@ -5,7 +5,7 @@ permissions:
 jobs:
   runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -14,10 +14,13 @@ jobs:
       - run: python -m pip install '.[dev]'
       - run: sudo apt-get update && sudo apt-get install -y bubblewrap
       - run: docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Dockerfile tests/compatibility
-      - run: python -m pytest tests/compatibility -q --junitxml=container-results.xml
+      - run: docker build -t local-appsec-lab-browser:0.2.0 -f tests/compatibility/browser.Dockerfile tests/compatibility
+      - run: docker pull postgres:17-alpine
+      - run: python -m pytest tests/compatibility tests/integration/test_workflows.py -q --junitxml=container-results.xml
         env:
           APPSEC_TEST_IMAGE: local-appsec-lab-test:0.1.0
-          APPSEC_TEST_BWRAP: '1'
+          APPSEC_TEST_COMPOSE: '1'
+          APPSEC_TEST_BROWSER_IMAGE: local-appsec-lab-browser:0.2.0
       - uses: actions/upload-artifact@v4
         if: always()
         with:

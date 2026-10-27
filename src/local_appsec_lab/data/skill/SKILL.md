@@ -9,7 +9,7 @@ description: >
 
 # Local AppSec Lab
 
-Use the deterministic CLI to assess the user's actual repository. Work from that
+Use the CLI to assess the user's actual repository. Work from that
 repository, not this skill directory. Read the engine's coverage and limitations
 before drawing conclusions. Do not describe deterministic workers as AI agents.
 
@@ -35,21 +35,32 @@ already authorizes this specific repository, environment and tests. Only then us
 Never infer ownership from an open localhost port. An existing instance requires
 the explicit manifest digest from plan and its configured health identity.
 
-When contextual AI review is requested and host delegation is available, use
-specialist subagents with distinct roles from [agent roles](references/agent-roles.md).
-Set `ai.strategy: host`; the scan exports bounded, redacted JSON assignments.
-Give each worker only its assignment and read-only source access. Collect results
-using the documented host-result format. Use a fresh verifier for each significant
-candidate, preserving disagreements. Host delegation is controlled by the host,
-not by Python. If unavailable, perform targeted sequential review and disclose it.
-Programmatic HTTP review is optional and needs separate consent before redacted
-source is transmitted, plus explicit model token and price budgets.
+When contextual AI review is requested, prefer `ai.strategy: native` with the
+user's already authenticated supported host CLI. Set explicit token/call/time
+budgets and pass `--native-host codex|claude|cursor|gemini` with
+`--allow-model-requests` only after consent to transmit selected redacted context.
+The engine dispatches distinct specialist tasks, fresh verification and remediation
+workers with executable tools disabled. Native vendor token/cost caps are not
+uniformly enforceable; disclose unreported usage and the report's actual limits.
+Use [agent roles](references/agent-roles.md) for native/host/HTTP choices and login
+boundaries. If native dispatch is unavailable, use deterministic review or explicit
+host-result exchange; disclose the fallback. Do not claim a model ran from a
+scheduled deterministic worker's name.
+
+Locked dependency setup, disposable Compose/databases, stateful workflows and
+Chromium require their explicit prerequisites and policies; see
+[runtime management](references/runtime-management.md). Network provisioning needs
+`--allow-network`; application execution needs `--authorize`. Repository scripts
+cannot grant either. AI-proposed checks pass a parent-owned allowlist and budget;
+they cannot supply arbitrary commands, destinations or mutation payloads.
 
 Open the generated HTML or Markdown report. Report confirmed findings separately
 from candidates and informational observations. Include blocked and untested
 coverage. `verify --finding ID --run RUN --authorize` repeats a synthetic boundary
 check with fresh authorization; absence alone does not close an issue. Never
-modify application code during the default scan. Run `clean` after interruption;
+modify application code during the default scan. `fix` prepares a private diff;
+applying or rolling back requires the user's explicit approval of the concrete
+bundle and `--authorize-fix`. Run `clean` after interruption;
 it refuses unowned resources. Exit 1 means a confirmed finding exceeds the chosen
 threshold, 2 means partial coverage, 4 means authorization failed, 5 means startup
 failed. Read [troubleshooting](references/troubleshooting.md) for the full table.

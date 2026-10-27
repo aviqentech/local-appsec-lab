@@ -66,6 +66,8 @@ class Finding(Model):
     regression: str = ""
     limitations: list[str] = Field(default_factory=list)
     provenance: str = "builtin"
+    cvss: dict[str, Any] | None = None
+    remediation_details: dict[str, Any] = Field(default_factory=dict)
 
     def identify(self, repository: str) -> Finding:
         location = self.source.path if self.source else self.endpoint

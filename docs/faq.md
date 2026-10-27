@@ -2,15 +2,18 @@
 
 ## Is this a complete autonomous penetration tester?
 
-No. Version 0.1.0 is an experimental tested core. It combines source candidates, bounded HTTP observations and configured synthetic policy checks. Browser workflows, automatic Compose/database setup, whole-program taint, live advisory lookup and several other requested capabilities remain incomplete. See [requirements status](requirements-status.md).
+Version 0.2.0 implements the supported architecture, including real specialist workers,
+locked setup, disposable Compose, browser/state workflows, bounded data-flow,
+advisory refresh and caching. It remains experimental, with explicit scope and
+verification boundaries. See [requirements status](requirements-status.md).
 
 ## Does it work without an AI model or paid subscription?
 
-Yes. The CLI's deterministic workers and verification do not require a model. Optional model requests need separate consent, endpoint configuration and budgets. Real provider integration has not been validated.
+Yes. The CLI's deterministic workers and verification do not require a model. Optional model requests need separate consent, endpoint configuration and budgets. Codex, Claude and Cursor native worker contracts were tested with real accounts; Gemini and the generic HTTPS backend have separate prerequisites.
 
 ## Does installation prove it works in every agent?
 
-No. The installer and copied helper were tested for all targets. Interactive discovery, invocation and native subagent dispatch inside the actual host applications remain unverified. The CLI works independently of an agent application.
+The installer supports all targets. Real CLI skill invocation and copied-helper inspection/planning were exercised in Codex, Claude and Cursor, separately from their native specialist worker tests. Gemini remains blocked by provider authentication. Desktop GUI invocation and other versions are separate verification surfaces. The CLI also works independently.
 
 ## Do Windows and Linux need Docker for source review?
 

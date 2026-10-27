@@ -1,0 +1,26 @@
+version: 1
+execution:
+  compose_file: compose.yaml
+  service: api
+  command: [python, server.py]
+  startup_timeout: 40
+  seeds:
+    database: seed.sql
+limits:
+  requests_per_second: 10
+  memory_mb: 1024
+  storage_mb: 128
+  processes: 64
+scenarios:
+  - id: vulnerable-cross-user
+    path: /records/vulnerable/42
+    category: authorization
+    owner_headers: {X-Test-User: alice}
+    actor_headers: {X-Test-User: bob}
+    marker: SYNTHETIC_ALICE_RECORD_42
+  - id: secure-cross-user
+    path: /records/secure/42
+    category: authorization
+    owner_headers: {X-Test-User: alice}
+    actor_headers: {X-Test-User: bob}
+    marker: SYNTHETIC_ALICE_RECORD_42

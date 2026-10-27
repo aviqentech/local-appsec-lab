@@ -3,10 +3,22 @@ from __future__ import annotations
 import asyncio
 import inspect
 import time
+import threading
+from contextvars import ContextVar
 from collections.abc import Callable
 from typing import Any
 
 from local_appsec_lab.models import Model
+
+_cancel = ContextVar("appsec_job_cancellation", default=None)
+
+
+def check_cancelled():
+    from local_appsec_lab.errors import BudgetExceeded
+
+    event = _cancel.get()
+    if event is not None and event.is_set():
+        raise BudgetExceeded("Worker was cancelled or exceeded its time budget")
 
 
 class Job(Model):
@@ -55,17 +67,33 @@ class Scheduler:
                     for attempt in range(self.retries + 1):
                         job.state, job.attempts = "running", attempt + 1
                         self.progress(self.snapshot())
+                        cancelled = threading.Event()
+                        token = _cancel.set(cancelled)
+                        pending = None
                         try:
                             fn = self.tasks[identifier]
                             operation = (
                                 fn() if inspect.iscoroutinefunction(fn) else asyncio.to_thread(fn)
                             )
-                            results[identifier] = await asyncio.wait_for(operation, self.timeout)
+                            pending = asyncio.create_task(operation)
+                            results[identifier] = await asyncio.wait_for(
+                                asyncio.shield(pending), self.timeout
+                            )
                             job.state = "completed"
                             break
                         except Exception as exc:
                             job.error = type(exc).__name__
                             job.state = "failed"
+                        finally:
+                            cancelled.set()
+                            if pending and not pending.done():
+                                if inspect.iscoroutinefunction(fn):
+                                    pending.cancel()
+                                try:
+                                    await asyncio.wait_for(asyncio.shield(pending), 5)
+                                except (Exception, asyncio.CancelledError):
+                                    pending.cancel()
+                            _cancel.reset(token)
                 except asyncio.CancelledError:
                     job.state = "cancelled"
                     raise

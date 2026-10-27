@@ -211,6 +211,22 @@ def scan_source(
                 ".yaml",
                 ".yml",
                 ".tf",
+                ".go",
+                ".java",
+                ".kt",
+                ".cs",
+                ".rs",
+                ".dart",
+                ".swift",
+                ".json",
+                ".toml",
+                ".xml",
+                ".md",
+                ".txt",
+                ".ini",
+                ".cfg",
+                ".conf",
+                ".lock",
             }
             and path.name != "Dockerfile"
         ):
@@ -269,6 +285,15 @@ def scan_source(
         for rule, line in sorted(matched):
             if not categories or RULES[rule][0] in categories:
                 findings.append(source_finding(rule, relative, text, line))
+                if len(findings) >= 200:
+                    return findings, [
+                        Check(
+                            id="source-finding-budget",
+                            category="analysis",
+                            status="blocked",
+                            reason="Source worker reached 200 candidates; remaining constructs were not inspected",
+                        )
+                    ]
     checks = [
         Check(
             id="source:" + rule,
@@ -282,7 +307,7 @@ def scan_source(
 
 
 def dependencies(
-    root: Path, inventory: dict, snapshot: str | None
+    root: Path, inventory: dict, snapshot: str | None, max_age_days: int = 7
 ) -> tuple[list[Finding], list[Check]]:
     if not snapshot:
         return [], [
@@ -293,9 +318,12 @@ def dependencies(
                 reason="No authorized offline advisory snapshot configured; no current vulnerability claims",
             )
         ]
-    data = json.loads(read_text(root, snapshot))
+    data = json.loads(read_text(root, snapshot, 8_000_000))
     if not isinstance(data.get("advisories"), list) or not isinstance(data.get("updated"), str):
         raise ValueError("Advisory snapshot requires updated and advisories fields")
+    from local_appsec_lab.intelligence import snapshot_age
+
+    age = snapshot_age(data)
     findings = []
     for dep in inventory["dependencies"]:
         if not dep["locked"]:
@@ -322,6 +350,7 @@ def dependencies(
                                 "dependency": dep,
                                 "advisory": advisory["id"],
                                 "snapshot_updated": data["updated"],
+                                "snapshot_age_days": age,
                             }
                         ],
                         remediation="Upgrade to a reviewed unaffected version and run compatibility tests.",
@@ -330,11 +359,32 @@ def dependencies(
                         ],
                     )
                 )
+                for severity in advisory.get("severity", []):
+                    if severity.get("type") == "CVSS_V4" and isinstance(severity.get("score"), str):
+                        from local_appsec_lab.intelligence.severity import calculate
+
+                        try:
+                            findings[-1].cvss = calculate(
+                                severity["score"], "OSV advisory " + advisory["id"]
+                            )
+                        except Exception:
+                            findings[-1].limitations.append(
+                                "Upstream CVSS v4 vector was invalid; no score assigned"
+                            )
+                if len(findings) >= 200:
+                    return findings, [
+                        Check(
+                            id="dependency-finding-budget",
+                            category="dependencies",
+                            status="blocked",
+                            reason="Dependency worker reached 200 advisory candidates; remaining coordinates need a narrower assessment",
+                        )
+                    ]
     return findings, [
         Check(
             id="dependency-advisories",
             category="dependencies",
-            status="completed",
-            reason=f"Exact-version snapshot matching; snapshot updated {data['updated']}",
+            status="completed" if age <= max_age_days else "blocked",
+            reason=f"Exact-version snapshot matching; snapshot updated {data['updated']}; age {age:.2f} days; {'fresh within policy' if age <= max_age_days else 'stale: refresh required for current advisory coverage'}",
         )
     ]

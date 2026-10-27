@@ -56,6 +56,12 @@ def parser() -> argparse.ArgumentParser:
         "clean",
         "config",
         "skills",
+        "advisories",
+        "cache",
+        "tools",
+        "setup",
+        "cvss",
+        "fix",
     ]:
         command = commands.add_parser(name)
         common(command)
@@ -76,6 +82,19 @@ def parser() -> argparse.ArgumentParser:
             )
             command.add_argument("--model-price-per-million", type=float, default=0)
             command.add_argument(
+                "--native-host",
+                choices=["codex", "claude", "cursor", "gemini"],
+                help="Explicit authenticated host for ai.strategy=native",
+            )
+            command.add_argument(
+                "--native-model", help="Optional trusted model selection for native host workers"
+            )
+            command.add_argument(
+                "--native-auth-dir",
+                type=Path,
+                help="Dedicated local login directory for Gemini/Cursor (trusted CLI choice)",
+            )
+            command.add_argument(
                 "--model-key-env",
                 help="Trusted CLI selection of a credential environment variable for the reviewed model endpoint",
             )
@@ -83,6 +102,12 @@ def parser() -> argparse.ArgumentParser:
                 "--host-results", help="Repository-relative JSON results of native host assignments"
             )
         if name == "scan":
+            command.add_argument("--setup-dependencies", action="store_true")
+            command.add_argument(
+                "--allow-network",
+                action="store_true",
+                help="Allow locked dependency artifact downloads when --setup-dependencies is selected",
+            )
             command.add_argument(
                 "--mode", choices=["review", "local-passive", "local-active"], default="review"
             )
@@ -109,6 +134,35 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument("operation", choices=["validate"])
         if name == "skills":
             command.add_argument("operation", choices=["doctor"])
+        if name == "advisories":
+            command.add_argument("operation", choices=["update", "status"])
+            command.add_argument(
+                "--allow-network",
+                action="store_true",
+                help="Authorize sending exact package names/versions to api.osv.dev",
+            )
+        if name == "cache":
+            command.add_argument("operation", choices=["status", "clear"])
+        if name == "tools":
+            command.add_argument("operation", choices=["update"])
+            command.add_argument("name", choices=["osv-scanner", "trivy"])
+            command.add_argument("--allow-network", action="store_true")
+            command.add_argument("--ecosystem", action="append", default=[])
+        if name == "setup":
+            command.add_argument("--authorize", action="store_true")
+            command.add_argument("--allow-network", action="store_true")
+        if name == "cvss":
+            command.add_argument("--vector", required=True)
+        if name == "fix":
+            command.add_argument("--finding")
+            command.add_argument("--run", default="latest")
+            command.add_argument(
+                "--replacement",
+                help="Project-relative reviewed replacement file; original is not changed during preparation",
+            )
+            command.add_argument("--apply", metavar="FIX_ID")
+            command.add_argument("--rollback", metavar="FIX_ID")
+            command.add_argument("--authorize-fix", action="store_true")
     return root
 
 
@@ -149,12 +203,90 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "inspect":
             from local_appsec_lab.discovery import inspect
 
-            result = inspect(root)
+            result = inspect(root, config.output)
+        elif command == "tools":
+            from local_appsec_lab.integrations.provision import update
+
+            result = update(state_path(root, config), args.name, args.allow_network, args.ecosystem)
+        elif command == "setup":
+            from local_appsec_lab.runtime.setup import setup
+
+            result = setup(
+                root, state_path(root, config), config, args.authorize, args.allow_network
+            )
+        elif command == "cvss":
+            from local_appsec_lab.intelligence.severity import calculate
+
+            result = calculate(args.vector, "explicit CLI vector")
+        elif command == "fix":
+            from local_appsec_lab.remediation.patches import apply, prepare
+
+            state = state_path(root, config)
+            if args.apply or args.rollback:
+                if args.apply and args.rollback:
+                    raise ConfigError("Choose either apply or rollback")
+                result = apply(
+                    root,
+                    state,
+                    args.apply or args.rollback,
+                    args.authorize_fix,
+                    bool(args.rollback),
+                )
+            else:
+                if not args.finding:
+                    raise ConfigError(
+                        "Select --finding to prepare a fix, or --apply/--rollback for a reviewed bundle"
+                    )
+                store = RunStore(state)
+                finding = next(
+                    (f for f in store.read(args.run).findings if f.id == args.finding), None
+                )
+                if not finding:
+                    raise ConfigError("Finding is absent from the selected run")
+                result = prepare(root, state, finding, args.replacement)
+        elif command == "advisories":
+            from local_appsec_lab.discovery import inspect
+            from local_appsec_lab.intelligence import refresh, status
+
+            if args.operation == "update":
+                result = refresh(
+                    root, state_path(root, config), inspect(root, config.output), args.allow_network
+                )
+            else:
+                result = status(
+                    root,
+                    config.tools.advisory_snapshot
+                    or (Path(config.output) / "advisories/osv.json").as_posix(),
+                )
+        elif command == "cache":
+            directory = inside(root, Path(config.output) / "analysis-cache")
+            entries = (
+                []
+                if not directory.exists()
+                else [
+                    p
+                    for p in directory.iterdir()
+                    if p.is_file()
+                    and not p.is_symlink()
+                    and len(p.stem) == 64
+                    and all(c in "0123456789abcdef" for c in p.stem)
+                    and p.suffix == ".json"
+                ]
+            )
+            result = {"entries": len(entries), "bytes": sum(p.stat().st_size for p in entries)}
+            if args.operation == "clear":
+                for entry in entries:
+                    entry.unlink()
+                result["removed"] = len(entries)
         elif command == "plan":
             result = plan(root, config)
         elif command == "clean":
             result = {"resources": clean(root, config)}
         elif command in {"scan", "verify"}:
+            if getattr(args, "setup_dependencies", False):
+                from local_appsec_lab.runtime.setup import setup
+
+                setup(root, state_path(root, config), config, args.authorize, args.allow_network)
             finding = None
             mode = getattr(args, "mode", "review")
             if command == "verify":
@@ -187,6 +319,9 @@ def main(argv: list[str] | None = None) -> int:
                 args.host_results,
                 finding,
                 args.model_key_env,
+                args.native_host,
+                args.native_model,
+                args.native_auth_dir,
             )
             result = {
                 "run_id": report.run_id,

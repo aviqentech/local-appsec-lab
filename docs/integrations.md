@@ -25,9 +25,20 @@ Official references checked during implementation:
 Optional adapter contracts target Semgrep 1.x, OSV-Scanner 2.x and Trivy 0.60+.
 These are intended version families, not a tested compatibility guarantee. Every
 actual adapter run records tool version or failure. Tools must already exist; offline
-databases must be provisioned. ZAP and Playwright are methodology references only.
+databases must be provisioned. Playwright/Chromium workflows are implemented in a prepared Docker image. ZAP remains a methodology reference; no ZAP adapter is claimed.
 
 Methodology references: [WSTG](https://wstg.owasp.org/),
 [ASVS](https://asvs.owasp.org/), [CWE](https://cwe.mitre.org/),
 [Cheat Sheets](https://cheatsheetseries.owasp.org/), [OSV](https://osv.dev/),
 [OpenSSF](https://openssf.org/). These do not imply certification or full coverage.
+
+
+## Measured native integration versions
+
+Real specialist, fresh verifier and remediation calls were exercised using the
+installed Codex CLI, Claude Code 2.1.311 and Cursor agent 2026.10.22. Gemini CLI
+0.65.0 rejected the individual-account OAuth client at Google's token/service
+exchange. Do not equate a packaged adapter with a successful Gemini model test.
+Semgrep 1.182.1, OSV-Scanner 2.7.0 and Trivy 0.72.0 passed real offline positive
+and negative controls on macOS and Docker. See [advanced setup](advanced-usage.md)
+and [validation](validation.md) for auth, data, resource and platform boundaries.

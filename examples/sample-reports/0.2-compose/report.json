@@ -1,0 +1,799 @@
+{
+  "schema_version": 1,
+  "run_id": "6c78c5a4487a482e9472fa98602f1592",
+  "product": "Local AppSec Lab",
+  "repository": "/assessed-project",
+  "revision": "08e021c886560d4f3ff5344228e2356f417a6b6a",
+  "started": "2026-10-27T12:24:27.976051+00:00",
+  "finished": "2026-10-27T12:24:31.617044+00:00",
+  "duration_seconds": 3.641046124997956,
+  "mode": "local-active",
+  "status": "partial",
+  "environment": {
+    "os": "Darwin",
+    "python": "3.13.0",
+    "engine": "0.2.0",
+    "backend": "compose",
+    "metadata_policy": "Repository/operator metadata generalized; measured findings unchanged. Review before sharing."
+  },
+  "architecture": {
+    "files": [
+      "appsec-lab.yaml",
+      "compose.yaml",
+      "seed.sql",
+      "server.py"
+    ],
+    "languages": {
+      "YAML": [
+        "appsec-lab.yaml",
+        "compose.yaml"
+      ],
+      "Python": [
+        "server.py"
+      ]
+    },
+    "frameworks": {},
+    "package_managers": {},
+    "services": [
+      {
+        "id": "api",
+        "kind": "compose",
+        "source": "compose.yaml",
+        "image": "local-appsec-lab-browser:0.2.0",
+        "dependencies": [
+          "database"
+        ],
+        "command": []
+      },
+      {
+        "id": "database",
+        "kind": "compose",
+        "source": "compose.yaml",
+        "image": "postgres:17-alpine",
+        "dependencies": [],
+        "command": []
+      },
+      {
+        "id": ".",
+        "kind": "python",
+        "source": "server.py",
+        "command": [
+          "python",
+          "server.py"
+        ],
+        "dependencies": []
+      }
+    ],
+    "routes": [],
+    "dependencies": [],
+    "external_integrations": [],
+    "security_sensitive_files": [
+      "appsec-lab.yaml",
+      "server.py"
+    ],
+    "infrastructure": [
+      "compose.yaml"
+    ],
+    "service_graph": {
+      "api": [
+        "database"
+      ],
+      "database": [],
+      ".": []
+    },
+    "limitations": [
+      "Recognition does not imply complete analysis or runtime support.",
+      "Environment files and private-key files are excluded, never loaded into the app."
+    ]
+  },
+  "authorization": {
+    "version": 1,
+    "repository": "/assessed-project",
+    "repository_fingerprint": "83be92f5b7f8cad517aa9071dc8d59e33177cb72eafa2a458ace64cf4c56c28e",
+    "plan_digest": "247f906e4e06efe052b0f8289c47a92093eb8716dc91d090115151c475d95269",
+    "user": "authorized-operator",
+    "acknowledgment": "I authorize local execution and bounded testing",
+    "mode": "local-active",
+    "service_identities": [
+      "api",
+      "database"
+    ],
+    "addresses": [
+      "127.0.0.1"
+    ],
+    "ports": [
+      58388
+    ],
+    "categories": [
+      "headers",
+      "session",
+      "cors",
+      "authentication",
+      "authorization",
+      "validation",
+      "business_logic",
+      "tenant_isolation"
+    ],
+    "limits": {
+      "duration_seconds": 300,
+      "max_requests": 100,
+      "requests_per_second": 10.0,
+      "response_bytes": 65536,
+      "log_bytes": 262144,
+      "storage_mb": 128,
+      "memory_mb": 1024,
+      "processes": 64,
+      "cpus": 1,
+      "max_concurrent": 2,
+      "retries": 0,
+      "model_tokens": 0,
+      "model_calls": 16,
+      "model_cost_usd": 0,
+      "max_findings": 500
+    },
+    "expires_at": 1793104167.977325,
+    "run_id": "6c78c5a4487a482e9472fa98602f1592",
+    "existing_manifest_digest": null
+  },
+  "execution_strategy": "deterministic-workers",
+  "findings": [
+    {
+      "schema_version": 1,
+      "id": "LAB-f83eded2773d4eb4",
+      "fingerprint": "f83eded2773d4eb4b63fc681e28cb04a541f047a5286a841a33540ec43aa0d41",
+      "rule": "boundary:vulnerable-cross-user",
+      "title": "Synthetic access policy violated: vulnerable-cross-user",
+      "category": "authorization",
+      "severity": "high",
+      "severity_reason": "The configured lower-trust synthetic actor received the prohibited fixture response.",
+      "confidence": "high",
+      "state": "confirmed",
+      "cwe": "CWE-862",
+      "source": null,
+      "endpoint": "/records/vulnerable/42",
+      "service": "app",
+      "description": "The owner baseline succeeded and the disallowed synthetic request received an unexpected response.",
+      "root_cause": "Exact source-level cause is not established by the available evidence.",
+      "expected": "Actor response status in [401, 403, 404]; protected record inaccessible.",
+      "observed": "Actor received the configured synthetic resource or disallowed response.",
+      "evidence": [
+        {
+          "test_id": "vulnerable-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/vulnerable/42",
+          "timestamp": "2026-10-27T12:24:30.702891+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+            "body_bytes": 55,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "actor": {
+            "status": 200,
+            "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+            "body_bytes": 55,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": true,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.21063562499330146,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ],
+      "verification": [
+        {
+          "reviewer": "independent-deterministic-verifier",
+          "timestamp": "2026-10-27T12:24:30.906403+00:00",
+          "previous_state": "candidate",
+          "conclusion": "confirmed",
+          "new_observation": {
+            "test_id": "vulnerable-cross-user",
+            "category": "authorization",
+            "method": "GET",
+            "path": "/records/vulnerable/42",
+            "timestamp": "2026-10-27T12:24:31.116525+00:00",
+            "owner": {
+              "status": 200,
+              "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+              "body_bytes": 55,
+              "truncated": false,
+              "marker_present": true,
+              "security_headers": {
+                "content-type": "application/json"
+              }
+            },
+            "actor": {
+              "status": 200,
+              "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+              "body_bytes": 55,
+              "truncated": false,
+              "marker_present": true,
+              "security_headers": {
+                "content-type": "application/json"
+              }
+            },
+            "owner_precondition": true,
+            "expected_status": [
+              401,
+              403,
+              404
+            ],
+            "violation": true,
+            "actor_identity": "configured-synthetic-actor",
+            "duration_seconds": 0.2101504170059343,
+            "limitations": "Expected policy and fixture ownership are supplied by the developer."
+          }
+        }
+      ],
+      "remediation": "Enforce the configured ownership/role/input policy at the server-side resource boundary.",
+      "regression": "Run `appsec-lab verify --finding <id> --authorize` after fixing scenario vulnerable-cross-user; actor must be denied.",
+      "limitations": [
+        "Conclusion depends on the explicitly configured synthetic users, records and expected policy."
+      ],
+      "provenance": "builtin",
+      "cvss": null,
+      "remediation_details": {
+        "affected_component": "/records/vulnerable/42",
+        "root_cause": "Exact source-level cause is not established by the available evidence.",
+        "impact": "The configured lower-trust synthetic actor received the prohibited fixture response.",
+        "recommended_fix": "Enforce the configured ownership/role/input policy at the server-side resource boundary.",
+        "regression": "Run `appsec-lab verify --finding <id> --authorize` after fixing scenario vulnerable-cross-user; actor must be denied.",
+        "framework_context": {},
+        "compatibility": "Review existing callers and deployment controls; run application regression tests before release.",
+        "verification": "Repeat the recorded check with the same synthetic fixtures and verify both the denied actor and allowed owner controls.",
+        "alternative_mitigation": "Constrain the affected interface while a source correction is reviewed; deployment controls need independent validation.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/862.html"
+        ]
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "source:sql-construction",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:shell-command",
+      "category": "command_execution",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-deserialization",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:dynamic-eval",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:jwt-no-verify",
+      "category": "authentication",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:weak-crypto",
+      "category": "cryptography",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:debug-mode",
+      "category": "configuration",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-html",
+      "category": "frontend",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:potential-secret",
+      "category": "sensitive_data",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:sensitive-logging",
+      "category": "sensitive_logging",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:cors-wildcard",
+      "category": "cors",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:csrf-disabled",
+      "category": "csrf",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:ssrf-interface",
+      "category": "server_side_requests",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-template",
+      "category": "template_rendering",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:upload-name",
+      "category": "file_upload",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:container-root",
+      "category": "infrastructure",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:privileged-container",
+      "category": "infrastructure",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:ai-tool-eval",
+      "category": "ai_security",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "python-dataflow",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded AST provenance and interprocedural summaries; candidates require contextual verification",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "functions_analyzed": 0,
+          "ast_nodes": 247,
+          "flows": 0,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "id": "dependency-advisories",
+      "category": "dependencies",
+      "status": "blocked",
+      "reason": "No authorized offline advisory snapshot configured; no current vulnerability claims",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "runtime-health",
+      "category": "runtime",
+      "status": "completed",
+      "reason": "",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "backend": "compose",
+          "owned": true,
+          "port": 58388
+        }
+      ]
+    },
+    {
+      "id": "response:/health",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/health",
+      "duration_seconds": 0.1034038750003674,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "6d160fff74b6c0c19b7d52a992b4d2d277977f90b48f3f546e0a9d36f973008b",
+          "body_bytes": 15,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cors:/health",
+      "category": "cors",
+      "status": "completed",
+      "reason": "",
+      "target": "/health",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "6d160fff74b6c0c19b7d52a992b4d2d277977f90b48f3f546e0a9d36f973008b",
+          "body_bytes": 15,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vulnerable-cross-user",
+      "category": "authorization",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/vulnerable/42",
+      "duration_seconds": 0.21063562499330146,
+      "observations": [
+        {
+          "test_id": "vulnerable-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/vulnerable/42",
+          "timestamp": "2026-10-27T12:24:30.702891+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+            "body_bytes": 55,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "actor": {
+            "status": 200,
+            "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+            "body_bytes": 55,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": true,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.21063562499330146,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "secure-cross-user",
+      "category": "authorization",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/secure/42",
+      "duration_seconds": 0.2025021250010468,
+      "observations": [
+        {
+          "test_id": "secure-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/secure/42",
+          "timestamp": "2026-10-27T12:24:30.905618+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "25b562d9bec6c7296370d66bb2a739bce7a06e7a2dbee859aababaece81f5468",
+            "body_bytes": 55,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "actor": {
+            "status": 403,
+            "body_sha256": "387fe73d9abe7e6c32a0eb6113efea98dea609edefe9c3b4c9788fcaaef1603b",
+            "body_bytes": 22,
+            "truncated": false,
+            "marker_present": false,
+            "security_headers": {
+              "content-type": "application/json"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": false,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.2025021250010468,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "coverage:session",
+      "category": "session",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:sensitive_response",
+      "category": "sensitive_response",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:validation",
+      "category": "validation",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:error_handling",
+      "category": "error_handling",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:business_logic",
+      "category": "business_logic",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:tenant_isolation",
+      "category": "tenant_isolation",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    }
+  ],
+  "jobs": [
+    {
+      "id": "source:authentication",
+      "role": "authentication",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.0047374999994644895,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:authorization",
+      "role": "authorization",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.0063222919998224825,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:api",
+      "role": "api",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.004782208001415711,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:data_flow",
+      "role": "data_flow",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.005152290999831166,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:business_logic",
+      "role": "business_logic",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.005897167000512127,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:frontend",
+      "role": "frontend",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.004880250002315734,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:infrastructure",
+      "role": "infrastructure",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.005100415997731034,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:sensitive_data",
+      "role": "sensitive_data",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.005217874997470062,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:ai_security",
+      "role": "ai_security",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.005303833000652958,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "dataflow",
+      "role": "data_flow",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.00479879199701827,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "dependencies",
+      "role": "supply_chain",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002675499999895692,
+      "error": null,
+      "strategy": "deterministic-worker"
+    }
+  ],
+  "metrics": {
+    "source_files_inspected": 4,
+    "dependencies_identified": 0,
+    "services_identified": 3,
+    "services_started": 2,
+    "routes_discovered": 0,
+    "routes_tested": 1,
+    "http_requests": 10,
+    "browser_workflows": 0,
+    "stateful_workflows": 0,
+    "fuzz_properties": 0,
+    "adaptive_new_coverage": 0,
+    "dynamic_checks_completed": 4,
+    "worker_assignments_completed": 11,
+    "candidate_findings": 0,
+    "confirmed_findings": 1,
+    "false_positives": 0,
+    "blocked_checks": 1,
+    "not_tested_checks": 6,
+    "runtime_startup_failed": false,
+    "cleanup_completed": true,
+    "model_tokens_reserved": 0,
+    "model_cost_upper_bound_usd": 0,
+    "model_calls": 0,
+    "model_reported_tokens": null,
+    "model_reported_cost_usd": null,
+    "native_hard_token_cap": null,
+    "analysis_cache_hits": 0,
+    "analysis_cache_misses": 10,
+    "analysis_cache_verified": true
+  },
+  "limitations": [
+    "Recognition does not imply complete analysis or runtime support.",
+    "Environment files and private-key files are excluded, never loaded into the app.",
+    "Syntactic source checks remain candidates; manual data-flow and deployment review is required.",
+    "Deterministic workers and verification are not independent AI reviewers.",
+    "No current advisory coverage without a supplied offline snapshot or a successful optional scanner.",
+    "State-changing scenarios rely on explicitly configured disposable synthetic fixtures.",
+    "Data-flow analysis is bounded and conservative; unsupported dynamic dispatch and languages need specialist review. Mobile emulation and automatic business-policy inference are not provided."
+  ]
+}

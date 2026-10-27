@@ -8,7 +8,8 @@
           "enum": [
             "deterministic",
             "host",
-            "http"
+            "http",
+            "native"
           ],
           "title": "Strategy",
           "type": "string"
@@ -46,6 +47,136 @@
         }
       },
       "title": "AI",
+      "type": "object"
+    },
+    "BrowserMutation": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "enum": [
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "method",
+        "path"
+      ],
+      "title": "BrowserMutation",
+      "type": "object"
+    },
+    "BrowserStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "fill",
+            "click",
+            "goto",
+            "expect_text",
+            "expect_path"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "selector": {
+          "default": "body",
+          "maxLength": 256,
+          "title": "Selector",
+          "type": "string"
+        },
+        "value": {
+          "default": "",
+          "maxLength": 1024,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "title": "BrowserStep",
+      "type": "object"
+    },
+    "BrowserWorkflow": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/BrowserStep"
+          },
+          "maxItems": 20,
+          "title": "Steps",
+          "type": "array"
+        },
+        "max_requests": {
+          "default": 8,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "allowed_mutations": {
+          "items": {
+            "$ref": "#/$defs/BrowserMutation"
+          },
+          "maxItems": 8,
+          "title": "Allowed Mutations",
+          "type": "array"
+        },
+        "rollback_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rollback Path"
+        },
+        "synthetic": {
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "disposable": {
+          "default": false,
+          "title": "Disposable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "path"
+      ],
+      "title": "BrowserWorkflow",
       "type": "object"
     },
     "Execution": {
@@ -136,9 +267,113 @@
           ],
           "default": null,
           "title": "Existing Identity"
+        },
+        "compose_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compose File"
+        },
+        "seeds": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 8,
+          "title": "Seeds",
+          "type": "object"
+        },
+        "migrations": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxProperties": 8,
+          "title": "Migrations",
+          "type": "object"
+        },
+        "dependency_lock": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dependency Lock"
+        },
+        "use_dependencies": {
+          "default": true,
+          "title": "Use Dependencies",
+          "type": "boolean"
         }
       },
       "title": "Execution",
+      "type": "object"
+    },
+    "FuzzTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "parameter": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+          "title": "Parameter",
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": true,
+          "title": "Input Schema",
+          "type": "object"
+        },
+        "max_cases": {
+          "default": 3,
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Max Cases",
+          "type": "integer"
+        },
+        "expected_invalid_status": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Expected Invalid Status",
+          "type": "array"
+        },
+        "expected_valid_status": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Expected Valid Status",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "parameter"
+      ],
+      "title": "FuzzTarget",
       "type": "object"
     },
     "Limits": {
@@ -223,9 +458,16 @@
         },
         "model_tokens": {
           "default": 0,
-          "maximum": 100000,
+          "maximum": 1000000,
           "minimum": 0,
           "title": "Model Tokens",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 16,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Model Calls",
           "type": "integer"
         },
         "model_cost_usd": {
@@ -234,6 +476,13 @@
           "minimum": 0,
           "title": "Model Cost Usd",
           "type": "number"
+        },
+        "max_findings": {
+          "default": 500,
+          "maximum": 2000,
+          "minimum": 10,
+          "title": "Max Findings",
+          "type": "integer"
         }
       },
       "title": "Limits",
@@ -359,6 +608,69 @@
       "title": "Scenario",
       "type": "object"
     },
+    "StatefulWorkflow": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "category": {
+          "default": "business_logic",
+          "enum": [
+            "business_logic",
+            "authorization",
+            "tenant_isolation",
+            "authentication"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "identities": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Identities",
+          "type": "object"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/WorkflowStep"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "rollback": {
+          "$ref": "#/$defs/WorkflowStep"
+        },
+        "synthetic": {
+          "const": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "disposable": {
+          "const": true,
+          "title": "Disposable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "identities",
+        "steps",
+        "rollback",
+        "synthetic",
+        "disposable"
+      ],
+      "title": "StatefulWorkflow",
+      "type": "object"
+    },
     "Tools": {
       "additionalProperties": false,
       "properties": {
@@ -388,9 +700,126 @@
           ],
           "default": null,
           "title": "Advisory Snapshot"
+        },
+        "advisory_max_age_days": {
+          "default": 7,
+          "maximum": 365,
+          "minimum": 1,
+          "title": "Advisory Max Age Days",
+          "type": "integer"
+        },
+        "backend": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "macos",
+            "bubblewrap",
+            "docker"
+          ],
+          "title": "Backend",
+          "type": "string"
+        },
+        "images": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "semgrep",
+              "osv-scanner",
+              "trivy"
+            ]
+          },
+          "title": "Images",
+          "type": "object"
         }
       },
       "title": "Tools",
+      "type": "object"
+    },
+    "WorkflowStep": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "method": {
+          "default": "GET",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "identity": {
+          "default": "owner",
+          "title": "Identity",
+          "type": "string"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "expected_status": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Expected Status",
+          "type": "array"
+        },
+        "marker": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Marker"
+        },
+        "capture": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 5,
+          "title": "Capture",
+          "type": "object"
+        },
+        "security_assertion": {
+          "default": false,
+          "title": "Security Assertion",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "path"
+      ],
+      "title": "WorkflowStep",
       "type": "object"
     }
   },
@@ -458,10 +887,42 @@
       "title": "Offline",
       "type": "boolean"
     },
+    "cvss_vectors": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 100,
+      "title": "Cvss Vectors",
+      "type": "object"
+    },
     "browser": {
       "default": false,
       "title": "Browser",
       "type": "boolean"
+    },
+    "browser_workflows": {
+      "items": {
+        "$ref": "#/$defs/BrowserWorkflow"
+      },
+      "maxItems": 10,
+      "title": "Browser Workflows",
+      "type": "array"
+    },
+    "workflows": {
+      "items": {
+        "$ref": "#/$defs/StatefulWorkflow"
+      },
+      "maxItems": 10,
+      "title": "Workflows",
+      "type": "array"
+    },
+    "fuzz_targets": {
+      "items": {
+        "$ref": "#/$defs/FuzzTarget"
+      },
+      "maxItems": 10,
+      "title": "Fuzz Targets",
+      "type": "array"
     }
   },
   "title": "Config",

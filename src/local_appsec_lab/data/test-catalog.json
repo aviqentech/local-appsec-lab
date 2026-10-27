@@ -608,5 +608,162 @@
       "Developer-supplied fixture and policy assumptions",
       "No inferred business-state machine"
     ]
+  },
+  {
+    "schema_version": 1,
+    "id": "python-dataflow",
+    "title": "Bounded interprocedural Python provenance",
+    "category": "input_data_flow",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "Python source"
+    ],
+    "authorization": "Read-only review",
+    "mode": "review",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "AST request-to-sink summaries, at most 100,000 nodes, 200 finding outputs",
+    "verification": "Fresh source context; conservative candidates only",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "offline-tools",
+    "title": "Optional offline scanner adapters",
+    "category": "dependencies",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source",
+      "lockfiles"
+    ],
+    "authorization": "Read-only review",
+    "mode": "review",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "Semgrep, OSV-Scanner or Trivy structured output and version/data provenance",
+    "verification": "Source/dependency evidence validated; no exploit confirmation",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "stateful-workflow",
+    "title": "Explicit synthetic state workflow",
+    "category": "business_logic",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "owned disposable service"
+    ],
+    "authorization": "Unexpired active approval and owned runtime",
+    "mode": "local-active",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "Ordered identities, scalar capture, assertion and reserved DELETE rollback",
+    "verification": "Fresh complete sequence and cleanup with protected control",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "scalar-fuzz",
+    "title": "Bounded scalar-schema properties",
+    "category": "validation",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "explicit local GET field"
+    ],
+    "authorization": "Unexpired active approval and owned runtime",
+    "mode": "local-active",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "Valid control before at most eight malformed small cases",
+    "verification": "Status-only discrepancies remain candidates",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "chromium-workflow",
+    "title": "Isolated browser policy workflow",
+    "category": "browser",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "owned Docker/Compose service"
+    ],
+    "authorization": "Unexpired active approval and owned runtime",
+    "mode": "local-active",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "Parent-brokered HTTP, configured assertions, screenshot digest only",
+    "verification": "Browser observations do not independently establish exploitability",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "adaptive-get",
+    "title": "Parent-gated adaptive response checks",
+    "category": "headers",
+    "cwe": null,
+    "preconditions": [
+      "Explicit supported configuration and prerequisites",
+      "Required category/scope authorization"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "known GET route"
+    ],
+    "authorization": "Unexpired active approval and owned runtime",
+    "mode": "local-active",
+    "expected_secure_behavior": "Configured security policy and corresponding protected control hold",
+    "observation": "At most four new approved header/CORS/error checks from model proposals",
+    "verification": "Concrete parent checks; proposals cannot expand scope or mutate state",
+    "cleanup": "Owned runtime/lease cleanup; reserve rollback before state changes",
+    "timeout_seconds": 60,
+    "resource_budget": "Run request/time/storage/model limits and module-specific bounded work",
+    "limitations": [
+      "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+    ]
   }
 ]

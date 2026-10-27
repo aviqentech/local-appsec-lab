@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -36,12 +37,60 @@ def docker_control() -> tuple[list[str], dict[str, str]]:
     return ["docker", "--host", endpoint], env
 
 
+def local_image(base: list[str], env: dict, reference: str) -> str:
+    """Resolve a preloaded exact reference to content identity; never pull implicitly."""
+    result = subprocess.run(
+        [*base, "image", "inspect", reference, "--format", "{{.Id}}"],
+        env=env,
+        capture_output=True,
+        timeout=10,
+    )
+    identity = result.stdout.decode().strip()
+    if not result.returncode and re.fullmatch(r"sha256:[a-f0-9]{64}", identity):
+        return identity
+    # Some containerd image stores list a tag but reject tag inspection. Match
+    # the exact tag/digest in the local inventory, then inspect its content ID.
+    listing = subprocess.run(
+        [*base, "image", "ls", "--digests", "--no-trunc", "--format", "{{json .}}"],
+        env=env,
+        capture_output=True,
+        timeout=10,
+    )
+    if listing.returncode or len(listing.stdout) > 1_000_000:
+        raise RuntimeFailure("Cannot read the bounded local image inventory")
+    expected = (
+        reference
+        if ":" in reference.rsplit("/", 1)[-1] or "@" in reference
+        else reference + ":latest"
+    )
+    matches = set()
+    for line in listing.stdout.splitlines():
+        item = json.loads(line)
+        if (
+            item["Repository"] + ":" + item["Tag"] == expected
+            or item["Repository"] + "@" + item.get("Digest", "") == expected
+        ):
+            matches.add(item["ID"])
+    if len(matches) == 1:
+        identity = matches.pop()
+        if re.fullmatch(r"sha256:[a-f0-9]{64}", identity):
+            verified = subprocess.run(
+                [*base, "image", "inspect", identity, "--format", "{{.Id}}"],
+                env=env,
+                capture_output=True,
+                timeout=10,
+            )
+            if not verified.returncode and verified.stdout.decode().strip() == identity:
+                return identity
+    raise RuntimeFailure(
+        "The exact runtime image is not preloaded or cannot be resolved; provision it explicitly"
+    )
+
+
 def backend(config: Config) -> str:
     requested = config.execution.backend
     if requested != "auto":
         return requested
-    if platform.system() == "Darwin" and shutil.which("sandbox-exec"):
-        return "macos"
     if shutil.which("docker"):
         return "docker"
     if platform.system() == "Linux" and shutil.which("bwrap"):
@@ -79,9 +128,33 @@ def mac_profile(scratch: Path, source: Path, executable: str, port: int) -> str:
         "/private/etc/localtime",
     ]
     reads += "\n" + "\n".join(f"(allow file-read* (literal {q(p)}))" for p in system_files)
+    sysctls = "\n".join(
+        f'(allow sysctl-read (sysctl-name "{name}"))'
+        for name in (
+            "hw.memsize",
+            "hw.ncpu",
+            "hw.availcpu",
+            "hw.physicalcpu",
+            "hw.physicalcpu_max",
+            "hw.logicalcpu",
+            "hw.logicalcpu_max",
+            "hw.machine",
+            "hw.model",
+            "hw.pagesize",
+            "hw.pagesize_compat",
+            "hw.cachelinesize",
+            "hw.optional.arm64",
+            "kern.ostype",
+            "kern.osrelease",
+            "kern.version",
+            "kern.hostname",
+            "kern.osversion",
+        )
+    )
     return f"""(version 1)
 (deny default)
-(allow process-exec process-fork sysctl-read mach-lookup)
+(allow process-exec process-fork)
+{sysctls}
 (allow signal (target self))
 (allow file-read-metadata)
 (allow file-read* (literal "/"))
@@ -101,6 +174,7 @@ def command_for(
     command: list[str],
     name: str,
     docker_base: list[str] | None = None,
+    dependencies: tuple[Path, str] | None = None,
 ) -> tuple[list[str], str]:
     selected = backend(config)
     if selected == "macos":
@@ -119,6 +193,8 @@ def command_for(
             "--unshare-all",
             "--die-with-parent",
             "--new-session",
+            "--cap-drop",
+            "ALL",
             "--proc",
             "/proc",
             "--dev",
@@ -146,6 +222,10 @@ def command_for(
             raise RuntimeFailure("Docker executable is unavailable")
         # The caller runs a bridge inside the container. No published ports or egress.
         limit = config.limits
+        control_base, control_env = docker_control()
+        image_identity = local_image(
+            docker_base or control_base, control_env, config.execution.image
+        )
         if "," in str(source):
             raise RuntimeFailure("Docker bind paths containing commas are unsupported")
         args = [
@@ -180,9 +260,29 @@ def command_for(
         ]
         for key, value in config.execution.environment.items():
             args += [f"--env={key}={value}"]
+        if dependencies:
+            installed, manager = dependencies
+            if manager == "pip":
+                args += [
+                    "--mount",
+                    f"type=bind,src={installed},dst=/deps,readonly",
+                    "--env=PYTHONPATH=/deps",
+                ]
+            else:
+                args += [
+                    "--mount",
+                    f"type=bind,src={installed / 'node_modules'},dst=/app/node_modules,readonly",
+                ]
+        if config.browser or config.browser_workflows:
+            args += [
+                "--mount",
+                f"type=bind,src={Path(__file__).parent.parent / 'runtime' / 'browser_worker.py'},dst=/browser_worker.py,readonly",
+                "--security-opt",
+                f"seccomp={Path(__file__).parent.parent / 'data' / 'browser-seccomp.json'}",
+            ]
         args += [
             "--entrypoint=python",
-            config.execution.image,
+            image_identity,
             "-I",
             "/bridge.py",
             json.dumps(command),
@@ -192,8 +292,12 @@ def command_for(
     raise RuntimeFailure("Unsupported isolation backend")
 
 
-def sandbox_probe() -> dict:
-    if platform.system() == "Darwin" and shutil.which("sandbox-exec"):
+def sandbox_probe(config: Config | None = None) -> dict:
+    try:
+        selected = backend(config or Config())
+    except RuntimeFailure:
+        selected = "none"
+    if selected == "macos" and platform.system() == "Darwin" and shutil.which("sandbox-exec"):
         result = subprocess.run(
             ["sandbox-exec", "-p", "(version 1)(allow default)(deny network*)", "/usr/bin/true"],
             capture_output=True,
@@ -203,9 +307,9 @@ def sandbox_probe() -> dict:
             "backend": "macos",
             "available": result.returncode == 0,
             "remediation": "Run where macOS sandbox-exec is allowed; nested sandboxes may reject it",
-            "limits": "CPU/file limits enforced; process/RSS/storage aggregate limits monitored, not cgroups",
+            "limits": "Reviewed source only: numeric process-argument sysctls can expose same-user host process metadata/environment despite Seatbelt. CPU/file limits enforced; aggregate RSS/process/storage monitored. Use Docker for untrusted code.",
         }
-    if shutil.which("docker"):
+    if selected == "docker" and shutil.which("docker"):
         result = subprocess.run(
             ["docker", "info", "--format", "{{.ServerVersion}}"], capture_output=True, timeout=5
         )

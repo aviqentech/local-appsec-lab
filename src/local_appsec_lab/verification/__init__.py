@@ -18,6 +18,7 @@ def verify(
     client: Client | None,
     mode: str = "review",
     allowed_categories: tuple[str, ...] = (),
+    owned_runtime: bool = False,
 ) -> Finding:
     verdict = {
         "reviewer": "independent-deterministic-verifier",
@@ -60,6 +61,38 @@ def verify(
             except (OSError, LabError) as exc:
                 finding.state = "blocked"
                 verdict["conclusion"] = type(exc).__name__
+    elif finding.rule.startswith("workflow:"):
+        from local_appsec_lab.dynamic_tests.workflows import observe
+
+        _, workflow_id, step = finding.rule.split(":", 2)
+        workflow = next((w for w in config.workflows if w.id == workflow_id), None)
+        if (
+            not client
+            or not workflow
+            or not owned_runtime
+            or finding.provenance != "builtin"
+            or mode != "local-active"
+            or workflow.category not in allowed_categories
+        ):
+            finding.state, verdict["conclusion"] = (
+                "blocked",
+                "Workflow replay requires an authorized owned disposable runtime",
+            )
+        else:
+            try:
+                observation = observe(client, workflow)
+                finding.state = (
+                    "confirmed"
+                    if step in observation["violations"]
+                    else "not_reproduced"
+                    if observation["baseline"]
+                    else "blocked"
+                )
+                verdict.update({"conclusion": finding.state, "new_observation": observation})
+            except RollbackFailure:
+                raise
+            except (LabError, OSError, ValueError, KeyError) as exc:
+                finding.state, verdict["conclusion"] = "blocked", type(exc).__name__
     elif finding.source:
         source = read_text(root, finding.source.path)
         current_hash = hashlib.sha256(source.encode()).hexdigest()

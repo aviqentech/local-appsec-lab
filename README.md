@@ -1,140 +1,119 @@
 # Local AppSec Lab
 
-A local application security CLI and portable Agent Skill from [AVIQEN](https://github.com/aviqentech), licensed under Apache-2.0.
+A local application security engine and portable Agent Skill from [AVIQEN](https://github.com/aviqentech), licensed under Apache-2.0.
 
-**Version 0.1.0 is experimental.** It performs source review and bounded tests of supported local applications. It does not provide complete penetration testing, universal framework support, or a security guarantee.
+**Version 0.2.0 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
 
-The engine inventories real source, schedules deterministic review workers, starts supported Python/Node services in an OS sandbox, checks configured synthetic access policies through HTTP, independently repeats boundary findings, and produces JSON, Markdown, offline HTML and SARIF reports. No AI subscription, API key or cloud account is required for deterministic assessments.
-
-## Prerequisites
-
-| Requirement | When needed |
-|---|---|
-| Python 3.11 or newer, with `venv` and `pip` | All installations; Python 3.11 and 3.13 were tested |
-| Git | Cloning and updating this repository |
-| Internet access | Initial package installation and explicit image/tool provisioning; optional model requests |
-| Node.js | JavaScript application execution; Node 22 is used in native CI |
-| Flask or other application dependencies | Running applications that use them; provision them in the selected trusted runtime |
-| OS isolation backend | Application execution: macOS Seatbelt, or Docker with a Linux engine on Linux/Windows/macOS |
-| A compatible agent application | Using the optional skill in Claude Code, Codex, Cursor or Gemini CLI |
-
-Source review needs Python and the package dependencies, but does not require Docker, Node or an agent application. The engine never installs application dependencies, builds images or pulls images implicitly. See [installation and runtime setup](docs/installation.md).
+The engine inventories source, runs bounded source and Python data-flow analysis, coordinates specialist AI workers with fresh verification and remediation workers, provisions supported locked dependencies and disposable Compose services, and tests actual local applications through scoped HTTP and Chromium. It produces JSON, Markdown, offline HTML and SARIF reports. Deterministic assessments require no model subscription or API key.
 
 ## Install
 
-Clone the project from the publication account:
+Prerequisites: **Python 3.11+**, `venv` and `pip`; Git for cloning. Active execution also needs a supported OS isolation backend and a prepared runtime. Browser/database workflows require Docker with **Linux containers**. See the [full prerequisites and installation guide](docs/installation.md).
 
 ```sh
 git clone https://github.com/aviqentech/local-appsec-lab.git
 cd local-appsec-lab
-```
-
-### macOS / Linux
-
-```sh
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install .
-appsec-lab --version
 appsec-lab doctor
 ```
 
-### Windows PowerShell
-
-These commands work without changing PowerShell's script execution policy:
+Windows PowerShell, without activating scripts or changing execution policy:
 
 ```powershell
+git clone https://github.com/aviqentech/local-appsec-lab.git
+cd local-appsec-lab
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install .
-.\.venv\Scripts\appsec-lab.exe --version
 .\.venv\Scripts\appsec-lab.exe doctor
 ```
 
-If the `py` launcher is unavailable, use `python` after checking `python --version` is 3.11+. In the examples below, Windows users can replace `appsec-lab` with the full path to `.venv\Scripts\appsec-lab.exe`. Source installation is supported; no PyPI publication is assumed.
+Use the explicit Windows executable in subsequent examples when the environment is not active. Source installation is supported; a PyPI release is not assumed.
 
-## First source review
+## Use it
 
-Use a repository you own or are authorized to assess. Replace the example path with a real directory:
+Replace `/path/to/application` with an authorized local repository:
 
 ```sh
 appsec-lab inspect --project /path/to/application
 appsec-lab plan --project /path/to/application
 appsec-lab scan --project /path/to/application --mode review
-appsec-lab status --project /path/to/application
 appsec-lab report --project /path/to/application --run latest --format html
 ```
 
-Review mode does not execute application code. Configuration is optional for review. Run `appsec-lab init --project /path/to/application` if you want a starting `appsec-lab.yaml`; it refuses to overwrite an existing file and adds `.appsec-lab/` to that project's `.gitignore`.
-
-Commands return JSON with report paths. A scan can exit with `2` when coverage is partial, for example when advisory data is missing. This is disclosed incomplete coverage. Exit `1` means a confirmed finding meets the configured severity threshold. See the [exit-code table](docs/usage.md#exit-codes).
-
-## Install the optional agent skill
-
-From the Python environment where the engine was installed:
+Review does not execute application code. Configure a supported startup command and synthetic test policies, inspect the plan, then authorize execution:
 
 ```sh
-python -m local_appsec_lab.install --global --target all
-# Or install only in an existing application repository:
-python -m local_appsec_lab.install --project /path/to/application --target codex
-```
-
-On Windows, use `.\.venv\Scripts\python.exe` in place of `python` if the environment is not activated. Targets are `claude`, `codex`, `cursor`, `gemini`, `generic` or `all`. The installer copies the skill and its engine, validates the copied helper, and records the installing Python interpreter. Keep that Python environment available.
-
-Host discovery and interactive invocation remain unverified. The installed files do not automatically start native subagents. See [host paths and integration limits](docs/installation.md#agent-skill-installation).
-
-## Run an application assessment
-
-Review the startup command, service, isolation backend, synthetic data, scope and budgets before authorizing execution:
-
-```sh
-appsec-lab config validate --project /path/to/application
-appsec-lab plan --project /path/to/application
 appsec-lab scan --project /path/to/application --mode local-active --authorize
 appsec-lab clean --project /path/to/application
 ```
 
-`local-passive` starts the selected service and inspects approved responses. `local-active` also executes configured synthetic policy scenarios. Both require fresh `--authorize` consent. The tool never tests public targets or infers arbitrary attack workflows.
+A deliberately vulnerable fixture can exit `1` for a confirmed finding. Exit `2` means partial coverage; inspect blocked and untested checks. Read [usage and exit codes](docs/usage.md) and the [configuration guide](docs/configuration.md).
 
-For a working example, follow the [Node demo](docs/usage.md#run-the-synthetic-node-demo). It intentionally contains a cross-user access defect and a secure control. Linux/Windows Docker setup needs an explicitly built image with Python plus Node; the default Python-only image cannot run Node. A [Docker demo configuration](examples/configuration/docker-synthetic.yaml) and trusted [test image recipe](tests/compatibility/runtime.Dockerfile) are included.
+## Optional AI and skill
 
-## Platform evidence
+Install the skill in a user or project directory:
 
-| Surface | Validation | Remaining limits |
-|---|---|---|
-| Windows | Native source review, CLI and installer tests on Python 3.11/3.13; PowerShell wrapper help | Docker Desktop Linux-container execution unverified |
-| Linux | Native source/installer tests; real Node/Flask Docker assessments and cleanup | Bubblewrap probe blocked by runner namespace permissions; experimental |
-| macOS | Native source/installer CI; real Seatbelt Node/Flask execution; local arm64 Docker tests | Aggregate process/memory/storage limits are monitored rather than hard cgroup limits |
-| Agent applications | Installer, copied helper and definition files for all four hosts | Interactive skill discovery/invocation and native host dispatch unverified |
+```sh
+python -m local_appsec_lab.install --global --target all
+# Or: python -m local_appsec_lab.install --project /path/to/application --target codex
+```
 
-Native platform CI and Linux container assessments passed in the [public repository validation](docs/validation.md#public-repository-validation). The [publication summary](examples/publication-validation.json) links the actual runs and records skipped work. Historical pre-publication measurements remain separately labeled in [compatibility-results.json](examples/compatibility-results.json).
+Targets are Claude Code, Codex, Cursor, Gemini CLI and generic Agent Skills hosts. Installing files, invoking a skill, and running specialist model workers are distinct capabilities. Use [host instructions and measured compatibility](docs/integrations.md).
 
-## Capabilities and limitations
+For automatic model workers, set `ai.strategy: native`, a positive `limits.model_tokens` budget and a bounded `limits.model_calls`, then explicitly authorize transmitting selected redacted context:
 
-| Area | Implemented | Limits |
-|---|---|---|
-| Discovery | Languages, manifests, frameworks, routes/OpenAPI, service graph | Recognition is broader than analysis |
-| Source analysis | Python AST and bounded multi-language patterns | Candidates need review; no whole-program taint analysis |
-| Dependencies | Exact locked versions, supplied offline snapshots, optional adapters | No built-in current advisory lookup |
-| Dynamic checks | Headers, CORS, cookies, synthetic owner/actor access policies | No arbitrary crawling, brute force or remote targets |
-| Verification | Fresh source reads and independent repeated HTTP evidence | Deterministic verification, not an independent AI audit |
-| Reports | JSON schemas, Markdown, HTML, SARIF and run comparisons | Redaction is best effort; review before sharing |
-| AI | Optional host task exchange and HTTPS Chat Completions backend | Separate consent/budgets; real provider integration unverified |
-| Runtime | Python/Node single service in macOS/Docker isolation | No automatic Compose/database provisioning or application setup |
+```sh
+appsec-lab scan --project /path/to/application --mode review \
+  --native-host codex --allow-model-requests
+```
 
-Browser workflows, ZAP execution, mobile emulators, CVSS scoring, universal framework launch and automatic host-agent dispatch are not implemented. See [requirements status](docs/requirements-status.md). Review the [security model](docs/security-model.md) before running application code, especially code you do not trust.
+Claude, Cursor and Gemini have corresponding `--native-host` values. Authenticated CLIs must be installed separately. Native vendor token/cost caps are not uniformly enforceable; reports distinguish reserved and reported usage. Gemini's individual-account OAuth client was rejected by Google during testing; supported API/enterprise authentication is needed. See [AI setup](docs/advanced-usage.md#ai-workers).
 
-## Documentation
+## Capabilities and limits
 
-- [Installation, prerequisites, updates and uninstall](docs/installation.md)
-- [Usage, synthetic demo, reports and exit codes](docs/usage.md)
-- [Configuration and budgets](docs/configuration.md)
-- [Agent and optional scanner integrations](docs/integrations.md)
-- [Supported framework recognition](docs/supported-frameworks.md)
-- [Report format and evidence states](docs/report-format.md)
-- [Architecture](docs/architecture.md), [security model](docs/security-model.md), and [validation evidence](docs/validation.md)
-- [Troubleshooting](docs/troubleshooting.md) and [FAQ](docs/faq.md)
-- [Contributing](CONTRIBUTING.md), [release process](docs/releasing.md), [security policy](SECURITY.md), and [code of conduct](CODE_OF_CONDUCT.md)
+| Capability | Implemented behavior |
+|---|---|
+| Source review | File/route/dependency inventory, deterministic candidates, bounded interprocedural Python provenance; Semgrep adds supported JS/TS taint rules |
+| Specialist orchestration | Distinct scheduled roles, parent-owned shared knowledge, fresh AI verifier and remediation processes, bounded adaptive check proposals |
+| Local execution | macOS Seatbelt, Docker Linux containers; experimental Linux bubblewrap |
+| Environment setup | Integrity-pinned public Python wheels/npm packages, lifecycle scripts disabled; constrained generated Compose, disposable PostgreSQL/Redis, explicit seeds/migrations |
+| Active tests | Synthetic access policies, multi-step state workflows with rollback, bounded scalar-schema fuzzing and isolated Playwright/Chromium workflows |
+| Security intelligence | Explicit OSV refresh and offline OSV/Trivy database updates, staleness reporting, sealed persistent deterministic cache |
+| Scanners | Real offline Semgrep, OSV-Scanner and Trivy adapters on macOS and Docker; no implicit installs/downloads |
+| Remediation | Contextual guidance, explicit CVSS v4 vectors, private patch preparation, separately authorized apply/rollback |
+| Reports | JSON/schema, SARIF, Markdown and offline HTML; candidates and untested coverage remain visible |
 
-## License and support
+Runtime recognition does not imply universal framework launch. Whole-program proof, arbitrary Compose files, inferred business policies, mobile emulators and ZAP execution are outside the implemented scope. Fix generation currently supports a narrow Python debug rewrite or a reviewed Python/JSON replacement. See the [requirement-by-requirement status](docs/requirements-status.md).
 
-Apache-2.0; see [LICENSE](LICENSE), [NOTICE](NOTICE) and [third-party notices](THIRD_PARTY_NOTICES.md). Report non-sensitive defects through [GitHub Issues](https://github.com/aviqentech/local-appsec-lab/issues). Follow [SECURITY.md](SECURITY.md) for confidential vulnerability reports. Version 0.1.x receives best-effort maintenance without a response SLA.
+| Platform/host | Verification boundary |
+|---|---|
+| macOS | Real Seatbelt/Docker applications, browser/database workflows, scanners and Codex/Claude/Cursor model workers tested locally |
+| Linux | Native source/installer and Linux Docker tested; bubblewrap depends on host namespace policy |
+| Windows | Native source/installer tests; Linux-container execution requires Docker Desktop and a native Windows test machine |
+| Agent hosts | Skill installation supports all four; worker verification and skill discovery are tracked separately |
+
+Consult [validation](docs/validation.md) for exact measured results and outstanding prerequisites.
+
+## Documentation and development
+
+- [Installation, update and uninstall](docs/installation.md)
+- [Usage](docs/usage.md), [advanced workflows](docs/advanced-usage.md), [configuration/schema](docs/configuration.md)
+- [Architecture](docs/architecture.md), [security model](docs/security-model.md), [framework support](docs/supported-frameworks.md)
+- [Troubleshooting](docs/troubleshooting.md), [FAQ](docs/faq.md), [report format](docs/report-format.md)
+- [Validation](docs/validation.md), [requirements status](docs/requirements-status.md), [release procedure](docs/releasing.md)
+- [Contributing](CONTRIBUTING.md), [security disclosure](SECURITY.md), [third-party notices](THIRD_PARTY_NOTICES.md)
+
+```sh
+python -m pip install '.[dev]'
+make lint
+python -m pytest -q
+python -m build
+```
+
+Runtime tests need their documented platform and preloaded images. Never treat skipped integration tests as successful execution. Private `.appsec-lab` state contains local security evidence and must stay out of version control.
+
+Native macOS Seatbelt is an explicit reviewed-source option. It cannot block every
+numeric same-user process-argument query; host process environment/arguments may
+be exposed. Use Docker for untrusted application or scanner code.

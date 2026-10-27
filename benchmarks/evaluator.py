@@ -1,6 +1,7 @@
 """Runs only owned synthetic fixtures through the actual engine."""
 
 import json
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -21,7 +22,13 @@ def main():
                 root,
                 ignore=shutil.ignore_patterns(".appsec-lab", "__pycache__"),
             )
-            report, _ = scan(root, root, load(root), case["mode"], case["mode"] != "review")
+            config = load(root)
+            if case["mode"] != "review":
+                config.execution.backend = "docker"
+                config.execution.image = os.environ.get(
+                    "APPSEC_TEST_IMAGE", "local-appsec-lab-test:0.1.0"
+                )
+            report, _ = scan(root, root, config, case["mode"], case["mode"] != "review")
             rules = {f.rule for f in report.findings if f.state == "confirmed"}
             actual = {f.rule for f in report.findings}
             passed = (

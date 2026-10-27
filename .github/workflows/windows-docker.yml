@@ -1,0 +1,30 @@
+name: Native Windows Linux-container assessments
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-docker:
+    # Attach a disposable Windows machine with Docker Desktop Linux containers.
+    # Never put model credentials or production data on this runner.
+    runs-on: [self-hosted, Windows, appsec-linux-containers]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - shell: pwsh
+        run: |
+          if ((docker info --format '{{.OSType}}') -ne 'linux') { throw 'Linux-container engine required' }
+          python -m pip install '.[dev]'
+          docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Dockerfile tests/compatibility
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:APPSEC_TEST_IMAGE = 'local-appsec-lab-test:0.1.0'
+          python -m pytest tests/compatibility/test_docker_assessment.py tests/integration/test_workflows.py -q --junitxml=windows-docker-results.xml
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-windows-docker-results
+          path: windows-docker-results.xml

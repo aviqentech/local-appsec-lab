@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "release": "0.2.0",
+  "date": "2026-10-27",
+  "local_platform": "macOS arm64; Python 3.13; Docker Desktop Linux engine",
+  "local_suite": {
+    "passed": 152,
+    "failed": 0,
+    "skipped": 3,
+    "skips": [
+      {
+        "test": "test_experimental_bubblewrap_bridge",
+        "reason": "Explicit native Linux bubblewrap validation only"
+      },
+      {
+        "test": "test_windows_junction_is_not_a_source_directory",
+        "reason": "Native Windows junction contract"
+      },
+      {
+        "test": "test_windows_artifacts_have_protected_user_system_acl",
+        "reason": "Native Windows private ACL contract"
+      }
+    ]
+  },
+  "native_workers": [
+    {
+      "host": "codex",
+      "review_findings": 1,
+      "verification": "supported",
+      "calls": 3,
+      "actual_tokens": 34609,
+      "source_executed": false,
+      "cost_usd": null
+    },
+    {
+      "host": "claude",
+      "review_findings": 1,
+      "verification": "supported",
+      "calls": 3,
+      "actual_tokens": 15551,
+      "source_executed": false,
+      "cost_usd": null
+    },
+    {
+      "host": "cursor",
+      "review_findings": 1,
+      "verification": "supported",
+      "calls": 3,
+      "actual_tokens": null,
+      "source_executed": false,
+      "cost_usd": null
+    }
+  ],
+  "installed_skill_invocations": [
+    {
+      "host": "codex",
+      "completed": true,
+      "canary_created": false,
+      "scan_state_created": false,
+      "output_bytes": 40705
+    },
+    {
+      "host": "claude",
+      "completed": true,
+      "canary_created": false,
+      "scan_state_created": false,
+      "output_bytes": 5596
+    },
+    {
+      "host": "cursor",
+      "completed": true,
+      "canary_created": false,
+      "scan_state_created": false,
+      "output_bytes": 2707
+    }
+  ],
+  "offline_scanners": {
+    "versions": {
+      "semgrep": "1.182.1",
+      "osv-scanner": "2.7.0",
+      "trivy": "0.72.0"
+    },
+    "macos": "passed positive and protected controls",
+    "docker": "passed positive and protected controls"
+  },
+  "live_data": {
+    "osv_api_refresh": "passed",
+    "osv_offline_pypi_archive": "passed",
+    "trivy_fixed_origin_oci_refresh": "passed"
+  },
+  "locked_dependencies": {
+    "python_wheels": "passed setup and import in actual isolated application",
+    "npm": "passed setup and module import; lifecycle canary did not run"
+  },
+  "isolation": "Docker automatic; native macOS explicitly reviewed source only; numeric process-argument metadata is not blocked by Seatbelt",
+  "external_prerequisites": [
+    "Gemini supported API or enterprise authentication",
+    "Native Windows with a local Docker Linux-container engine",
+    "Real generic HTTPS model endpoint credentials"
+  ],
+  "private_evidence_policy": "Raw login state, model transcripts, scanner caches and local test paths are excluded from publication."
+}

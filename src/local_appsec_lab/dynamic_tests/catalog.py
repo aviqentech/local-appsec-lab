@@ -89,4 +89,85 @@ def catalog() -> list[dict]:
                 ],
             ).model_dump()
         )
+    for identifier, category, title, targets, mode, observation, verification in [
+        (
+            "python-dataflow",
+            "input_data_flow",
+            "Bounded interprocedural Python provenance",
+            ["Python source"],
+            "review",
+            "AST request-to-sink summaries, at most 100,000 nodes, 200 finding outputs",
+            "Fresh source context; conservative candidates only",
+        ),
+        (
+            "offline-tools",
+            "dependencies",
+            "Optional offline scanner adapters",
+            ["source", "lockfiles"],
+            "review",
+            "Semgrep, OSV-Scanner or Trivy structured output and version/data provenance",
+            "Source/dependency evidence validated; no exploit confirmation",
+        ),
+        (
+            "stateful-workflow",
+            "business_logic",
+            "Explicit synthetic state workflow",
+            ["owned disposable service"],
+            "local-active",
+            "Ordered identities, scalar capture, assertion and reserved DELETE rollback",
+            "Fresh complete sequence and cleanup with protected control",
+        ),
+        (
+            "scalar-fuzz",
+            "validation",
+            "Bounded scalar-schema properties",
+            ["explicit local GET field"],
+            "local-active",
+            "Valid control before at most eight malformed small cases",
+            "Status-only discrepancies remain candidates",
+        ),
+        (
+            "chromium-workflow",
+            "browser",
+            "Isolated browser policy workflow",
+            ["owned Docker/Compose service"],
+            "local-active",
+            "Parent-brokered HTTP, configured assertions, screenshot digest only",
+            "Browser observations do not independently establish exploitability",
+        ),
+        (
+            "adaptive-get",
+            "headers",
+            "Parent-gated adaptive response checks",
+            ["known GET route"],
+            "local-active",
+            "At most four new approved header/CORS/error checks from model proposals",
+            "Concrete parent checks; proposals cannot expand scope or mutate state",
+        ),
+    ]:
+        result.append(
+            TestDefinition(
+                id=identifier,
+                title=title,
+                category=category,
+                preconditions=[
+                    "Explicit supported configuration and prerequisites",
+                    "Required category/scope authorization",
+                ],
+                supported_targets=targets,
+                authorization="Read-only review"
+                if mode == "review"
+                else "Unexpired active approval and owned runtime",
+                mode=mode,
+                expected_secure_behavior="Configured security policy and corresponding protected control hold",
+                observation=observation,
+                verification=verification,
+                cleanup="Owned runtime/lease cleanup; reserve rollback before state changes",
+                timeout_seconds=60,
+                resource_budget="Run request/time/storage/model limits and module-specific bounded work",
+                limitations=[
+                    "Supported explicit workflow only; blocked or untested prerequisites remain visible"
+                ],
+            ).model_dump()
+        )
     return result

@@ -18,6 +18,7 @@ from local_appsec_lab.findings import RunStore
 def test_network_and_file_boundary(runtime_ready, fixture_project, free_port, tmp_path):
     root = fixture_project()
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     import socket
 
@@ -68,6 +69,7 @@ def test_port_collision_and_no_unrelated_process_kill(runtime_ready, fixture_pro
 
     root = fixture_project()
     config = load(root)
+    config.execution.backend = "macos"
     config.execution.port = free_port
     server = socket.socket()
     server.bind(("127.0.0.1", free_port))
@@ -129,3 +131,34 @@ def test_docker_python_bridge(fixture_project, free_port):
     )
     result, _ = scan(root, root, config, "local-passive", True)
     assert result.metrics["services_started"] == 1 and result.metrics["cleanup_completed"]
+
+
+@pytest.mark.runtime
+def test_macos_reports_process_arguments_limitation(runtime_ready, tmp_path):
+    import sys
+
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    profile = scratch / "policy.sb"
+    profile.write_text(mac_profile(scratch, scratch, sys.executable, 8765))
+    probe = """import ctypes, os
+libc = ctypes.CDLL(None, use_errno=True)
+mib = (ctypes.c_int * 3)(1, 49, os.getppid())
+buffer = ctypes.create_string_buffer(1048576)
+size = ctypes.c_size_t(len(buffer))
+result = libc.sysctl(mib, 3, buffer, ctypes.byref(size), None, 0)
+print('readable' if result == 0 else 'denied')
+"""
+    result = subprocess.run(
+        ["sandbox-exec", "-f", str(profile), sys.executable, "-I", "-c", probe],
+        capture_output=True,
+        timeout=10,
+    )
+    assert result.returncode == 0 and result.stdout.strip() in {b"readable", b"denied"}, (
+        result.stderr
+    )
+    from local_appsec_lab.configuration import Config
+    from local_appsec_lab.isolation import sandbox_probe
+
+    status = sandbox_probe(Config(execution={"backend": "macos"}))
+    assert "process-argument" in status["limits"] and "Use Docker" in status["limits"]

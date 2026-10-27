@@ -11,7 +11,9 @@ PATTERNS = [
     re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b"),
     re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,})\b"),
     re.compile(r"(?is)-----BEGIN [^-]*PRIVATE KEY-----.*?-----END [^-]*PRIVATE KEY-----"),
-    re.compile(r"(?i)(?:password|secret|token|api[_-]?key)\s*[=:]\s*['\"]?[^\s,'\";}]+"),
+    re.compile(
+        r"""(?ix)(?:["']?[a-z0-9_-]*(?:password|passwd|secret|token|api[_-]?key|credential|authorization|cookie)[a-z0-9_-]*["']?)\s*[=:]\s*(?:"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|[^\s,;}]+)"""
+    ),
     re.compile(r"(?i)(https?://)[^\s/@:]+:[^\s/@]+@"),
 ]
 

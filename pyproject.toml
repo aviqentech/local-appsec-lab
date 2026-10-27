@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "local-appsec-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Authorized local application security assessment engine and portable Agent Skill"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-dependencies = ["pydantic>=2.10,<3", "PyYAML>=6.0.2,<7", "jsonschema>=4.23,<5"]
+dependencies = ["pydantic>=2.10,<3", "PyYAML>=6.0.2,<7", "jsonschema>=4.23,<5", "certifi>=2025.1", "cvss>=3.6,<4"]
 
 [project.urls]
 Homepage = "https://github.com/aviqentech/local-appsec-lab"

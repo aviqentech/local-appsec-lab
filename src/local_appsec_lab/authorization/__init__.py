@@ -14,9 +14,9 @@ from local_appsec_lab.models import Mode, Model, digest
 from local_appsec_lab.utilities.files import files, read_text
 
 
-def fingerprint(root: Path) -> str:
+def fingerprint(root: Path, output: str = ".appsec-lab") -> str:
     parts = []
-    for path in files(root):
+    for path in files(root, excluded_paths=[output]):
         parts.append((path, hashlib.sha256(read_text(root, path).encode()).hexdigest()))
     return digest([str(root.resolve()), parts])
 
@@ -42,7 +42,7 @@ class Approval(Model):
         if time.time() >= self.expires_at:
             raise AuthorizationError("Authorization expired; authorize a new run")
         if self.repository != str(root.resolve()) or self.repository_fingerprint != fingerprint(
-            root
+            root, config.output
         ):
             raise AuthorizationError("Repository changed since authorization")
         if (
@@ -83,14 +83,19 @@ def authorize(
         raise AuthorizationError(
             "Existing service requires --existing-manifest-digest from the reviewed plan"
         )
+    identities = [config.execution.service or "app"]
+    if config.execution.compose_file:
+        from local_appsec_lab.runtime.compose import definition
+
+        identities = list(definition(root, config)[0])
     return Approval(
         repository=str(root),
-        repository_fingerprint=fingerprint(root),
+        repository_fingerprint=fingerprint(root, config.output),
         plan_digest=digest(config.model_dump()),
         user=getpass.getuser(),
         acknowledgment="I authorize local execution and bounded testing",
         mode=mode,
-        service_identities=[config.execution.service or "app"],
+        service_identities=identities,
         ports=[config.execution.port],
         categories=config.categories
         or [
@@ -102,6 +107,7 @@ def authorize(
             "validation",
             "business_logic",
             "tenant_isolation",
+            *(["browser"] if config.browser or config.browser_workflows else []),
         ],
         limits=config.limits.model_dump(),
         expires_at=time.time() + config.limits.duration_seconds,

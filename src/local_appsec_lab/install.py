@@ -88,7 +88,7 @@ def install(base: Path, targets: list[str], operation: str = "install") -> list[
     source_skill = repository_skill if repository_skill.is_dir() else package / "data" / "skill"
     if not source_skill.is_dir():
         raise ConfigError("Packaged skill resources missing; reinstall the distribution")
-    for dependency in ("pydantic", "yaml", "jsonschema"):
+    for dependency in ("pydantic", "yaml", "jsonschema", "certifi", "cvss"):
         if not importlib.util.find_spec(dependency):
             raise ConfigError(
                 "Install the CLI with pip first; installer never downloads dependencies implicitly"

@@ -181,7 +181,7 @@ class Client:
         path: str,
         headers: dict[str, str] | None = None,
         method: str = "GET",
-        body: dict | None = None,
+        body: dict | bytes | None = None,
     ) -> Response:
         safe_path(path)
         if method not in {"GET", "HEAD"} and (method, path) not in self.allowed_mutations:
@@ -194,7 +194,13 @@ class Client:
             for k, v in headers.items()
         ):
             raise ScopeError("Unsafe request headers")
-        data = json.dumps(body).encode() if body is not None else None
+        data = (
+            body
+            if isinstance(body, bytes)
+            else json.dumps(body).encode()
+            if body is not None
+            else None
+        )
         if data and len(data) > 4096:
             raise ScopeError("Request body exceeds safe input budget")
         self.budget.claim()

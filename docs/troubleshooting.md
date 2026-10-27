@@ -32,6 +32,6 @@ The scan's JSON gives its run ID and report paths. Default history is beneath th
 
 ## Optional integrations
 
-Model requests require separate consent and nonzero budgets. Scanner tools must be installed and supplied with the intended offline data. A missing integration is a coverage blocker, not evidence of safety. Real external model and optional scanner success remain unverified; see [validation](validation.md).
+Model requests require separate consent and nonzero budgets. Scanner tools must be installed and supplied with the intended offline data. A missing integration is a coverage blocker, not evidence of safety. Codex/Claude/Cursor native workers and all three offline scanners have real integration evidence; see [validation](validation.md). Gemini individual OAuth was rejected by Google. Keep model login state outside the assessed project and use supported authentication.
 
 For a reproducible bug, use the smallest synthetic fixture possible and include only non-sensitive commands plus the [exit code](usage.md#exit-codes). Use [private reporting](../SECURITY.md) for suspected vulnerabilities in this tool.
