@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://appsec.aviqen.com/">
-    <img src="https://raw.githubusercontent.com/aviqentech/local-appsec-lab/main/docs/assets/banner.png" alt="Local AppSec Lab — the AI security scanner that runs on your machine. Official website: appsec.aviqen.com" width="100%">
+    <img src="https://raw.githubusercontent.com/aviqentech/local-appsec-lab/26b645905434a147bf01c853b253998924e03941/docs/assets/banner.png" alt="Local AppSec Lab — the AI security scanner that runs on your machine. Official website: appsec.aviqen.com" width="100%">
   </a>
 </p>
 
