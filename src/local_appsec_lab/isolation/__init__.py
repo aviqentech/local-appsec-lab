@@ -297,29 +297,58 @@ def sandbox_probe(config: Config | None = None) -> dict:
         selected = backend(config or Config())
     except RuntimeFailure:
         selected = "none"
-    if selected == "macos" and platform.system() == "Darwin" and shutil.which("sandbox-exec"):
-        result = subprocess.run(
-            ["sandbox-exec", "-p", "(version 1)(allow default)(deny network*)", "/usr/bin/true"],
-            capture_output=True,
-            timeout=5,
-        )
-        return {
-            "backend": "macos",
-            "available": result.returncode == 0,
-            "remediation": "Run where macOS sandbox-exec is allowed; nested sandboxes may reject it",
-            "limits": "Reviewed source only: numeric process-argument sysctls can expose same-user host process metadata/environment despite Seatbelt. CPU/file limits enforced; aggregate RSS/process/storage monitored. Use Docker for untrusted code.",
-        }
-    if selected == "docker" and shutil.which("docker"):
-        result = subprocess.run(
-            ["docker", "info", "--format", "{{.ServerVersion}}"], capture_output=True, timeout=5
-        )
-        return {
-            "backend": "docker",
-            "available": result.returncode == 0,
-            "remediation": "Start Docker; preload the required image",
-        }
-    return {
-        "backend": "none",
+    status = {
+        "backend": selected,
         "available": False,
-        "remediation": "Install a supported isolation backend",
+        "remediation": "Install/start the selected isolation backend and preload its runtime",
     }
+    try:
+        if selected == "macos" and platform.system() == "Darwin" and shutil.which("sandbox-exec"):
+            result = subprocess.run(
+                [
+                    "sandbox-exec",
+                    "-p",
+                    "(version 1)(allow default)(deny network*)",
+                    "/usr/bin/true",
+                ],
+                capture_output=True,
+                timeout=5,
+            )
+            status.update(
+                {
+                    "available": result.returncode == 0,
+                    "remediation": "Run where macOS sandbox-exec is allowed; nested sandboxes may reject it",
+                    "limits": "Reviewed source only: numeric process-argument sysctls can expose same-user host process metadata/environment despite Seatbelt. CPU/file limits enforced; aggregate RSS/process/storage monitored. Use Docker for untrusted code.",
+                }
+            )
+        elif selected == "docker" and shutil.which("docker"):
+            base, env = docker_control()
+            result = subprocess.run(
+                [*base, "info", "--format", "{{.OSType}} {{.ServerVersion}}"],
+                env=env,
+                capture_output=True,
+                timeout=5,
+            )
+            status.update(
+                {
+                    "available": result.returncode == 0 and result.stdout.startswith(b"linux "),
+                    "remediation": "Start a local Docker Linux-container engine; preload the required image",
+                }
+            )
+        elif selected == "bubblewrap" and platform.system() == "Linux":
+            args = ["bwrap", "--unshare-all", "--cap-drop", "ALL"]
+            for path in ("/usr", "/bin", "/lib", "/lib64"):
+                if Path(path).exists():
+                    args.extend(["--ro-bind", path, path])
+            result = subprocess.run([*args, "/usr/bin/true"], capture_output=True, timeout=5)
+            status.update(
+                {
+                    "available": result.returncode == 0,
+                    "remediation": "Use a host where the required user/network namespaces are permitted; do not disable host protections",
+                }
+            )
+    except (OSError, subprocess.TimeoutExpired, RuntimeFailure):
+        status["reason"] = (
+            "Backend capability probe unavailable or timed out; source review remains available"
+        )
+    return status

@@ -4,7 +4,7 @@
   "date": "2026-10-27",
   "local_platform": "macOS arm64; Python 3.13; Docker Desktop Linux engine",
   "local_suite": {
-    "passed": 152,
+    "passed": 153,
     "failed": 0,
     "skipped": 3,
     "skips": [
@@ -98,5 +98,19 @@
     "Native Windows with a local Docker Linux-container engine",
     "Real generic HTTPS model endpoint credentials"
   ],
-  "private_evidence_policy": "Raw login state, model transcripts, scanner caches and local test paths are excluded from publication."
+  "private_evidence_policy": "Raw login state, model transcripts, scanner caches and local test paths are excluded from publication.",
+  "linux_bubblewrap": {
+    "trusted_root_controller": "passed real isolated HTTP fixture and cleanup on GitHub ubuntu runner",
+    "unprivileged": "blocked: loopback RTM_NEWADDR permission denied",
+    "host_protections_disabled": false
+  },
+  "windows_engine_probe": {
+    "engine": "windows",
+    "linux_container_execution_verified": false
+  },
+  "wheel_installation": {
+    "version": "0.2.0",
+    "unrelated_venv": "passed",
+    "all_skill_targets_install_doctor_uninstall": "passed"
+  }
 }

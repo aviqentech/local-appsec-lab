@@ -23,7 +23,7 @@ The requested architecture is implemented for the supported bounded workflows be
 
 - Gemini real model integration: Google rejected the tested individual-account client. An API key or supported enterprise authentication is needed.
 - Native Windows Docker: requires a Windows machine with a local Linux-container engine. Hosted native source tests do not establish this capability.
-- Linux bubblewrap: unprivileged namespaces were blocked on the original hosted runner. A separate controlled capability test records its actual outcome without disabling host protections.
+- Linux bubblewrap: a real isolated HTTP test passed under a trusted root controller on the disposable GitHub runner. Unprivileged namespaces remain blocked there; no host protections were disabled.
 - Generic HTTPS model endpoint: strict contract tests exist; a real endpoint and explicitly selected credential are needed for provider validation.
 
 Current evidence, including installed-skill tests, is maintained in [validation](validation.md). Unsupported cases produce blocked or untested coverage instead of fabricated success.

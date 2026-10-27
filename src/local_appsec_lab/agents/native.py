@@ -206,6 +206,12 @@ def bounded_run(
             if time.monotonic() >= deadline:
                 raise BudgetExceeded("Host model worker timed out")
             time.sleep(0.05)
+        if os.name == "posix":
+            # The CLI leader may exit while an ephemeral helper retains its pipes.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
         for thread in readers:
             thread.join(timeout=2)
         if overflow.is_set():
@@ -237,6 +243,12 @@ def bounded_run(
                 else:
                     process.kill()
                 process.wait(timeout=3)
+        if os.name == "posix":
+            # The group identifier cannot be reused while owned descendants remain.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
         writer.join(timeout=1)
 
 

@@ -2,7 +2,7 @@
 
 ## Current local evidence
 
-The expanded suite passed **152 tests, 0 failed, 3 skipped** on macOS arm64,
+The expanded suite passed **153 tests, 0 failed, 3 skipped** on macOS arm64,
 Python 3.13, Node 24.6.0 and Docker Desktop Engine 29.4.0 (Linux containers).
 The three skips select native Linux bubblewrap and native Windows junction/ACL
 contracts. They are not successful platform executions. Tests use actual
@@ -55,7 +55,7 @@ and `appsec-linux-containers` and a real local Linux-container engine. It is not
 or reported successful without that machine. Existing Windows hosted source tests
 cannot establish native Windows Docker execution.
 
-Current publication CI run links are recorded after the release source is pushed.
+The first 0.2 source commit passed the [Linux container workflow](https://github.com/aviqentech/local-appsec-lab/actions/runs/40519454241) and [platform capability workflow](https://github.com/aviqentech/local-appsec-lab/actions/runs/40519454392). Downloaded JUnit confirms one real bubblewrap test passed under the trusted root controller, while the unprivileged test skipped because namespace loopback configuration was denied. The hosted Windows probe reported a Windows-container engine, so no native Windows Linux-container execution is claimed. A later source revision corrects Windows test-environment/probe handling; final native-matrix links are recorded with its verified result.
 Earlier public 0.1.0 results are preserved separately in
 [historical validation](validation-0.1.md); their counts do not describe this release.
 
@@ -74,3 +74,7 @@ APPSEC_TEST_IMAGE=local-appsec-lab-test:0.1.0 APPSEC_TEST_COMPOSE=1 APPSEC_TEST_
 Runtime validation needs permission to invoke the actual OS isolation backend;
 nested execution environments may block it. Images/data/model accounts are explicit
 prerequisites. Do not bypass a denied boundary or reinterpret a skip as a pass.
+
+The built 0.2.0 wheel was installed in a fresh unrelated temporary Python environment;
+version, source inspection and managed install/doctor/uninstall for all skill targets passed.
+The vulnerable/secure-control fixture benchmark passed all three cases.

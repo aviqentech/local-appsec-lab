@@ -128,16 +128,40 @@ def test_windows_artifacts_have_protected_user_system_acl(tmp_path):
 
     directory = private_dir(tmp_path / "private-state")
     env = dict(os.environ, APPSEC_ACL_TEST_PATH=str(directory))
-    script = """$acl = Get-Acl -LiteralPath $env:APPSEC_ACL_TEST_PATH
+    env.pop("PSModulePath", None)
+    script = """$ErrorActionPreference = 'Stop'
+$acl = Get-Acl -LiteralPath $env:APPSEC_ACL_TEST_PATH
 @{protected=$acl.AreAccessRulesProtected; identities=@($acl.Access | ForEach-Object {$_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value})} | ConvertTo-Json -Compress
 """
     result = subprocess.run(
-        ["powershell", "-NoProfile", "-Command", script],
+        [__import__("shutil").which("pwsh") or "powershell", "-NoProfile", "-Command", script],
         capture_output=True,
         env=env,
         timeout=20,
         check=True,
     )
     value = json.loads(result.stdout)
-    assert value["protected"]
+    assert value["protected"], result.stderr.decode(errors="replace")
     assert set(value["identities"]) == {"S-1-5-18", current_sid()}
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX process-group cleanup")
+def test_worker_leader_exit_does_not_preserve_background_child(tmp_path):
+    script = """import os, signal, time
+pid = os.fork()
+if pid == 0:
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    while True: time.sleep(1)
+else:
+    print(pid, flush=True)
+"""
+    output, _ = bounded_run([sys.executable, "-I", "-c", script], "", tmp_path, {}, 5)
+    pid = int(output)
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        result = subprocess.run(["ps", "-p", str(pid), "-o", "stat="], capture_output=True)
+        if result.returncode or result.stdout.strip().startswith(b"Z"):
+            break
+        time.sleep(0.05)
+    else:
+        pytest.fail("An owned ephemeral worker child survived its process group cleanup")
