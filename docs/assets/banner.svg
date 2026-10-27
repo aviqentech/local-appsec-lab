@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+  <title id="title">Local AppSec Lab</title>
+  <desc id="desc">Open-source AI security scanner that runs locally. Official website: appsec.aviqen.com</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070b16"/>
+      <stop offset="0.55" stop-color="#0b1530"/>
+      <stop offset="1" stop-color="#101a3a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.22" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0.85" cy="0.2" r="0.5">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="0.5" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0.55"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#1e2a4a" stroke-width="1"/>
+    </pattern>
+    <clipPath id="radar"><circle cx="190" cy="210" r="118"/></clipPath>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="1280" height="420" fill="url(#bg)"/>
+  <rect width="1280" height="420" fill="url(#grid)" opacity="0.55"/>
+  <rect width="1280" height="420" fill="url(#glow)"/>
+  <rect width="1280" height="420" fill="url(#glow2)"/>
+  <rect x="0" y="0" width="1280" height="4" fill="url(#brand)"/>
+
+  <!-- Radar with shield -->
+  <g>
+    <circle cx="190" cy="210" r="118" fill="#0a1328" stroke="#1f3a5f" stroke-width="1.5"/>
+    <circle cx="190" cy="210" r="86" fill="none" stroke="#1f3a5f" stroke-width="1"/>
+    <circle cx="190" cy="210" r="54" fill="none" stroke="#1f3a5f" stroke-width="1"/>
+    <path d="M72 210H308M190 92V328" stroke="#1f3a5f" stroke-width="1"/>
+    <g clip-path="url(#radar)">
+      <path d="M190 210L308 210A118 118 0 0 0 273 127Z" fill="url(#sweep)"/>
+    </g>
+    <circle cx="262" cy="160" r="5" fill="#f43f5e"/>
+    <circle cx="262" cy="160" r="11" fill="none" stroke="#f43f5e" stroke-opacity="0.5"/>
+    <circle cx="128" cy="262" r="4" fill="#fbbf24"/>
+    <circle cx="236" cy="276" r="3.5" fill="#34d399"/>
+    <path d="M190 158l42 16v32c0 28-18 48-42 58c-24-10-42-30-42-58v-32z" fill="url(#shield)" stroke="#bae6fd" stroke-width="2"/>
+    <path d="M172 210l13 13l24-26" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="360" y="118" fill="#7dd3fc" font-size="15" font-weight="600" letter-spacing="4">AVIQEN · OPEN SOURCE · APACHE-2.0</text>
+    <text x="358" y="190" fill="url(#brand)" font-size="60" font-weight="800" letter-spacing="-1.5">Local AppSec Lab</text>
+    <text x="360" y="234" fill="#e2e8f0" font-size="23" font-weight="500">The AI security scanner that runs on your machine.</text>
+    <text x="360" y="266" fill="#94a3b8" font-size="18">Source review · sandboxed live testing · evidence-backed findings</text>
+
+    <!-- Website pill -->
+    <rect x="360" y="298" width="244" height="44" rx="22" fill="#0f2a44" stroke="#38bdf8" stroke-width="1.5"/>
+    <circle cx="386" cy="320" r="8" fill="none" stroke="#5eead4" stroke-width="2"/>
+    <path d="M378 320h16M386 312c-4 5-4 11 0 16M386 312c4 5 4 11 0 16" fill="none" stroke="#5eead4" stroke-width="1.5"/>
+    <text x="404" y="327" fill="#f8fafc" font-size="19" font-weight="700">appsec.aviqen.com</text>
+  </g>
+
+  <!-- Terminal card -->
+  <g transform="translate(922 92)">
+    <rect width="326" height="236" rx="14" fill="#060a14" fill-opacity="0.85" stroke="#26385f" stroke-width="1.5"/>
+    <circle cx="22" cy="22" r="6" fill="#f43f5e"/>
+    <circle cx="42" cy="22" r="6" fill="#fbbf24"/>
+    <circle cx="62" cy="22" r="6" fill="#34d399"/>
+    <g font-family="'SF Mono', Menlo, Consolas, monospace" font-size="13.5" xml:space="preserve">
+      <text x="20" y="66" fill="#5eead4">$ <tspan fill="#e2e8f0">appsec-lab plan</tspan></text>
+      <text x="20" y="92" fill="#64748b">  sandbox  docker · no network</text>
+      <text x="20" y="118" fill="#5eead4">$ <tspan fill="#e2e8f0">appsec-lab scan --authorize</tspan></text>
+      <text x="20" y="146" fill="#f43f5e">  ● HIGH  <tspan fill="#cbd5e1">access boundary</tspan></text>
+      <text x="20" y="170" fill="#fbbf24">  ● MED   <tspan fill="#cbd5e1">credentialed CORS</tspan></text>
+      <text x="20" y="194" fill="#34d399">  ✓ <tspan fill="#cbd5e1">evidence · SARIF · HTML</tspan></text>
+      <rect x="20" y="206" width="9" height="16" fill="#5eead4"/>
+    </g>
+  </g>
+</svg>
