@@ -5,6 +5,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import load
 from local_appsec_lab.engine import scan
 from local_appsec_lab.findings import RunStore
@@ -19,7 +20,9 @@ def test_real_application_full_workflow(runtime_ready, fixture_project, free_por
     config = load(root)
     config.execution.backend = "macos"
     config.execution.port = free_port
-    result, outputs = scan(root, root, config, "local-active", True)
+    result, outputs = scan(
+        root, root, config, "local-active", True, reviewed_plan=plan_digest(config)
+    )
     assert result.metrics["services_started"] == 1
     assert result.metrics["http_requests"] >= 10
     confirmed = [f for f in result.findings if f.state == "confirmed"]
@@ -48,7 +51,7 @@ def test_fix_reverification_preserves_disagreement(runtime_ready, fixture_projec
     config = load(root)
     config.execution.backend = "macos"
     config.execution.port = free_port
-    result, _ = scan(root, root, config, "local-active", True)
+    result, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     finding = next(f for f in result.findings if f.state == "confirmed")
     source = root / "server.js"
     text = source.read_text()
@@ -57,7 +60,15 @@ def test_fix_reverification_preserves_disagreement(runtime_ready, fixture_projec
         "return actor === 'alice' ? send(200,{owner:'alice',data:'SYNTHETIC_ALICE_RECORD_42'})",
     )
     source.write_text(text)
-    fixed, _ = scan(root, root, config, "local-active", True, reverify=finding)
+    fixed, _ = scan(
+        root,
+        root,
+        config,
+        "local-active",
+        True,
+        reverify=finding,
+        reviewed_plan=plan_digest(config),
+    )
     current = fixed.findings[0]
     assert current.state == "not_reproduced"
     assert current.verification[-1]["previous_state"] == "confirmed"
@@ -79,6 +90,13 @@ def test_cli_cancellation_cleans_owned_runtime(runtime_ready, fixture_project, f
     data["execution"]["port"] = free_port
     data["limits"]["requests_per_second"] = 1
     (root / "appsec-lab.yaml").write_text(yaml.safe_dump(data))
+    reviewed = json.loads(
+        subprocess.run(
+            [sys.executable, "-m", "local_appsec_lab", "plan", "--project", str(root)],
+            capture_output=True,
+            check=True,
+        ).stdout
+    )["plan_digest"]
     process = subprocess.Popen(
         [
             sys.executable,
@@ -90,6 +108,8 @@ def test_cli_cancellation_cleans_owned_runtime(runtime_ready, fixture_project, f
             "--mode",
             "local-active",
             "--authorize",
+            "--plan-digest",
+            reviewed,
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

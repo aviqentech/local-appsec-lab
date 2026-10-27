@@ -3,6 +3,7 @@ import os
 import pytest
 from pydantic import ValidationError
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import BrowserWorkflow, load
 from local_appsec_lab.engine import scan
 
@@ -35,7 +36,7 @@ def test_real_browser_workflow(fixture_project, free_port):
             steps=[{"action": "expect_text", "selector": "h1", "value": "Local security fixture"}],
         )
     ]
-    result, _ = scan(root, root, config, "local-active", True)
+    result, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     checks = [c for c in result.checks if c.id.startswith("browser:")]
     assert checks and checks[0].status == "completed", [
         (c.status, c.reason, c.observations) for c in checks

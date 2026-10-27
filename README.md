@@ -51,10 +51,10 @@ appsec-lab scan --project /path/to/application --mode review
 appsec-lab report --project /path/to/application --run latest --format html
 ```
 
-Review does not execute application code. Configure a supported startup command and synthetic test policies, inspect the plan, then authorize execution:
+Review does not execute application code. Configure a supported startup command and synthetic test policies, inspect the plan, then authorize execution with the `plan_digest` that `plan` printed. The scan is refused if the effective configuration has changed since:
 
 ```sh
-appsec-lab scan --project /path/to/application --mode local-active --authorize
+appsec-lab scan --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
 appsec-lab clean --project /path/to/application
 ```
 

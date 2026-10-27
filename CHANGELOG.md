@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- `scan`/`verify --authorize` now requires `--plan-digest` from `plan`; a
+  repository config changed after review (backend, image, model endpoint) is refused.
+- The repository fingerprint hashes raw bytes, so binary file changes invalidate approvals.
+- Bubblewrap mounts the source copy read-only after the scratch bind, and the macOS
+  profile denies writes to it.
+- Request paths with raw spaces or DEL are scope errors; repeated response headers
+  (each `Set-Cookie`) are kept, and cookie flags must hold for every cookie.
+- Symlinks above an operator-chosen project or home directory (such as macOS `/tmp`)
+  no longer break reads; symlinks inside the project are still refused.
+
 ## 0.2.0 — 2026-10-27
 
 Published to PyPI using the AVIQEN GitHub Trusted Publisher; verified registry

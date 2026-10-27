@@ -4,6 +4,7 @@ import subprocess
 
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import load
 from local_appsec_lab.discovery import inspect
 from local_appsec_lab.engine import clean
@@ -129,7 +130,7 @@ def test_docker_python_bridge(fixture_project, free_port):
     config = Config(
         execution={"backend": "docker", "command": ["python", "server.py"], "port": free_port}
     )
-    result, _ = scan(root, root, config, "local-passive", True)
+    result, _ = scan(root, root, config, "local-passive", True, reviewed_plan=plan_digest(config))
     assert result.metrics["services_started"] == 1 and result.metrics["cleanup_completed"]
 
 

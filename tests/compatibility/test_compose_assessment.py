@@ -4,6 +4,7 @@ import subprocess
 
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import load
 from local_appsec_lab.engine import scan
 from local_appsec_lab.errors import ScopeError
@@ -40,7 +41,7 @@ def test_real_disposable_database_assessment(fixture_project, free_port):
             "import os, psycopg; c = psycopg.connect(os.environ['DATABASE_URL']); assert c.execute('SELECT count(*) FROM records').fetchone()[0] == 1; c.close()",
         ]
     }
-    result, _ = scan(root, root, config, "local-active", True)
+    result, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     assert result.metrics["services_started"] == 2, [
         (c.id, c.reason) for c in result.checks if c.status in {"failed", "blocked"}
     ]

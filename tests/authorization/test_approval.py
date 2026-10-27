@@ -1,5 +1,6 @@
 import time
 import pytest
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.authorization import authorize
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.errors import AuthorizationError
@@ -12,14 +13,18 @@ def test_modes_and_authorization(tmp_path):
         authorize(tmp_path, tmp_path, config, "local-passive", "run", False)
     with pytest.raises(AuthorizationError):
         authorize(tmp_path, tmp_path, config, "local-active", "run", False)
-    record = authorize(tmp_path, tmp_path, config, "local-active", "run", True)
+    record = authorize(
+        tmp_path, tmp_path, config, "local-active", "run", True, reviewed_plan=plan_digest(config)
+    )
     record.validate_scope(tmp_path, config, "local-active", "run")
 
 
 @pytest.mark.parametrize("change", ["expiry", "source", "config", "run", "mode"])
 def test_bound_approval(tmp_path, change):
     config = Config()
-    record = authorize(tmp_path, tmp_path, config, "local-active", "run", True)
+    record = authorize(
+        tmp_path, tmp_path, config, "local-active", "run", True, reviewed_plan=plan_digest(config)
+    )
     mode, run = "local-active", "run"
     if change == "expiry":
         record.expires_at = time.time() - 1

@@ -47,9 +47,9 @@ limits:
 
 ```sh
 appsec-lab setup --project /path/to/application --authorize --allow-network
-appsec-lab scan --project /path/to/application --mode local-active --authorize
+appsec-lab scan --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
 # Combined, with the same explicit download authorization:
-appsec-lab scan --project /path/to/application --mode local-active --authorize \
+appsec-lab scan --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST \
   --setup-dependencies --allow-network
 ```
 

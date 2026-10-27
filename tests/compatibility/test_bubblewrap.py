@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.engine import scan
 
@@ -25,6 +26,6 @@ def test_experimental_bubblewrap_bridge(fixture_project, free_port):
     config = Config(
         execution={"backend": "bubblewrap", "command": ["python", "server.py"], "port": free_port}
     )
-    result, _ = scan(root, root, config, "local-passive", True)
+    result, _ = scan(root, root, config, "local-passive", True, reviewed_plan=plan_digest(config))
     assert result.metrics["services_started"] == 1
     assert result.metrics["cleanup_completed"]

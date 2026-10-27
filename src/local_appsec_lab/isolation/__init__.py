@@ -160,6 +160,7 @@ def mac_profile(scratch: Path, source: Path, executable: str, port: int) -> str:
 (allow file-read* (literal "/"))
 {reads}
 (allow file-read* file-write* (subpath {q(scratch)}))
+(deny file-write* (subpath {q(source)}))
 (allow file-write-data (literal "/dev/null"))
 (allow network-bind (local ip "localhost:{port}"))
 (allow network-inbound (local ip "localhost:{port}"))
@@ -205,13 +206,15 @@ def command_for(
         for path in ("/usr", "/bin", "/lib", "/lib64", "/opt", "/Library"):
             if Path(path).exists():
                 args += ["--ro-bind", path, path]
+        # Mounts apply in order. The source lives inside scratch, so its read-only
+        # bind must come after the writable scratch bind or scratch hides it.
         args += [
-            "--ro-bind",
-            str(source),
-            str(source),
             "--bind",
             str(scratch),
             str(scratch),
+            "--ro-bind",
+            str(source),
+            str(source),
             "--chdir",
             str(source),
             *command,

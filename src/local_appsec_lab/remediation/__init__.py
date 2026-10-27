@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.models import Finding
 
@@ -79,7 +80,8 @@ import sys
 def test_access_boundary():
     result = subprocess.run([sys.executable, "-m", "local_appsec_lab", "verify",
                              "--project", {str(root or Path.cwd())!r},
-                             "--run", {run_id!r}, "--finding", {finding.id!r}, "--authorize"],
+                             "--run", {run_id!r}, "--finding", {finding.id!r}, "--authorize",
+                             "--plan-digest", {plan_digest(config)!r}],
                             capture_output=True, text=True)
     data = json.loads(result.stdout)
     finding = data["finding"]

@@ -7,6 +7,7 @@ import time
 import pytest
 from pydantic import ValidationError
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.agents.native import bounded_run
 from local_appsec_lab.authorization import authorize
 from local_appsec_lab.configuration import Config
@@ -31,7 +32,9 @@ def test_json_credentials_are_redacted_before_model_context(key):
 def test_custom_state_excluded_from_discovery_and_approval(tmp_path):
     (tmp_path / "app.py").write_text("pass")
     config = Config(output="./assessment-state/")
-    approval = authorize(tmp_path, tmp_path, config, "local-active", "test", True)
+    approval = authorize(
+        tmp_path, tmp_path, config, "local-active", "test", True, reviewed_plan=plan_digest(config)
+    )
     state = tmp_path / config.output
     state.mkdir()
     (state / "oauth.json").write_text('{"refresh_token":"DUMMY_CREDENTIAL"}')

@@ -17,7 +17,7 @@ Start with `appsec-lab --version`, `appsec-lab doctor`, and `appsec-lab config v
 | Permission/namespace denial | Nested Seatbelt and restricted Linux user/network namespaces can block execution. Use source review or a supported backend; preserve isolation |
 | Scan returns `1` | A confirmed finding meets the severity threshold; the intentionally vulnerable fixture should do this |
 | Scan returns `2` / partial | Read blocked/untested checks; missing advisory data, unsupported categories and budget limits are disclosed coverage gaps |
-| Execution consent rejected | Use fresh `--authorize` after reviewing current source/config/scope; a config file cannot grant consent |
+| Execution consent rejected | Use fresh `--authorize --plan-digest` with the digest from a fresh `plan` after reviewing current source/config/scope; a config file cannot grant consent |
 | Skill appears installed but is unavailable | Check the intended host path and host's current skill discovery settings; interactive invocation has not been validated |
 | Installed helper fails after moving venv | Reinstall from a working Python environment; the interpreter path is recorded at install time |
 | Update/uninstall refuses files | Preserve your edits and inspect the installation; ownership hashes deliberately protect modified/foreign trees |

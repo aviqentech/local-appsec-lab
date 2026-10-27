@@ -8,6 +8,7 @@ import subprocess
 
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import load
 from local_appsec_lab.discovery import inspect
 from local_appsec_lab.engine import scan
@@ -36,7 +37,7 @@ def test_container_active_assessment(runtime_image, fixture_project, free_port, 
     config.execution.backend = "docker"
     config.execution.image = runtime_image
     config.execution.port = free_port
-    result, _ = scan(root, root, config, "local-active", True)
+    result, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     assert result.metrics["services_started"] == 1
     assert result.metrics["http_requests"] >= 10
     confirmed = [finding for finding in result.findings if finding.state == "confirmed"]
