@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.2 — 2026-10-27
+
+Released from PR #3, source `9755b6a9e70c2dfa89e6608a2c2e2a12f5eb3769`.
+
 - Refine discovery with validated, grouped and typed URL references, binary-safe
   text analysis, explained review priorities, static HTML route candidates,
   page/resource relationships and Apache/GitHub Actions context. Include
