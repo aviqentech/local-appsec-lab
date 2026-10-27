@@ -90,7 +90,7 @@ Runtime recognition does not imply universal framework launch. Whole-program pro
 | Platform/host | Verification boundary |
 |---|---|
 | macOS | Real Seatbelt/Docker applications, browser/database workflows, scanners and Codex/Claude/Cursor model workers tested locally |
-| Linux | Native source/installer and Linux Docker tested; bubblewrap depends on host namespace policy |
+| Linux | Native source/installer and Linux Docker tested; bubblewrap passed with a trusted root controller, with unprivileged restrictions documented |
 | Windows | Native source/installer tests; Linux-container execution requires Docker Desktop and a native Windows test machine |
 | Agent hosts | Skill installation supports all four; worker verification and skill discovery are tracked separately |
 

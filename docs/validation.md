@@ -55,7 +55,27 @@ and `appsec-linux-containers` and a real local Linux-container engine. It is not
 or reported successful without that machine. Existing Windows hosted source tests
 cannot establish native Windows Docker execution.
 
-The first 0.2 source commit passed the [Linux container workflow](https://github.com/aviqentech/local-appsec-lab/actions/runs/40519454241) and [platform capability workflow](https://github.com/aviqentech/local-appsec-lab/actions/runs/40519454392). Downloaded JUnit confirms one real bubblewrap test passed under the trusted root controller, while the unprivileged test skipped because namespace loopback configuration was denied. The hosted Windows probe reported a Windows-container engine, so no native Windows Linux-container execution is claimed. A later source revision corrects Windows test-environment/probe handling; final native-matrix links are recorded with its verified result.
+Final executable source revision [`92ed833`](https://github.com/aviqentech/local-appsec-lab/commit/92ed83390d9448aa29cc3440074e0d12193fedd6) passed all five public workflows:
+
+- [Windows/Linux/macOS native matrix](https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217700).
+- [Linux container, Chromium and PostgreSQL tests](https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217827).
+- [Platform capabilities](https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217686).
+- [Lint and resource synchronization](https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217782).
+- [Source-only assessment](https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217668).
+
+Downloaded JUnit artifacts confirm these outcomes. Each native row applies separately to Python 3.11 and 3.13.
+
+| Job | Passed | Failed/errors | Skipped |
+|---|---:|---:|---:|
+| Windows native, each Python version | 136 | 0 | 20 |
+| Linux native, each Python version | 136 | 0 | 20 |
+| macOS native, each Python version | 145 | 0 | 11 |
+| Linux container/browser/database | 11 | 0 | 1 |
+| Linux bubblewrap, trusted root controller | 1 | 0 | 0 |
+| Linux bubblewrap, unprivileged probe | 0 | 0 | 1 |
+
+The Windows native matrix exercised actual protected user/SYSTEM DACL and junction handling. Its separate engine probe reported Windows containers; no native Windows Linux-container assessment is claimed. The unprivileged Linux namespace probe failed loopback setup, while the trusted root controller completed a real isolated HTTP assessment and cleanup without disabling host protections. Native-matrix skips are platform-specific execution cases and unprovisioned Docker/browser/database tests; the separate Linux container job covers those provisioned runtime paths.
+
 Earlier public 0.1.0 results are preserved separately in
 [historical validation](validation-0.1.md); their counts do not describe this release.
 
@@ -78,3 +98,15 @@ prerequisites. Do not bypass a denied boundary or reinterpret a skip as a pass.
 The built 0.2.0 wheel was installed in a fresh unrelated temporary Python environment;
 version, source inspection and managed install/doctor/uninstall for all skill targets passed.
 The vulnerable/secure-control fixture benchmark passed all three cases.
+
+## Documented CLI demo
+
+A private copy of the Node fixture was scanned with the documented Docker demo configuration and the actual CLI. It made **24 HTTP requests**, started **one service**, independently confirmed **one high authorization finding**, did not report the secure cross-user control, and completed cleanup. Exit code `1` was expected because the high confirmed finding meets the default threshold.
+
+```sh
+docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Dockerfile tests/compatibility
+cp examples/configuration/docker-synthetic.yaml tests/fixtures/javascript-api/appsec-lab.local.yaml
+appsec-lab scan --project tests/fixtures/javascript-api --config appsec-lab.local.yaml --mode local-active --authorize
+```
+
+The [new Compose sample reports](../examples/sample-reports/0.2-compose/report.md) come from an actual disposable PostgreSQL-backed run; JSON and SARIF validate against their published schemas. Repository/operator metadata is generalized, with measured findings preserved.

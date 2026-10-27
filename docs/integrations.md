@@ -36,7 +36,7 @@ Methodology references: [WSTG](https://wstg.owasp.org/),
 ## Measured native integration versions
 
 Real specialist, fresh verifier and remediation calls were exercised using the
-installed Codex CLI, Claude Code 2.1.311 and Cursor agent 2026.10.22. Gemini CLI
+installed Codex CLI 0.164.0-alpha.11.1, Claude Code 2.1.311 and Cursor agent 2026.10.22. Gemini CLI
 0.65.0 rejected the individual-account OAuth client at Google's token/service
 exchange. Do not equate a packaged adapter with a successful Gemini model test.
 Semgrep 1.182.1, OSV-Scanner 2.7.0 and Trivy 0.72.0 passed real offline positive

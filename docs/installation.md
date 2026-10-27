@@ -7,10 +7,10 @@ The CLI works independently of an AI agent. Installing the skill is optional and
 | Use case | Requirements |
 |---|---|
 | Source review and report generation | Python 3.11+, `pip`, `venv`, and the package dependencies |
-| macOS application execution | Above, working `sandbox-exec`, and the selected runtime/dependencies |
+| macOS application execution | Docker Linux engine recommended; explicit Seatbelt only for reviewed source with the documented metadata limitation |
 | Linux application execution | Above, Docker Engine with Linux containers and a reviewed preloaded image |
 | Windows application execution | Above, Docker Desktop configured for Linux containers and a reviewed preloaded image; native Windows execution remains unverified |
-| Experimental Linux bubblewrap | Working user/network namespaces and `bwrap`; CI's namespace probe was blocked |
+| Experimental Linux bubblewrap | Working user/network namespaces and `bwrap`; disposable root-controller CI passed, unprivileged namespaces were blocked |
 | Agent skill | Above, a compatible installed host, and permission to write the selected skill directory |
 | Development | `.[dev]`; Node for JavaScript runtime fixtures; Docker for container tests |
 

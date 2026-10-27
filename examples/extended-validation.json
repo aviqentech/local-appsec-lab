@@ -112,5 +112,96 @@
     "version": "0.2.0",
     "unrelated_venv": "passed",
     "all_skill_targets_install_doctor_uninstall": "passed"
+  },
+  "source_revision": "92ed83390d9448aa29cc3440074e0d12193fedd6",
+  "documented_node_cli_demo": {
+    "exit_code": 1,
+    "services_started": 1,
+    "requests": 24,
+    "confirmed": [
+      {
+        "rule": "boundary:vulnerable-cross-user",
+        "severity": "high"
+      }
+    ],
+    "secure_control_reported": false,
+    "cleanup": true
+  },
+  "public_ci": [
+    {
+      "name": "Native platform matrix",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217700",
+      "conclusion": "success"
+    },
+    {
+      "name": "Linux container/browser/database",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217827",
+      "conclusion": "success"
+    },
+    {
+      "name": "Platform capabilities",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217686",
+      "conclusion": "success"
+    },
+    {
+      "name": "Lint/resources",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217782",
+      "conclusion": "success"
+    },
+    {
+      "name": "Source assessment",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40520217668",
+      "conclusion": "success"
+    }
+  ],
+  "native_ci_results": [
+    {
+      "job": "results-macos-latest-3.11",
+      "tests": 156,
+      "passed": 145,
+      "failed": 0,
+      "skipped": 11
+    },
+    {
+      "job": "results-macos-latest-3.13",
+      "tests": 156,
+      "passed": 145,
+      "failed": 0,
+      "skipped": 11
+    },
+    {
+      "job": "results-ubuntu-latest-3.11",
+      "tests": 156,
+      "passed": 136,
+      "failed": 0,
+      "skipped": 20
+    },
+    {
+      "job": "results-ubuntu-latest-3.13",
+      "tests": 156,
+      "passed": 136,
+      "failed": 0,
+      "skipped": 20
+    },
+    {
+      "job": "results-windows-latest-3.11",
+      "tests": 156,
+      "passed": 136,
+      "failed": 0,
+      "skipped": 20
+    },
+    {
+      "job": "results-windows-latest-3.13",
+      "tests": 156,
+      "passed": 136,
+      "failed": 0,
+      "skipped": 20
+    }
+  ],
+  "linux_container_ci": {
+    "tests": 12,
+    "passed": 11,
+    "skipped": 1,
+    "failures": 0
   }
 }
