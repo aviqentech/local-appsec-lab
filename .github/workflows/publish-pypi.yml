@@ -1,0 +1,72 @@
+name: Publish to PyPI
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the validated distributions to production PyPI
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: pypi-release
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.repository == 'aviqentech/local-appsec-lab' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install release tooling
+        run: python -m pip install '.[dev]' build twine
+      - name: Check source and bundled resources
+        run: make lint
+      - name: Run source and installer tests
+        run: python -m pytest -q
+      - name: Build and validate exact distributions
+        run: |
+          python -m build
+          python -m twine check --strict dist/*
+          python scripts/validate_distribution.py
+      - name: Install the wheel outside the checkout
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/pypi-smoke"
+          "$RUNNER_TEMP/pypi-smoke/bin/python" -m pip install dist/*.whl
+          mkdir -p "$RUNNER_TEMP/pypi-fixture"
+          cd "$RUNNER_TEMP/pypi-fixture"
+          "$RUNNER_TEMP/pypi-smoke/bin/appsec-lab" --version
+          "$RUNNER_TEMP/pypi-smoke/bin/appsec-lab" inspect
+          "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all
+          "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation doctor
+          "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation uninstall
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi-distributions
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: pypi
+      url: https://pypi.org/project/local-appsec-lab/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/
+      - name: Publish with PyPI trusted identity
+        # Official pypa/gh-action-pypi-publish release/v1, pinned for auditability.
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086

@@ -8,7 +8,7 @@ The engine inventories source, runs bounded source and Python data-flow analysis
 
 ## Install
 
-Prerequisites: **Python 3.11+**, `venv` and `pip`; Git for cloning. Active execution also needs a supported OS isolation backend and a prepared runtime. Browser/database workflows require Docker with **Linux containers**. See the [full prerequisites and installation guide](docs/installation.md).
+Prerequisites: **Python 3.11+**, `venv` and `pip`; Git for cloning. Active execution also needs a supported OS isolation backend and a prepared runtime. Browser/database workflows require Docker with **Linux containers**. See the [full prerequisites and installation guide](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/installation.md).
 
 ```sh
 git clone https://github.com/aviqentech/local-appsec-lab.git
@@ -49,7 +49,7 @@ appsec-lab scan --project /path/to/application --mode local-active --authorize
 appsec-lab clean --project /path/to/application
 ```
 
-A deliberately vulnerable fixture can exit `1` for a confirmed finding. Exit `2` means partial coverage; inspect blocked and untested checks. Read [usage and exit codes](docs/usage.md) and the [configuration guide](docs/configuration.md).
+A deliberately vulnerable fixture can exit `1` for a confirmed finding. Exit `2` means partial coverage; inspect blocked and untested checks. Read [usage and exit codes](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/usage.md) and the [configuration guide](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/configuration.md).
 
 ## Optional AI and skill
 
@@ -60,7 +60,7 @@ python -m local_appsec_lab.install --global --target all
 # Or: python -m local_appsec_lab.install --project /path/to/application --target codex
 ```
 
-Targets are Claude Code, Codex, Cursor, Gemini CLI and generic Agent Skills hosts. Installing files, invoking a skill, and running specialist model workers are distinct capabilities. Use [host instructions and measured compatibility](docs/integrations.md).
+Targets are Claude Code, Codex, Cursor, Gemini CLI and generic Agent Skills hosts. Installing files, invoking a skill, and running specialist model workers are distinct capabilities. Use [host instructions and measured compatibility](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/integrations.md).
 
 For automatic model workers, set `ai.strategy: native`, a positive `limits.model_tokens` budget and a bounded `limits.model_calls`, then explicitly authorize transmitting selected redacted context:
 
@@ -69,7 +69,7 @@ appsec-lab scan --project /path/to/application --mode review \
   --native-host codex --allow-model-requests
 ```
 
-Claude, Cursor and Gemini have corresponding `--native-host` values. Authenticated CLIs must be installed separately. Native vendor token/cost caps are not uniformly enforceable; reports distinguish reserved and reported usage. Gemini's individual-account OAuth client was rejected by Google during testing; supported API/enterprise authentication is needed. See [AI setup](docs/advanced-usage.md#ai-workers).
+Claude, Cursor and Gemini have corresponding `--native-host` values. Authenticated CLIs must be installed separately. Native vendor token/cost caps are not uniformly enforceable; reports distinguish reserved and reported usage. Gemini's individual-account OAuth client was rejected by Google during testing; supported API/enterprise authentication is needed. See [AI setup](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md#ai-workers).
 
 ## Capabilities and limits
 
@@ -85,7 +85,7 @@ Claude, Cursor and Gemini have corresponding `--native-host` values. Authenticat
 | Remediation | Contextual guidance, explicit CVSS v4 vectors, private patch preparation, separately authorized apply/rollback |
 | Reports | JSON/schema, SARIF, Markdown and offline HTML; candidates and untested coverage remain visible |
 
-Runtime recognition does not imply universal framework launch. Whole-program proof, arbitrary Compose files, inferred business policies, mobile emulators and ZAP execution are outside the implemented scope. Fix generation currently supports a narrow Python debug rewrite or a reviewed Python/JSON replacement. See the [requirement-by-requirement status](docs/requirements-status.md).
+Runtime recognition does not imply universal framework launch. Whole-program proof, arbitrary Compose files, inferred business policies, mobile emulators and ZAP execution are outside the implemented scope. Fix generation currently supports a narrow Python debug rewrite or a reviewed Python/JSON replacement. See the [requirement-by-requirement status](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/requirements-status.md).
 
 | Platform/host | Verification boundary |
 |---|---|
@@ -94,16 +94,16 @@ Runtime recognition does not imply universal framework launch. Whole-program pro
 | Windows | Native source/installer tests; Linux-container execution requires Docker Desktop and a native Windows test machine |
 | Agent hosts | Skill installation supports all four; worker verification and skill discovery are tracked separately |
 
-Consult [validation](docs/validation.md) for exact measured results and outstanding prerequisites.
+Consult [validation](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/validation.md) for exact measured results and outstanding prerequisites.
 
 ## Documentation and development
 
-- [Installation, update and uninstall](docs/installation.md)
-- [Usage](docs/usage.md), [advanced workflows](docs/advanced-usage.md), [configuration/schema](docs/configuration.md)
-- [Architecture](docs/architecture.md), [security model](docs/security-model.md), [framework support](docs/supported-frameworks.md)
-- [Troubleshooting](docs/troubleshooting.md), [FAQ](docs/faq.md), [report format](docs/report-format.md)
-- [Validation](docs/validation.md), [requirements status](docs/requirements-status.md), [release procedure](docs/releasing.md)
-- [Contributing](CONTRIBUTING.md), [security disclosure](SECURITY.md), [third-party notices](THIRD_PARTY_NOTICES.md)
+- [Installation, update and uninstall](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/installation.md)
+- [Usage](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/usage.md), [advanced workflows](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md), [configuration/schema](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/configuration.md)
+- [Architecture](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/architecture.md), [security model](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/security-model.md), [framework support](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/supported-frameworks.md)
+- [Troubleshooting](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/troubleshooting.md), [FAQ](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/faq.md), [report format](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/report-format.md)
+- [Validation](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/validation.md), [requirements status](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/requirements-status.md), [release procedure](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/releasing.md)
+- [Contributing](https://github.com/aviqentech/local-appsec-lab/blob/main/CONTRIBUTING.md), [security disclosure](https://github.com/aviqentech/local-appsec-lab/blob/main/SECURITY.md), [third-party notices](https://github.com/aviqentech/local-appsec-lab/blob/main/THIRD_PARTY_NOTICES.md)
 
 ```sh
 python -m pip install '.[dev]'
