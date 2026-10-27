@@ -1,0 +1,163 @@
+{
+  "date": "2026-10-27",
+  "repository": "https://github.com/aviqentech/local-appsec-lab",
+  "visibility": "PUBLIC",
+  "tested_source_commit": "8b07f63604d56aa7c9697df856bdfcdfcdc7c871",
+  "publication_author": "aviqentech",
+  "private_vulnerability_reporting_enabled": true,
+  "workflows": [
+    {
+      "conclusion": "success",
+      "databaseId": 40472199640,
+      "headSha": "8b07f63604d56aa7c9697df856bdfcdfcdc7c871",
+      "status": "completed",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199640",
+      "workflowName": "Tests"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 40472199513,
+      "headSha": "8b07f63604d56aa7c9697df856bdfcdfcdc7c871",
+      "status": "completed",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199513",
+      "workflowName": "Linux container assessments"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 40472199505,
+      "headSha": "8b07f63604d56aa7c9697df856bdfcdfcdc7c871",
+      "status": "completed",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199505",
+      "workflowName": "Source assessment"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 40472199496,
+      "headSha": "8b07f63604d56aa7c9697df856bdfcdfcdc7c871",
+      "status": "completed",
+      "url": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199496",
+      "workflowName": "Lint"
+    }
+  ],
+  "native_jobs": {
+    "results-macos-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 119,
+      "skip_reasons": [
+        "Docker missing",
+        "Explicit native Linux bubblewrap validation only",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    },
+    "results-macos-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 119,
+      "skip_reasons": [
+        "Docker missing",
+        "Explicit native Linux bubblewrap validation only",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    },
+    "results-ubuntu-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 13,
+      "passed": 111,
+      "skip_reasons": [
+        "Explicit native Linux bubblewrap validation only",
+        "Live macOS runtime suite; Docker has a separate integration test",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    },
+    "results-ubuntu-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 13,
+      "passed": 111,
+      "skip_reasons": [
+        "Explicit native Linux bubblewrap validation only",
+        "Live macOS runtime suite; Docker has a separate integration test",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    },
+    "results-windows-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 14,
+      "passed": 110,
+      "skip_reasons": [
+        "Docker daemon/image unavailable; never pull implicitly",
+        "Explicit native Linux bubblewrap validation only",
+        "Live macOS runtime suite; Docker has a separate integration test",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    },
+    "results-windows-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 14,
+      "passed": 110,
+      "skip_reasons": [
+        "Docker daemon/image unavailable; never pull implicitly",
+        "Explicit native Linux bubblewrap validation only",
+        "Live macOS runtime suite; Docker has a separate integration test",
+        "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+      ]
+    }
+  },
+  "linux_runtime": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 3,
+    "skip_reasons": [
+      "Runner blocks bubblewrap namespaces: bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted"
+    ]
+  },
+  "local_documentation_preflight": {
+    "cli_installer_unit_tests_passed": 52,
+    "lint_and_resource_checks": "passed",
+    "distribution_builds": "wheel and source archive passed",
+    "documented_docker_demo": {
+      "documented_docker_demo_exit_code": 1,
+      "metrics": {
+        "source_files_inspected": 6,
+        "dependencies_identified": 0,
+        "services_identified": 1,
+        "services_started": 1,
+        "routes_discovered": 8,
+        "routes_tested": 8,
+        "http_requests": 25,
+        "browser_workflows": 0,
+        "dynamic_checks_completed": 16,
+        "worker_assignments_completed": 10,
+        "candidate_findings": 0,
+        "confirmed_findings": 1,
+        "false_positives": 0,
+        "blocked_checks": 1,
+        "not_tested_checks": 5,
+        "runtime_startup_failed": false,
+        "cleanup_completed": true,
+        "model_tokens_reserved": 0,
+        "model_cost_upper_bound_usd": 0
+      }
+    },
+    "publication_tree": "account-reference and private-state checks passed"
+  },
+  "limits": [
+    "Windows Docker Desktop Linux-container execution remains unverified.",
+    "Bubblewrap namespace setup was denied by the Linux runner and skipped.",
+    "Interactive skill discovery/invocation and native host dispatch remain unverified."
+  ]
+}

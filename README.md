@@ -106,7 +106,7 @@ For a working example, follow the [Node demo](docs/usage.md#run-the-synthetic-no
 | macOS | Native source/installer CI; real Seatbelt Node/Flask execution; local arm64 Docker tests | Aggregate process/memory/storage limits are monitored rather than hard cgroup limits |
 | Agent applications | Installer, copied helper and definition files for all four hosts | Interactive skill discovery/invocation and native host dispatch unverified |
 
-Historical measurements and skipped tests are recorded in [validation](docs/validation.md) and [compatibility-results.json](examples/compatibility-results.json). Those measurements predate publication; check the new repository's Actions tab for its own CI runs.
+Native platform CI and Linux container assessments passed in the [public repository validation](docs/validation.md#public-repository-validation). The [publication summary](examples/publication-validation.json) links the actual runs and records skipped work. Historical pre-publication measurements remain separately labeled in [compatibility-results.json](examples/compatibility-results.json).
 
 ## Capabilities and limitations
 

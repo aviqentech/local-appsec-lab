@@ -8,6 +8,46 @@ the official Python 3.13 slim image was preloaded, and a trusted test image was
 explicitly built with Node and Flask. The skipped case is the native Linux
 bubblewrap test. The engine did not download images or install application dependencies.
 
+## Public repository validation
+
+The initial public source commit
+[`8b07f63`](https://github.com/aviqentech/local-appsec-lab/commit/8b07f63604d56aa7c9697df856bdfcdfcdc7c871)
+was published under `aviqentech` with fresh history. All four public workflows
+completed successfully on 27 October 2026:
+
+- [Native Windows/Linux/macOS tests](https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199640).
+- [Linux container assessments](https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199513).
+- [Lint and bundled resource checks](https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199496).
+- [Source-only assessment](https://github.com/aviqentech/local-appsec-lab/actions/runs/40472199505).
+
+Downloaded JUnit artifacts confirm the counts below. Each native platform row
+applies separately to Python 3.11 and 3.13.
+
+| Public job | Passed | Failed/errors | Skipped |
+|---|---:|---:|---:|
+| Windows, each Python version | 110 | 0 | 14 |
+| Linux, each Python version | 111 | 0 | 13 |
+| macOS, each Python version | 119 | 0 | 5 |
+| Separate Linux container job | 3 | 0 | 1 |
+
+The container job ran real Node/Flask assessments, independent policy reproduction,
+secure controls, host-loopback denial and cleanup. Its bubblewrap probe was denied
+namespace loopback setup and skipped. Native Windows Docker execution and
+interactive agent-host invocation remain unverified; these results do not establish
+those capabilities. Native matrix skips retain the same platform/image distinctions
+explained below. Source assessment accepts disclosed partial coverage.
+
+Before pushing, 52 CLI/installer/unit tests passed locally, lint/resource checks
+passed, wheel/source distributions built, and the documented Docker Node demo
+completed with 25 HTTP requests, one independently confirmed high finding and
+successful cleanup. A publication-tree/archive check found no legacy account
+references or private state directories. Local machine identifiers in the shared
+JUnit samples were generalized without changing test results.
+
+[publication-validation.json](../examples/publication-validation.json) preserves
+run links, source identity, counts, skipped reasons and preflight measurements.
+Private vulnerability reporting was enabled and verified for the public repository.
+
 ## Actual application assessments
 
 | Fixture | Services started | Routes tested | HTTP requests | Confirmed | Other findings | Cleanup |
