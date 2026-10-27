@@ -1,0 +1,26 @@
+{
+  "package": "local-appsec-lab",
+  "version": "0.2.0",
+  "owner": "aviqentech",
+  "project_url": "https://pypi.org/project/local-appsec-lab/0.2.0/",
+  "workflow": "https://github.com/aviqentech/local-appsec-lab/actions/runs/40523120905",
+  "source_revision": "2a36621727a0a93ff9956178fa5ea1a89cf0182d",
+  "artifacts": [
+    {
+      "filename": "local_appsec_lab-0.2.0-py3-none-any.whl",
+      "sha256": "b028b8129ec2e1b18e9039e860df21ade06624dd7e8a69b2d6204577cdc99ce5",
+      "size": 204056,
+      "url": "https://files.pythonhosted.org/packages/11/d3/95454ba086097736572c8cf9774081d63ca63bff6747384d799a7b0b96d7/local_appsec_lab-0.2.0-py3-none-any.whl"
+    },
+    {
+      "filename": "local_appsec_lab-0.2.0.tar.gz",
+      "sha256": "1c128e0c37f6337ce17d9a9d786b1773a16c152b8a630b98ba000bfb1e68a3e9",
+      "size": 324659,
+      "url": "https://files.pythonhosted.org/packages/32/8c/89d6bcfc9797ed269a77d2526e84ea612be3d5dda4baa87d8855620c4819/local_appsec_lab-0.2.0.tar.gz"
+    }
+  ],
+  "registry_hashes_match_validated_ci_artifacts": true,
+  "fresh_pypi_install": "passed",
+  "cli_version_inspect": "passed",
+  "all_skill_targets_install_doctor_uninstall": "passed"
+}

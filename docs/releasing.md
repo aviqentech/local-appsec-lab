@@ -35,3 +35,18 @@ The manually dispatched `publish-pypi.yml` workflow builds and checks the exact 
 For first publication, sign in to PyPI as the intended owner and register a pending GitHub trusted publisher with project `local-appsec-lab`, owner `aviqentech`, repository `local-appsec-lab`, workflow `publish-pypi.yml`, environment `pypi`. This grants that workflow publishing authority for this project; it is a separate account-security action. Official guidance: https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/ .
 
 Run once with `publish: false` to review validation, then explicitly dispatch with `publish: true` for a production release. Verify the PyPI version, distribution SHA-256 values and a fresh `pip install local-appsec-lab==VERSION`. PyPI versions/files cannot be overwritten. Keep experimental status and platform limits visible. Independent security review is required before presenting this tool as suitable for hostile-code production assessments.
+
+
+## Published 0.2.0
+
+Version [0.2.0 on PyPI](https://pypi.org/project/local-appsec-lab/0.2.0/) was published
+from executable/source revision `2a36621727a0a93ff9956178fa5ea1a89cf0182d` using
+[the trusted publishing workflow](https://github.com/aviqentech/local-appsec-lab/actions/runs/40523120905).
+The wheel and source archive SHA-256 values match the validated Actions artifacts.
+A fresh install directly from PyPI passed CLI version/inspection and all-target skill
+install/doctor/uninstall checks. Exact artifact URLs and digests are recorded in
+[pypi-release-0.2.0.json](../examples/pypi-release-0.2.0.json).
+
+```sh
+python -m pip install local-appsec-lab==0.2.0
+```

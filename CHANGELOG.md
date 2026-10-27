@@ -2,6 +2,9 @@
 
 ## 0.2.0 — 2026-10-27
 
+Published to PyPI using the AVIQEN GitHub Trusted Publisher; verified registry
+artifact digests, clean package installation and all-target skill lifecycle.
+
 Added real native specialist/verifier/remediation orchestration, shared knowledge,
 bounded adaptive proposals, Python interprocedural provenance, sealed persistent
 analysis caching, live OSV and offline scanner-data refresh, and tested offline
