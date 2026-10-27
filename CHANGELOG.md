@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Refine discovery with validated, grouped and typed URL references, binary-safe
+  text analysis, explained review priorities, static HTML route candidates,
+  page/resource relationships and Apache/GitHub Actions context. Include
+  `.htaccess` source in specialist review assignments.
+
 ## 0.2.1 — 2026-10-27
 
 Released from PR #2, source `30a5160e0444cf8c10958d4b616e1c941c2d4c72`.

@@ -16,6 +16,38 @@ appsec-lab scan --project /path/to/application --mode review
 
 `inspect` inventories source/frameworks/services. `plan` describes the selected work and startup without executing application code. `review` runs source and configured offline dependency checks. No execution approval is needed for source review. A recognized framework is not a promise that its entire application can be launched or semantically audited.
 
+Discovery also reports the following source hints:
+
+- `external_references` separates navigation, metadata/schema, policy declarations,
+  code literals and network/resource call sites. `external_integrations` contains
+  only network/resource call hints. Both group by host, source and kind, with
+  occurrence counts and up to eight line references; URLs and credentials are not retained.
+- `security_sensitive_files` remains a path list. Each path has explanatory
+  `security_sensitive_details` with categories, lines and review reasons. These
+  are review priorities, not vulnerability findings. Binary/non-UTF-8 files skip
+  text analysis but remain in `files` and the authorization fingerprint.
+- A root `index.html` without a discovered application service identifies a
+  `static_website`. Root HTML files produce GET route candidates, including `/`
+  and `/index.html`. Nested templates/docs are not inferred deployment roots.
+  `resource_graph` links pages to inventoried local resources; `service_graph`
+  continues to describe service dependencies.
+- `server_configuration` inventories Apache-compatible `.htaccess` directives
+  and simple rewrite source/target paths. Templates and conditional rewrites are
+  marked rather than evaluated. `ci_cd`, `entry_points`, `security_test_targets`
+  and `runtime_requirements` provide additional review context.
+
+URL call recognition is a bounded heuristic, not complete JavaScript or Python
+data-flow analysis. Python recognizes direct supported clients and local wrappers
+containing those clients or a literal `curl` subprocess invocation. Dynamic URLs,
+other wrappers, non-UTF-8 source and deployment roots other than the project root
+may require manual review. References are capped at 512 unique groups and
+integrations at 100 after grouping; `references_truncated` indicates omitted groups.
+
+Static routes do not prove that a server exposes those paths, or authorize
+requests to referenced hosts. Browser testing still needs a reviewed startup
+configuration and execution consent. A generic static server does not apply
+`.htaccess`; testing those directives requires Apache-compatible hosting.
+
 To create a starting configuration:
 
 ```sh
