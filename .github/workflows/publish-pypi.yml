@@ -1,5 +1,7 @@
 name: Publish to PyPI
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       publish:
@@ -16,36 +18,66 @@ jobs:
   build:
     if: github.repository == 'aviqentech/local-appsec-lab' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      publish: ${{ steps.release.outputs.publish }}
+      version: ${{ steps.release.outputs.version }}
+      release_sha: ${{ steps.record.outputs.release_sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Install version-planning dependency
+        run: python -m pip install 'packaging>=24'
+      - name: Select merged PR, wait for CI and prepare next version
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PUBLISH: ${{ inputs.publish }}
+        run: python scripts/release_automation.py prepare
       - name: Install release tooling
+        if: steps.release.outputs.eligible == 'true'
         run: python -m pip install '.[dev]' build twine
       - name: Check source and bundled resources
+        if: steps.release.outputs.eligible == 'true'
         run: make lint
       - name: Run source and installer tests
+        if: steps.release.outputs.eligible == 'true'
         run: python -m pytest -q
       - name: Build and validate exact distributions
+        if: steps.release.outputs.eligible == 'true'
         run: |
           python -m build
           python -m twine check --strict dist/*
           python scripts/validate_distribution.py
       - name: Install the wheel outside the checkout
+        if: steps.release.outputs.eligible == 'true'
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
           python -m venv "$RUNNER_TEMP/pypi-smoke"
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m pip install dist/*.whl
           mkdir -p "$RUNNER_TEMP/pypi-fixture"
           cd "$RUNNER_TEMP/pypi-fixture"
-          "$RUNNER_TEMP/pypi-smoke/bin/appsec-lab" --version
+          test "$("$RUNNER_TEMP/pypi-smoke/bin/appsec-lab" --version)" = "$RELEASE_VERSION"
           "$RUNNER_TEMP/pypi-smoke/bin/appsec-lab" inspect
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation doctor
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation uninstall
+      - name: Record validated version on main without force pushing
+        if: steps.release.outputs.publish == 'true'
+        id: record
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+        run: python scripts/release_automation.py commit
       - uses: actions/upload-artifact@v4
+        if: steps.release.outputs.eligible == 'true'
         with:
           name: pypi-distributions
           path: |
@@ -53,7 +85,7 @@ jobs:
             dist/*.tar.gz
           if-no-files-found: error
   publish:
-    if: inputs.publish
+    if: needs.build.outputs.publish == 'true'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 8
@@ -67,6 +99,54 @@ jobs:
         with:
           name: pypi-distributions
           path: dist/
+      - name: Refuse conflicting existing files before retrying an upload
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, urllib.error, urllib.request
+          from pathlib import Path
+          url = 'https://pypi.org/pypi/local-appsec-lab/' + os.environ['RELEASE_VERSION'] + '/json'
+          try:
+              with urllib.request.urlopen(url, timeout=20) as response:
+                  indexed = {item['filename']: item for item in json.load(response)['urls']}
+          except urllib.error.HTTPError as exc:
+              if exc.code != 404:
+                  raise
+              indexed = {}
+          files = {path.name: path for path in Path('dist').iterdir() if path.is_file()}
+          if set(indexed) - set(files):
+              raise SystemExit('Registry contains unexpected files for this version')
+          for name, item in indexed.items():
+              if hashlib.sha256(files[name].read_bytes()).hexdigest() != item['digests']['sha256']:
+                  raise SystemExit('Existing immutable file differs; refusing upload')
+          PY
       - name: Publish with PyPI trusted identity
-        # Official pypa/gh-action-pypi-publish release/v1, pinned for auditability.
+        # No checkout, package build or target-code execution in the OIDC job.
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086
+        with:
+          # The preceding digest guard makes partial-upload retries safe.
+          skip-existing: true
+  verify:
+    if: needs.build.outputs.publish == 'true'
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.release_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/
+      - name: Verify registry hashes and fresh public installation
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: python scripts/verify_pypi_release.py "$RELEASE_VERSION"

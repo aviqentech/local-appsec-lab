@@ -105,6 +105,14 @@ Runtime recognition does not imply universal framework launch. Whole-program pro
 
 Consult [validation](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/validation.md) for exact measured results and outstanding prerequisites.
 
+## Automatic PyPI updates
+
+Merged PRs into `main` publish a new PyPI release after CI passes. The workflow
+chooses the next unused patch version, synchronizes package/CLI/changelog versions,
+validates the distributions, publishes with the existing Trusted Publisher, and
+verifies a fresh public installation. Direct pushes and unmerged PRs do not publish.
+See the [release process](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/releasing.md) for concurrency, retries and manual validation.
+
 ## Documentation and development
 
 - [Installation, update and uninstall](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/installation.md)
