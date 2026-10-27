@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "local-appsec-lab"
-version = "0.2.1"
+version = "0.2.2"
 description = "Authorized local application security assessment engine and portable Agent Skill"
 readme = "README.md"
 requires-python = ">=3.11"
