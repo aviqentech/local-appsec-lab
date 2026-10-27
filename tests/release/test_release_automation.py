@@ -96,6 +96,7 @@ def test_bump_keeps_runtime_metadata_readme_and_unreleased_notes_consistent(tmp_
 def test_concurrent_merge_prevents_version_commit(monkeypatch):
     monkeypatch.setenv("RELEASE_SOURCE_SHA", "reviewed")
     monkeypatch.setenv("RELEASE_VERSION", "0.2.1")
+    monkeypatch.setattr(release, "git", lambda *args: "reviewed")
     monkeypatch.setattr(release, "current_main", lambda: "newer-merge")
     with pytest.raises(RuntimeError, match="advanced"):
         release.commit()
@@ -111,7 +112,9 @@ def test_workflow_has_main_only_trigger_and_isolated_publisher():
     assert job["permissions"] == {"id-token": "write"}
     assert job["environment"]["name"] == "pypi"
     assert not any("actions/checkout" in step.get("uses", "") for step in job["steps"])
-    assert workflow["jobs"]["verify"]["needs"] == ["build", "publish"]
+    assert workflow["jobs"]["verify"]["needs"] == ["build", "record", "publish"]
+    assert workflow["jobs"]["build"]["permissions"]["contents"] == "read"
+    assert workflow["jobs"]["record"]["permissions"] == {"contents": "write"}
 
 
 def test_dry_run_plans_version_without_publishing_or_committing(tmp_path, monkeypatch):

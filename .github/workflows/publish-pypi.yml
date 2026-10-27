@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     permissions:
-      contents: write
+      contents: read
       actions: read
     outputs:
       publish: ${{ steps.release.outputs.publish }}
       version: ${{ steps.release.outputs.version }}
-      release_sha: ${{ steps.record.outputs.release_sha }}
+      source_sha: ${{ steps.release.outputs.source_sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -69,13 +69,6 @@ jobs:
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation doctor
           "$RUNNER_TEMP/pypi-smoke/bin/python" -m local_appsec_lab.install --project "$RUNNER_TEMP/pypi-fixture" --target all --operation uninstall
-      - name: Record validated version on main without force pushing
-        if: steps.release.outputs.publish == 'true'
-        id: record
-        env:
-          RELEASE_VERSION: ${{ steps.release.outputs.version }}
-          RELEASE_SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
-        run: python scripts/release_automation.py commit
       - uses: actions/upload-artifact@v4
         if: steps.release.outputs.eligible == 'true'
         with:
@@ -84,9 +77,45 @@ jobs:
             dist/*.whl
             dist/*.tar.gz
           if-no-files-found: error
-  publish:
+      - uses: actions/upload-artifact@v4
+        if: steps.release.outputs.eligible == 'true'
+        with:
+          name: release-version-files
+          path: |
+            pyproject.toml
+            src/local_appsec_lab/__init__.py
+            README.md
+            CHANGELOG.md
+          if-no-files-found: error
+  record:
     if: needs.build.outputs.publish == 'true'
     needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      release_sha: ${{ steps.record.outputs.release_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.source_sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-version-files
+          path: .
+      - name: Record validated version on main without force pushing
+        id: record
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          RELEASE_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+        run: python scripts/release_automation.py commit
+  publish:
+    if: needs.build.outputs.publish == 'true'
+    needs: [build, record]
     runs-on: ubuntu-latest
     timeout-minutes: 8
     environment:
@@ -129,7 +158,7 @@ jobs:
           skip-existing: true
   verify:
     if: needs.build.outputs.publish == 'true'
-    needs: [build, publish]
+    needs: [build, record, publish]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -137,7 +166,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.build.outputs.release_sha }}
+          ref: ${{ needs.record.outputs.release_sha }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:

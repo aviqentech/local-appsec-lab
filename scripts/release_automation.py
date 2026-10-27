@@ -14,8 +14,6 @@ import urllib.request
 from datetime import datetime, UTC
 from pathlib import Path
 
-from packaging.version import InvalidVersion, Version
-
 REPOSITORY = "aviqentech/local-appsec-lab"
 PACKAGE = "local-appsec-lab"
 REQUIRED_CI = {"test.yml", "container.yml", "lint.yml", "security.yml", "platform-capabilities.yml"}
@@ -93,6 +91,8 @@ def ci_state(runs: list[dict], sha: str) -> str:
 
 
 def next_version(current: str, published: list[str]) -> str:
+    from packaging.version import InvalidVersion, Version
+
     if not re.fullmatch(r"\d+\.\d+\.\d+", current):
         raise ValueError("Automatic releases require a stable MAJOR.MINOR.PATCH source version")
     versions = []
@@ -209,7 +209,7 @@ def prepare():
 
 def commit():
     source, version = os.environ["RELEASE_SOURCE_SHA"], os.environ["RELEASE_VERSION"]
-    if current_main() != source:
+    if git("rev-parse", "HEAD") != source or current_main() != source:
         raise RuntimeError("Main advanced during validation; no stale release will be published")
     if tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"] != version:
         raise RuntimeError("Validated version changed before the release commit")
