@@ -66,7 +66,7 @@ def assignments(root: Path, inventory: dict, config: Config) -> list[dict]:
             ".vue",
             ".svelte",
         }
-        or Path(p).name == "Dockerfile"
+        or Path(p).name in {"Dockerfile", ".htaccess"}
     }
     for role, categories in ROLES.items():
         if role in {"coordinator", "verifier", "remediation"}:

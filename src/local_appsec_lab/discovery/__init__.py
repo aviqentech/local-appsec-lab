@@ -9,8 +9,10 @@ from typing import Any
 
 import yaml
 
-from local_appsec_lab.utilities.files import files, read_text
+from local_appsec_lab.utilities.files import files, read_bytes
 from local_appsec_lab.utilities.yaml import safe_yaml
+
+from .context import CODE_SUFFIXES, enrich, text_content
 
 LANGUAGES = {
     ".js": "JavaScript",
@@ -88,11 +90,17 @@ def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
     languages: dict[str, list[str]] = {}
     frameworks: dict[str, list[str]] = {}
     managers: dict[str, list[str]] = {}
-    services, routes, dependencies, external, sensitive, infra = [], [], [], [], [], []
+    services, routes, dependencies, infra = [], [], [], []
+    texts: dict[str, str] = {}
+    binary_files = []
     limitations = []
     for relative in inventory:
         path = Path(relative)
-        text = read_text(root, relative)
+        text = text_content(relative, read_bytes(root, relative))
+        if text is None:
+            binary_files.append(relative)
+            continue
+        texts[relative] = text
         language = LANGUAGES.get(path.suffix)
         if language:
             languages.setdefault(language, []).append(relative)
@@ -238,7 +246,7 @@ def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
                 )
             except SyntaxError:
                 limitations.append(f"Python syntax could not be parsed: {relative}")
-        for match in ROUTE.finditer(text):
+        for match in ROUTE.finditer(text if path.suffix.lower() in CODE_SUFFIXES else ""):
             method = (match[1] or match[2]).upper()
             route = match[3]
             if route.startswith("/"):
@@ -268,36 +276,32 @@ def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
                             )
             except (ValueError, yaml.YAMLError, AttributeError):
                 limitations.append(f"Malformed API definition: {relative}")
-        if re.search(r"(?i)auth|session|tenant|permission|payment|llm|openai|anthropic", text):
-            sensitive.append(relative)
-        for url in re.findall(r"https?://[^\s'\"<>)}]+", text):
-            from urllib.parse import urlsplit
-
-            try:
-                host = urlsplit(url).hostname
-                if host and host not in {"localhost", "127.0.0.1", "::1"}:
-                    external.append({"host": host, "source": relative})
-            except ValueError:
-                pass
         if "wp-config" in relative or "wp-content/" in relative:
             frameworks.setdefault("WordPress", []).append(relative)
         if path.suffix == ".go" and '"net/http"' in text:
             frameworks.setdefault("Go HTTP", []).append(relative)
+    context = enrich(texts, inventory, services)
+    routes.extend(context.pop("static_routes"))
+    infra.extend(context.pop("infrastructure"))
     return {
+        **context,
         "files": inventory,
+        "binary_files": binary_files,
         "languages": languages,
         "frameworks": frameworks,
         "package_managers": managers,
         "services": services,
         "routes": list({(r["method"], r["path"], r["source"]): r for r in routes}.values()),
         "dependencies": dependencies,
-        "external_integrations": external[:100],
-        "security_sensitive_files": sensitive,
         "infrastructure": infra,
         "service_graph": {s["id"]: s["dependencies"] for s in services},
         "limitations": limitations
         + [
             "Recognition does not imply complete analysis or runtime support.",
+            "Routes, network calls and review reasons are source hints, not runtime observations or vulnerabilities.",
+            "Static routes assume a root document directory; conditional Apache rewrites are not resolved.",
+            "Text analysis skips binary and non-UTF-8 files; they remain in the inventory and approval fingerprint.",
+            "External references are capped at 512; integrations at 100, after deduplication.",
             "Environment files and private-key files are excluded, never loaded into the app.",
         ],
     }
