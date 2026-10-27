@@ -114,6 +114,7 @@ def test_workflow_has_main_only_trigger_and_isolated_publisher():
     assert not any("actions/checkout" in step.get("uses", "") for step in job["steps"])
     assert workflow["jobs"]["verify"]["needs"] == ["build", "record", "publish"]
     assert workflow["jobs"]["build"]["permissions"]["contents"] == "read"
+    assert workflow["jobs"]["build"]["permissions"]["pull-requests"] == "read"
     assert workflow["jobs"]["record"]["permissions"] == {"contents": "write"}
 
 
