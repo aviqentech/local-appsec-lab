@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from local_appsec_lab import __version__
 from local_appsec_lab.errors import ConfigError, ScopeError
 from local_appsec_lab.install import install
 
@@ -16,14 +17,14 @@ def test_install_reinstall_doctor_uninstall(tmp_path, target):
     first = install(base, [target])[0]
     destination = Path(first["path"])
     assert (destination / "SKILL.md").is_file()
-    assert install(base, [target], "update")[0]["version"] == "0.2.0"
+    assert install(base, [target], "update")[0]["version"] == __version__
     assert install(base, [target], "doctor")[0]["valid"]
     helper = subprocess.run(
         [sys.executable, "-I", str(destination / "scripts/appsec_lab.py"), "--version"],
         capture_output=True,
         text=True,
     )
-    assert helper.returncode == 0 and helper.stdout.strip() == "0.2.0"
+    assert helper.returncode == 0 and helper.stdout.strip() == __version__
     install(base, [target], "uninstall")
     assert not destination.exists()
 

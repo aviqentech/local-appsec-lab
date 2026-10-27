@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Automatically publish a new patch release after merged-main PRs pass CI, with
+  synchronized versions, immutable artifact checks and fresh PyPI installation tests.
+
 - `scan`/`verify --authorize` now requires `--plan-digest` from `plan`; a
   repository config changed after review (backend, image, model endpoint) is refused.
 - The repository fingerprint hashes raw bytes, so binary file changes invalidate approvals.

@@ -15,5 +15,6 @@ prune tests/fixtures/unsupported/.appsec-lab
 prune tests/fixtures/negative-controls/.appsec-lab
 prune tests/fixtures/malicious-instructions/.appsec-lab
 prune tests/fixtures/multi-service/.appsec-lab
-global-exclude *.py[cod] .DS_Store
 graft scripts
+prune scripts/__pycache__
+global-exclude *.py[cod] .DS_Store
