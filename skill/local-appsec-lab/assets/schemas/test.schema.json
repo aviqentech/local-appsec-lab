@@ -1,0 +1,114 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "category": {
+      "title": "Category",
+      "type": "string"
+    },
+    "cwe": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cwe"
+    },
+    "preconditions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Preconditions",
+      "type": "array"
+    },
+    "required_fixtures": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Fixtures",
+      "type": "array"
+    },
+    "supported_targets": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Supported Targets",
+      "type": "array"
+    },
+    "authorization": {
+      "title": "Authorization",
+      "type": "string"
+    },
+    "mode": {
+      "title": "Mode",
+      "type": "string"
+    },
+    "expected_secure_behavior": {
+      "title": "Expected Secure Behavior",
+      "type": "string"
+    },
+    "observation": {
+      "title": "Observation",
+      "type": "string"
+    },
+    "verification": {
+      "title": "Verification",
+      "type": "string"
+    },
+    "cleanup": {
+      "title": "Cleanup",
+      "type": "string"
+    },
+    "timeout_seconds": {
+      "default": 3,
+      "title": "Timeout Seconds",
+      "type": "integer"
+    },
+    "resource_budget": {
+      "title": "Resource Budget",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "category",
+    "preconditions",
+    "supported_targets",
+    "authorization",
+    "mode",
+    "expected_secure_behavior",
+    "observation",
+    "verification",
+    "cleanup",
+    "resource_budget",
+    "limitations"
+  ],
+  "title": "TestDefinition",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

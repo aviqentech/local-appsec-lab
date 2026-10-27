@@ -1,0 +1,9 @@
+# Synthetic read-only cross-user policy contract. Adapt to actual seeded data.
+scenarios:
+  - id: synthetic-cross-user
+    category: authorization
+    path: /records/42
+    owner_headers: {X-Test-User: alice}
+    actor_headers: {X-Test-User: bob}
+    expected_status: [401, 403, 404]
+    marker: SYNTHETIC_ALICE_RECORD_42

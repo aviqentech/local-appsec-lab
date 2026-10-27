@@ -1,0 +1,45 @@
+services:
+  api:
+    image: local-appsec-lab-fixture:0.1.0
+    build: .
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 32
+    environment:
+      PORT: "8765"
+      DATABASE_URL: postgresql://synthetic:synthetic-only@database:5432/synthetic
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [lab]
+    tmpfs: [/tmp]
+    ports: ["127.0.0.1:8765:8765"]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health')"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: synthetic
+      POSTGRES_PASSWORD: synthetic-only
+      POSTGRES_DB: synthetic
+    networks: [lab]
+    tmpfs: [/var/lib/postgresql/data]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 64
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U synthetic -d synthetic"]
+      interval: 5s
+      retries: 10
+networks:
+  lab:
+    internal: true

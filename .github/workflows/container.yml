@@ -1,0 +1,25 @@
+name: Linux container assessments
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install '.[dev]'
+      - run: sudo apt-get update && sudo apt-get install -y bubblewrap
+      - run: docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Dockerfile tests/compatibility
+      - run: python -m pytest tests/compatibility -q --junitxml=container-results.xml
+        env:
+          APPSEC_TEST_IMAGE: local-appsec-lab-test:0.1.0
+          APPSEC_TEST_BWRAP: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-container-results
+          path: container-results.xml

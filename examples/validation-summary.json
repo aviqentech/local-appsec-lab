@@ -1,0 +1,76 @@
+[
+  {
+    "fixture": "javascript-api",
+    "run_id": "deb35e4c711542dca7b342d320c47045",
+    "exit_code": 1,
+    "metrics": {
+      "source_files_inspected": 5,
+      "dependencies_identified": 0,
+      "services_identified": 1,
+      "services_started": 1,
+      "routes_discovered": 8,
+      "routes_tested": 8,
+      "http_requests": 25,
+      "browser_workflows": 0,
+      "dynamic_checks_completed": 16,
+      "worker_assignments_completed": 10,
+      "candidate_findings": 0,
+      "confirmed_findings": 1,
+      "false_positives": 0,
+      "blocked_checks": 1,
+      "not_tested_checks": 5,
+      "runtime_startup_failed": false,
+      "cleanup_completed": true,
+      "model_tokens_reserved": 0,
+      "model_cost_upper_bound_usd": 0
+    },
+    "findings": [
+      {
+        "id": "LAB-39965a8c6a50c56e",
+        "rule": "response-headers",
+        "state": "informational",
+        "severity": "low"
+      },
+      {
+        "id": "LAB-b700cb9bdca155b8",
+        "rule": "boundary:vulnerable-cross-user",
+        "state": "confirmed",
+        "severity": "high"
+      }
+    ]
+  },
+  {
+    "fixture": "python-api",
+    "run_id": "f8fb3fceeac74f9794e8a796d08d2fcb",
+    "exit_code": 1,
+    "metrics": {
+      "source_files_inspected": 3,
+      "dependencies_identified": 1,
+      "services_identified": 1,
+      "services_started": 1,
+      "routes_discovered": 5,
+      "routes_tested": 5,
+      "http_requests": 19,
+      "browser_workflows": 0,
+      "dynamic_checks_completed": 10,
+      "worker_assignments_completed": 10,
+      "candidate_findings": 0,
+      "confirmed_findings": 1,
+      "false_positives": 0,
+      "blocked_checks": 1,
+      "not_tested_checks": 5,
+      "runtime_startup_failed": false,
+      "cleanup_completed": true,
+      "model_tokens_reserved": 0,
+      "model_cost_upper_bound_usd": 0
+    },
+    "findings": [
+      {
+        "id": "LAB-1f0dcbd0e32a6026",
+        "rule": "boundary:vulnerable-cross-user",
+        "state": "confirmed",
+        "severity": "high"
+      }
+    ]
+  }
+]

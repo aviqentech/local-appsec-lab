@@ -1,0 +1,11 @@
+rules:
+  - id: python-shell-true
+    languages: [python]
+    severity: WARNING
+    message: Review shell=True for untrusted arguments; this is a candidate.
+    pattern: subprocess.run(..., shell=True, ...)
+  - id: javascript-direct-html
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Review the provenance and sanitization of direct HTML content.
+    pattern: $E.innerHTML = $VALUE

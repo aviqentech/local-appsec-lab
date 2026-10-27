@@ -1,0 +1,81 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Synthetic fixture",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/public": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/protected": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/records/vulnerable/42": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/records/secure/42": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/validate": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/html-insecure": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    },
+    "/html-secure": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "synthetic response"
+          }
+        }
+      }
+    }
+  }
+}

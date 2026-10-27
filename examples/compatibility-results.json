@@ -1,0 +1,350 @@
+{
+  "date": "2026-10-27",
+  "repository_visibility": "PRIVATE",
+  "native_jobs": {
+    "results-macos-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 119,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_docker_python_bridge",
+          "reason": "Docker missing"
+        }
+      ]
+    },
+    "results-macos-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 119,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_docker_python_bridge",
+          "reason": "Docker missing"
+        }
+      ]
+    },
+    "results-ubuntu-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 13,
+      "passed": 111,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_real_application_full_workflow[javascript-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_real_application_full_workflow[python-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_fix_reverification_preserves_disagreement",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cli_cancellation_cleans_owned_runtime",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_network_and_file_boundary",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_profile_exact_root_is_non_recursive",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_port_collision_and_no_unrelated_process_kill",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cleanup_surviving_child_after_leader_exit",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_passive_runtime_never_grants_mutation_capability",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        }
+      ]
+    },
+    "results-ubuntu-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 13,
+      "passed": 111,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_real_application_full_workflow[javascript-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_real_application_full_workflow[python-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_fix_reverification_preserves_disagreement",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cli_cancellation_cleans_owned_runtime",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_network_and_file_boundary",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_profile_exact_root_is_non_recursive",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_port_collision_and_no_unrelated_process_kill",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cleanup_surviving_child_after_leader_exit",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_passive_runtime_never_grants_mutation_capability",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        }
+      ]
+    },
+    "results-windows-latest-3.11": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 14,
+      "passed": 110,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_real_application_full_workflow[javascript-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_real_application_full_workflow[python-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_fix_reverification_preserves_disagreement",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cli_cancellation_cleans_owned_runtime",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_network_and_file_boundary",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_profile_exact_root_is_non_recursive",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_port_collision_and_no_unrelated_process_kill",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_docker_python_bridge",
+          "reason": "Docker daemon/image unavailable; never pull implicitly"
+        },
+        {
+          "test": "test_cleanup_surviving_child_after_leader_exit",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_passive_runtime_never_grants_mutation_capability",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        }
+      ]
+    },
+    "results-windows-latest-3.13": {
+      "tests": 124,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 14,
+      "passed": 110,
+      "skip_details": [
+        {
+          "test": "test_experimental_bubblewrap_bridge",
+          "reason": "Explicit native Linux bubblewrap validation only"
+        },
+        {
+          "test": "test_container_active_assessment[javascript-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_active_assessment[python-api]",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_container_cannot_reach_host_loopback",
+          "reason": "Set APPSEC_TEST_IMAGE to an explicitly prebuilt Python/Node/Flask image"
+        },
+        {
+          "test": "test_real_application_full_workflow[javascript-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_real_application_full_workflow[python-api]",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_fix_reverification_preserves_disagreement",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_cli_cancellation_cleans_owned_runtime",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_network_and_file_boundary",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_profile_exact_root_is_non_recursive",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_port_collision_and_no_unrelated_process_kill",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_docker_python_bridge",
+          "reason": "Docker daemon/image unavailable; never pull implicitly"
+        },
+        {
+          "test": "test_cleanup_surviving_child_after_leader_exit",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        },
+        {
+          "test": "test_passive_runtime_never_grants_mutation_capability",
+          "reason": "Live macOS runtime suite; Docker has a separate integration test"
+        }
+      ]
+    }
+  },
+  "linux_runtime": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 3,
+    "skip_details": [
+      {
+        "test": "test_experimental_bubblewrap_bridge",
+        "reason": "Runner blocks bubblewrap namespaces: bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted"
+      }
+    ]
+  },
+  "local_macos_with_docker": {
+    "tests": 124,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 123,
+    "skip_details": [
+      {
+        "test": "test_experimental_bubblewrap_bridge",
+        "reason": "Explicit native Linux bubblewrap validation only"
+      }
+    ]
+  },
+  "limitations": [
+    "Native Windows Docker Desktop Linux-container execution remains unverified.",
+    "Linux bubblewrap failed the namespace capability probe and was skipped.",
+    "Interactive skill invocation in Claude Code, Codex, Cursor and Gemini CLI remains unverified."
+  ],
+  "provenance": "Historical pre-publication private CI validation. Original account-specific run URLs are omitted; recorded measurements and skip details are retained. These results are not runs in the publication repository.",
+  "historical_tested_commit": "448a6e7455a6eb97e449bc21ef8eeb38d0e044d2",
+  "publication_repository": "https://github.com/aviqentech/local-appsec-lab"
+}

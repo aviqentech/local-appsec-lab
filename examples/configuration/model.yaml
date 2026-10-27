@@ -1,0 +1,10 @@
+version: 1
+ai:
+  strategy: http
+  endpoint: https://model.example.invalid/v1/chat/completions
+  model: choose-your-provider-model
+limits:
+  model_tokens: 20000
+  model_cost_usd: 0.50
+# Example invocation after reviewing plan and endpoint:
+# appsec-lab scan --allow-model-requests --model-price-per-million 10 --model-key-env YOUR_KEY_VARIABLE

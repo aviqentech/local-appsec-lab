@@ -1,0 +1,612 @@
+[
+  {
+    "schema_version": 1,
+    "id": "source:sql-construction",
+    "title": "SQL assembled from expressions",
+    "category": "input_data_flow",
+    "cwe": "CWE-89",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Bind values using the database driver's parameter API; allowlist dynamic identifiers.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:shell-command",
+    "title": "Shell command execution interface",
+    "category": "command_execution",
+    "cwe": "CWE-78",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Use an argument array with shell=False and validate untrusted arguments.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:unsafe-deserialization",
+    "title": "Unsafe deserialization interface",
+    "category": "input_data_flow",
+    "cwe": "CWE-502",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Accept a schema-validated data format instead of deserializing executable objects.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:dynamic-eval",
+    "title": "Dynamic code evaluation",
+    "category": "input_data_flow",
+    "cwe": "CWE-95",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Replace evaluation with a bounded parser or explicit operation mapping.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:jwt-no-verify",
+    "title": "Token signature verification disabled",
+    "category": "authentication",
+    "cwe": "CWE-347",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Require signature, issuer, audience and expiry validation for the intended token type.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:weak-crypto",
+    "title": "Legacy digest in security-sensitive code",
+    "category": "cryptography",
+    "cwe": "CWE-327",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Use a current purpose-specific primitive; password storage requires a password KDF.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:debug-mode",
+    "title": "Debug configuration enabled",
+    "category": "configuration",
+    "cwe": "CWE-489",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Disable debug mode outside disposable development environments.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:unsafe-html",
+    "title": "Direct HTML rendering sink",
+    "category": "frontend",
+    "cwe": "CWE-79",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Render text or sanitize untrusted HTML using a maintained, configured sanitizer.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:potential-secret",
+    "title": "Potential embedded credential",
+    "category": "sensitive_data",
+    "cwe": "CWE-798",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Remove and rotate the credential if genuine; use an external secret store.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:sensitive-logging",
+    "title": "Potential sensitive value logged",
+    "category": "sensitive_logging",
+    "cwe": "CWE-532",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Remove sensitive fields from log events and apply structured redaction.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:cors-wildcard",
+    "title": "Wildcard CORS configuration",
+    "category": "cors",
+    "cwe": "CWE-942",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Restrict origins where cross-origin access is not intended; verify credential behavior.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:csrf-disabled",
+    "title": "CSRF control explicitly disabled",
+    "category": "csrf",
+    "cwe": "CWE-352",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Enforce CSRF tokens or a documented equivalent for cookie-authenticated mutations.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:ssrf-interface",
+    "title": "Request-derived outbound URL",
+    "category": "server_side_requests",
+    "cwe": "CWE-918",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Allowlist destinations and enforce egress restrictions after resolution and at connection time.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:unsafe-template",
+    "title": "Dynamic template source",
+    "category": "template_rendering",
+    "cwe": "CWE-1336",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Keep templates static and pass untrusted input only as template data.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:upload-name",
+    "title": "Uploaded filename used in filesystem operation",
+    "category": "file_upload",
+    "cwe": "CWE-22",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Generate server-side filenames, validate type/size and confine storage outside executable paths.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:container-root",
+    "title": "Container explicitly configured as root",
+    "category": "infrastructure",
+    "cwe": "CWE-250",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Run the application as a dedicated non-root UID with minimal capabilities.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:privileged-container",
+    "title": "Privileged container configuration",
+    "category": "infrastructure",
+    "cwe": "CWE-250",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Remove privileged mode and Docker-socket mounts; grant only necessary capabilities.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "source:ai-tool-eval",
+    "title": "Model output reaches execution interface",
+    "category": "ai_security",
+    "cwe": "CWE-862",
+    "preconditions": [
+      "A supported source/configuration file exists"
+    ],
+    "required_fixtures": [],
+    "supported_targets": [
+      "source"
+    ],
+    "authorization": "workspace read only",
+    "mode": "review",
+    "expected_secure_behavior": "Use typed allowlisted tool calls, deterministic authorization and separate untrusted content from instructions.",
+    "observation": "Python AST or bounded syntactic pattern",
+    "verification": "Fresh source read; never confirm exploitability from a pattern",
+    "cleanup": "No target resources created",
+    "timeout_seconds": 60,
+    "resource_budget": "10,000 files / 50 MB repository; 1 MB per file",
+    "limitations": [
+      "No whole-program input provenance or deployment proof"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "synthetic:authentication",
+    "title": "Configured synthetic authentication policy",
+    "category": "authentication",
+    "cwe": null,
+    "preconditions": [
+      "Healthy authorized service",
+      "Explicit expected policy",
+      "Owner baseline succeeds"
+    ],
+    "required_fixtures": [
+      "Synthetic actors and records",
+      "Protected response marker for access tests"
+    ],
+    "supported_targets": [
+      "owned local HTTP service",
+      "explicitly approved existing local identity"
+    ],
+    "authorization": "Unexpired local-active approval including this category",
+    "mode": "local-active",
+    "expected_secure_behavior": "Lower-trust request satisfies configured denial/status policy",
+    "observation": "Bounded owner and actor requests; hashes, status and synthetic marker only",
+    "verification": "Independent repeat; validation status alone remains a candidate",
+    "cleanup": "Reserved DELETE rollback for mutations, then owned runtime destruction",
+    "timeout_seconds": 3,
+    "resource_budget": "2 requests/read-only or 3/mutation including rollback; reservation before execution",
+    "limitations": [
+      "Developer-supplied fixture and policy assumptions",
+      "No inferred business-state machine"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "synthetic:authorization",
+    "title": "Configured synthetic authorization policy",
+    "category": "authorization",
+    "cwe": "CWE-862",
+    "preconditions": [
+      "Healthy authorized service",
+      "Explicit expected policy",
+      "Owner baseline succeeds"
+    ],
+    "required_fixtures": [
+      "Synthetic actors and records",
+      "Protected response marker for access tests"
+    ],
+    "supported_targets": [
+      "owned local HTTP service",
+      "explicitly approved existing local identity"
+    ],
+    "authorization": "Unexpired local-active approval including this category",
+    "mode": "local-active",
+    "expected_secure_behavior": "Lower-trust request satisfies configured denial/status policy",
+    "observation": "Bounded owner and actor requests; hashes, status and synthetic marker only",
+    "verification": "Independent repeat; validation status alone remains a candidate",
+    "cleanup": "Reserved DELETE rollback for mutations, then owned runtime destruction",
+    "timeout_seconds": 3,
+    "resource_budget": "2 requests/read-only or 3/mutation including rollback; reservation before execution",
+    "limitations": [
+      "Developer-supplied fixture and policy assumptions",
+      "No inferred business-state machine"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "synthetic:tenant_isolation",
+    "title": "Configured synthetic tenant_isolation policy",
+    "category": "tenant_isolation",
+    "cwe": "CWE-862",
+    "preconditions": [
+      "Healthy authorized service",
+      "Explicit expected policy",
+      "Owner baseline succeeds"
+    ],
+    "required_fixtures": [
+      "Synthetic actors and records",
+      "Protected response marker for access tests"
+    ],
+    "supported_targets": [
+      "owned local HTTP service",
+      "explicitly approved existing local identity"
+    ],
+    "authorization": "Unexpired local-active approval including this category",
+    "mode": "local-active",
+    "expected_secure_behavior": "Lower-trust request satisfies configured denial/status policy",
+    "observation": "Bounded owner and actor requests; hashes, status and synthetic marker only",
+    "verification": "Independent repeat; validation status alone remains a candidate",
+    "cleanup": "Reserved DELETE rollback for mutations, then owned runtime destruction",
+    "timeout_seconds": 3,
+    "resource_budget": "2 requests/read-only or 3/mutation including rollback; reservation before execution",
+    "limitations": [
+      "Developer-supplied fixture and policy assumptions",
+      "No inferred business-state machine"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "synthetic:validation",
+    "title": "Configured synthetic validation policy",
+    "category": "validation",
+    "cwe": null,
+    "preconditions": [
+      "Healthy authorized service",
+      "Explicit expected policy",
+      "Owner baseline succeeds"
+    ],
+    "required_fixtures": [
+      "Synthetic actors and records",
+      "Protected response marker for access tests"
+    ],
+    "supported_targets": [
+      "owned local HTTP service",
+      "explicitly approved existing local identity"
+    ],
+    "authorization": "Unexpired local-active approval including this category",
+    "mode": "local-active",
+    "expected_secure_behavior": "Lower-trust request satisfies configured denial/status policy",
+    "observation": "Bounded owner and actor requests; hashes, status and synthetic marker only",
+    "verification": "Independent repeat; validation status alone remains a candidate",
+    "cleanup": "Reserved DELETE rollback for mutations, then owned runtime destruction",
+    "timeout_seconds": 3,
+    "resource_budget": "2 requests/read-only or 3/mutation including rollback; reservation before execution",
+    "limitations": [
+      "Developer-supplied fixture and policy assumptions",
+      "No inferred business-state machine"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "synthetic:business_logic",
+    "title": "Configured synthetic business_logic policy",
+    "category": "business_logic",
+    "cwe": null,
+    "preconditions": [
+      "Healthy authorized service",
+      "Explicit expected policy",
+      "Owner baseline succeeds"
+    ],
+    "required_fixtures": [
+      "Synthetic actors and records",
+      "Protected response marker for access tests"
+    ],
+    "supported_targets": [
+      "owned local HTTP service",
+      "explicitly approved existing local identity"
+    ],
+    "authorization": "Unexpired local-active approval including this category",
+    "mode": "local-active",
+    "expected_secure_behavior": "Lower-trust request satisfies configured denial/status policy",
+    "observation": "Bounded owner and actor requests; hashes, status and synthetic marker only",
+    "verification": "Independent repeat; validation status alone remains a candidate",
+    "cleanup": "Reserved DELETE rollback for mutations, then owned runtime destruction",
+    "timeout_seconds": 3,
+    "resource_budget": "2 requests/read-only or 3/mutation including rollback; reservation before execution",
+    "limitations": [
+      "Developer-supplied fixture and policy assumptions",
+      "No inferred business-state machine"
+    ]
+  }
+]

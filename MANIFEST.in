@@ -1,0 +1,19 @@
+include README.md LICENSE NOTICE THIRD_PARTY_NOTICES.md CHANGELOG.md CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md Makefile requirements-dev.lock .editorconfig .gitattributes .gitignore install.py
+graft skill
+graft adapters
+graft installers
+graft schemas
+graft docs
+graft examples
+graft benchmarks
+graft tests
+graft .github
+prune tests/fixtures/javascript-api/.appsec-lab
+prune tests/fixtures/python-api/.appsec-lab
+prune tests/fixtures/frontend/.appsec-lab
+prune tests/fixtures/unsupported/.appsec-lab
+prune tests/fixtures/negative-controls/.appsec-lab
+prune tests/fixtures/malicious-instructions/.appsec-lab
+prune tests/fixtures/multi-service/.appsec-lab
+global-exclude *.py[cod] .DS_Store
+graft scripts

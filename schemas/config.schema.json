@@ -1,0 +1,470 @@
+{
+  "$defs": {
+    "AI": {
+      "additionalProperties": false,
+      "properties": {
+        "strategy": {
+          "default": "deterministic",
+          "enum": [
+            "deterministic",
+            "host",
+            "http"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "context_bytes": {
+          "default": 12000,
+          "maximum": 32000,
+          "minimum": 1000,
+          "title": "Context Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "AI",
+      "type": "object"
+    },
+    "Execution": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "docker",
+            "macos",
+            "bubblewrap"
+          ],
+          "title": "Backend",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Command",
+          "type": "array"
+        },
+        "service": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service"
+        },
+        "port": {
+          "default": 8765,
+          "maximum": 65535,
+          "minimum": 1024,
+          "title": "Port",
+          "type": "integer"
+        },
+        "health_path": {
+          "default": "/health",
+          "title": "Health Path",
+          "type": "string"
+        },
+        "startup_timeout": {
+          "default": 20,
+          "maximum": 180,
+          "minimum": 1,
+          "title": "Startup Timeout",
+          "type": "integer"
+        },
+        "image": {
+          "default": "python:3.13-slim",
+          "title": "Image",
+          "type": "string"
+        },
+        "environment": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Environment",
+          "type": "object"
+        },
+        "existing_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Existing Url"
+        },
+        "existing_identity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Existing Identity"
+        }
+      },
+      "title": "Execution",
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "default": 300,
+          "maximum": 3600,
+          "minimum": 5,
+          "title": "Duration Seconds",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 100,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "requests_per_second": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "title": "Requests Per Second",
+          "type": "number"
+        },
+        "response_bytes": {
+          "default": 65536,
+          "maximum": 1048576,
+          "minimum": 256,
+          "title": "Response Bytes",
+          "type": "integer"
+        },
+        "log_bytes": {
+          "default": 262144,
+          "maximum": 1048576,
+          "minimum": 1024,
+          "title": "Log Bytes",
+          "type": "integer"
+        },
+        "storage_mb": {
+          "default": 64,
+          "maximum": 512,
+          "minimum": 8,
+          "title": "Storage Mb",
+          "type": "integer"
+        },
+        "memory_mb": {
+          "default": 512,
+          "maximum": 2048,
+          "minimum": 128,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "processes": {
+          "default": 32,
+          "maximum": 128,
+          "minimum": 4,
+          "title": "Processes",
+          "type": "integer"
+        },
+        "cpus": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "maximum": 4,
+          "title": "Cpus",
+          "type": "number"
+        },
+        "max_concurrent": {
+          "default": 2,
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Max Concurrent",
+          "type": "integer"
+        },
+        "retries": {
+          "default": 0,
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer"
+        },
+        "model_tokens": {
+          "default": 0,
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Model Tokens",
+          "type": "integer"
+        },
+        "model_cost_usd": {
+          "default": 0,
+          "maximum": 20,
+          "minimum": 0,
+          "title": "Model Cost Usd",
+          "type": "number"
+        }
+      },
+      "title": "Limits",
+      "type": "object"
+    },
+    "Scenario": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "authorization",
+            "authentication",
+            "validation",
+            "business_logic",
+            "tenant_isolation"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "method": {
+          "default": "GET",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "owner_headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Owner Headers",
+          "type": "object"
+        },
+        "actor_headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Actor Headers",
+          "type": "object"
+        },
+        "owner_status": {
+          "default": 200,
+          "maximum": 599,
+          "minimum": 100,
+          "title": "Owner Status",
+          "type": "integer"
+        },
+        "expected_status": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Expected Status",
+          "type": "array"
+        },
+        "marker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Marker"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "disposable": {
+          "default": false,
+          "title": "Disposable",
+          "type": "boolean"
+        },
+        "synthetic": {
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "rollback_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rollback Path"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "category"
+      ],
+      "title": "Scenario",
+      "type": "object"
+    },
+    "Tools": {
+      "additionalProperties": false,
+      "properties": {
+        "semgrep": {
+          "default": false,
+          "title": "Semgrep",
+          "type": "boolean"
+        },
+        "osv_scanner": {
+          "default": false,
+          "title": "Osv Scanner",
+          "type": "boolean"
+        },
+        "trivy": {
+          "default": false,
+          "title": "Trivy",
+          "type": "boolean"
+        },
+        "advisory_snapshot": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advisory Snapshot"
+        }
+      },
+      "title": "Tools",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "product_name": {
+      "default": "Local AppSec Lab",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Product Name",
+      "type": "string"
+    },
+    "execution": {
+      "$ref": "#/$defs/Execution"
+    },
+    "limits": {
+      "$ref": "#/$defs/Limits"
+    },
+    "scenarios": {
+      "items": {
+        "$ref": "#/$defs/Scenario"
+      },
+      "maxItems": 30,
+      "title": "Scenarios",
+      "type": "array"
+    },
+    "tools": {
+      "$ref": "#/$defs/Tools"
+    },
+    "ai": {
+      "$ref": "#/$defs/AI"
+    },
+    "output": {
+      "default": ".appsec-lab",
+      "title": "Output",
+      "type": "string"
+    },
+    "fail_on": {
+      "default": "high",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "informational"
+      ],
+      "title": "Fail On",
+      "type": "string"
+    },
+    "categories": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "offline": {
+      "default": true,
+      "title": "Offline",
+      "type": "boolean"
+    },
+    "browser": {
+      "default": false,
+      "title": "Browser",
+      "type": "boolean"
+    }
+  },
+  "title": "Config",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

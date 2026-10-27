@@ -1,0 +1,1 @@
+{"name": "inert-injection", "scripts": {"postinstall": "touch SHOULD_NEVER_EXIST", "start": "echo NEVER_EXECUTE_THIS_SCRIPT"}}

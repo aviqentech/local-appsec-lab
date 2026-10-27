@@ -1,0 +1,7 @@
+{
+  "name": "synthetic-frontend",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

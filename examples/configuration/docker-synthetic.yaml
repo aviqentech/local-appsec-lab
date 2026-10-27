@@ -1,0 +1,44 @@
+version: 1
+execution:
+  backend: docker
+  image: local-appsec-lab-test:0.1.0
+  command:
+  - node
+  - server.js
+  port: 8765
+  health_path: /health
+limits:
+  requests_per_second: 10
+  max_requests: 100
+scenarios:
+- id: vulnerable-cross-user
+  path: /records/vulnerable/42
+  category: authorization
+  owner_headers:
+    X-Test-User: alice
+  actor_headers:
+    X-Test-User: bob
+  marker: SYNTHETIC_ALICE_RECORD_42
+- id: secure-cross-user
+  path: /records/secure/42
+  category: authorization
+  owner_headers:
+    X-Test-User: alice
+  actor_headers:
+    X-Test-User: bob
+  marker: SYNTHETIC_ALICE_RECORD_42
+- id: protected-anonymous
+  path: /protected
+  category: authentication
+  owner_headers:
+    X-Test-User: alice
+  actor_headers: {}
+  marker: SYNTHETIC_PROTECTED
+  expected_status:
+  - 401
+- id: invalid-input
+  path: /validate?id=appsec-lab-invalid
+  category: validation
+  owner_status: 400
+  expected_status:
+  - 400

@@ -1,0 +1,55 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "category": {
+      "title": "Category",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "blocked",
+        "not_applicable",
+        "not_tested",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "reason": {
+      "default": "",
+      "title": "Reason",
+      "type": "string"
+    },
+    "target": {
+      "default": "repository",
+      "title": "Target",
+      "type": "string"
+    },
+    "duration_seconds": {
+      "default": 0,
+      "title": "Duration Seconds",
+      "type": "number"
+    },
+    "observations": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Observations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "category",
+    "status"
+  ],
+  "title": "Check",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

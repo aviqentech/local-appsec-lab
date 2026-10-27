@@ -1,0 +1,14 @@
+execution:
+  command:
+  - node
+  - server.js
+scenarios:
+- actor_headers: {}
+  category: authentication
+  expected_status:
+  - 401
+  id: protected-anonymous
+  marker: SYNTHETIC_PROTECTED
+  owner_headers:
+    X-Test-User: alice
+  path: /protected

@@ -1,0 +1,1153 @@
+{
+  "schema_version": 1,
+  "run_id": "deb35e4c711542dca7b342d320c47045",
+  "product": "Local AppSec Lab",
+  "repository": "/assessed-project",
+  "revision": "unversioned",
+  "started": "2026-10-27T07:30:49.279308+00:00",
+  "finished": "2026-10-27T07:30:52.004253+00:00",
+  "duration_seconds": 2.7246229170013976,
+  "mode": "local-active",
+  "status": "partial",
+  "environment": {
+    "os": "Darwin",
+    "python": "3.13.0",
+    "engine": "0.1.0",
+    "backend": "macos",
+    "metadata_policy": "Repository/operator metadata generalized; measured findings unchanged. Review before sharing."
+  },
+  "architecture": {
+    "files": [
+      "README.md",
+      "appsec-lab.yaml",
+      "openapi.json",
+      "package.json",
+      "server.js"
+    ],
+    "languages": {
+      "YAML": [
+        "appsec-lab.yaml"
+      ],
+      "JavaScript": [
+        "server.js"
+      ]
+    },
+    "frameworks": {},
+    "package_managers": {},
+    "services": [
+      {
+        "id": ".",
+        "kind": "javascript",
+        "source": "package.json",
+        "scripts": {
+          "start": "node server.js"
+        },
+        "startup": "node server.js",
+        "command": [
+          "node",
+          "server.js"
+        ],
+        "dependencies": []
+      }
+    ],
+    "routes": [
+      {
+        "method": "GET",
+        "path": "/health",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/public",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/protected",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/records/vulnerable/42",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/records/secure/42",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/validate",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/html-insecure",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      },
+      {
+        "method": "GET",
+        "path": "/html-secure",
+        "source": "openapi.json",
+        "line": 1,
+        "authentication": "unknown"
+      }
+    ],
+    "dependencies": [],
+    "external_integrations": [],
+    "security_sensitive_files": [
+      "appsec-lab.yaml",
+      "server.js"
+    ],
+    "infrastructure": [],
+    "service_graph": {
+      ".": []
+    },
+    "limitations": [
+      "Recognition does not imply complete analysis or runtime support.",
+      "Environment files and private-key files are excluded, never loaded into the app."
+    ]
+  },
+  "authorization": {
+    "version": 1,
+    "repository": "/assessed-project",
+    "repository_fingerprint": "fccdcb0c5e811d1ffea430319aafa2fed7fccad9ff15f6a8fab064fa62318cbf",
+    "plan_digest": "750bd1baa742103d9fff3139e65b9869ec512c20549554a16be6a8263e5a6dba",
+    "user": "authorized-operator",
+    "acknowledgment": "I authorize local execution and bounded testing",
+    "mode": "local-active",
+    "service_identities": [
+      "app"
+    ],
+    "addresses": [
+      "127.0.0.1"
+    ],
+    "ports": [
+      8765
+    ],
+    "categories": [
+      "headers",
+      "session",
+      "cors",
+      "authentication",
+      "authorization",
+      "validation",
+      "business_logic",
+      "tenant_isolation"
+    ],
+    "limits": {
+      "duration_seconds": 300,
+      "max_requests": 100,
+      "requests_per_second": 10.0,
+      "response_bytes": 65536,
+      "log_bytes": 262144,
+      "storage_mb": 64,
+      "memory_mb": 512,
+      "processes": 32,
+      "cpus": 1,
+      "max_concurrent": 2,
+      "retries": 0,
+      "model_tokens": 0,
+      "model_cost_usd": 0
+    },
+    "expires_at": 1793086549.2812722,
+    "run_id": "deb35e4c711542dca7b342d320c47045",
+    "existing_manifest_digest": null
+  },
+  "execution_strategy": "deterministic-workers",
+  "findings": [
+    {
+      "schema_version": 1,
+      "id": "LAB-39965a8c6a50c56e",
+      "fingerprint": "39965a8c6a50c56e97759af23f536824e3401958cdadbe3029a527c31cef2b33",
+      "rule": "response-headers",
+      "title": "Browser defense headers absent",
+      "category": "headers",
+      "severity": "low",
+      "severity_reason": "Missing browser defense in depth; no script injection is established.",
+      "confidence": "high",
+      "state": "informational",
+      "cwe": null,
+      "source": {
+        "path": "server.js",
+        "line": 17,
+        "end_line": 17,
+        "excerpt": "  if (url.pathname === '/html-insecure' || url.pathname === '/html-secure') {",
+        "sha256": "4bebe2d69e94c2cef027e1ee37706a86e53dc18a36ffdf9ef4a4a6a008ca8402"
+      },
+      "endpoint": "/html-insecure",
+      "service": "app",
+      "description": "An HTML response omitted common browser defense headers.",
+      "root_cause": "Exact source-level cause is not established by the available evidence.",
+      "expected": "Set a suitable CSP and X-Content-Type-Options: nosniff.",
+      "observed": "Missing: content-security-policy",
+      "evidence": [
+        {
+          "status": 200,
+          "body_sha256": "91869435dd35d3008460ba74c9efaf2fee49a50c12da9de9d27cdb374f4926b6",
+          "body_bytes": 79,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "text/html",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ],
+      "verification": [
+        {
+          "reviewer": "independent-deterministic-verifier",
+          "timestamp": "2026-10-27T07:30:51.727544+00:00",
+          "previous_state": "informational",
+          "conclusion": "Source location exists; applicability/reachability requires contextual review",
+          "source_sha256": "4bebe2d69e94c2cef027e1ee37706a86e53dc18a36ffdf9ef4a4a6a008ca8402"
+        }
+      ],
+      "remediation": "Apply headers at the application or trusted proxy; test compatibility.",
+      "regression": "",
+      "limitations": [
+        "Deployment reverse-proxy headers may differ.",
+        "Source reference identifies the route declaration/dispatch; it is not a complete execution-path trace."
+      ],
+      "provenance": "builtin"
+    },
+    {
+      "schema_version": 1,
+      "id": "LAB-b700cb9bdca155b8",
+      "fingerprint": "b700cb9bdca155b888b4ae2891e857c90b1b6d7f1018b7049ff08f6442d504bb",
+      "rule": "boundary:vulnerable-cross-user",
+      "title": "Synthetic access policy violated: vulnerable-cross-user",
+      "category": "authorization",
+      "severity": "high",
+      "severity_reason": "The configured lower-trust synthetic actor received the prohibited fixture response.",
+      "confidence": "high",
+      "state": "confirmed",
+      "cwe": "CWE-862",
+      "source": {
+        "path": "server.js",
+        "line": 14,
+        "end_line": 14,
+        "excerpt": "  if (url.pathname === '/records/vulnerable/42') return actor ? send(200,{owner:'alice',data:'SYNTHETIC_ALICE_RECORD_42'}) : send(401,{error:'authenticate'});",
+        "sha256": "4bebe2d69e94c2cef027e1ee37706a86e53dc18a36ffdf9ef4a4a6a008ca8402"
+      },
+      "endpoint": "/records/vulnerable/42",
+      "service": "app",
+      "description": "The owner baseline succeeded and the disallowed synthetic request received an unexpected response.",
+      "root_cause": "Exact source-level cause is not established by the available evidence.",
+      "expected": "Actor response status in [401, 403, 404]; protected record inaccessible.",
+      "observed": "Actor received the configured synthetic resource or disallowed response.",
+      "evidence": [
+        {
+          "test_id": "vulnerable-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/vulnerable/42",
+          "timestamp": "2026-10-27T07:30:51.073197+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+            "body_bytes": 52,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "actor": {
+            "status": 200,
+            "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+            "body_bytes": 52,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": true,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.2191947909996088,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ],
+      "verification": [
+        {
+          "reviewer": "independent-deterministic-verifier",
+          "timestamp": "2026-10-27T07:30:51.728049+00:00",
+          "previous_state": "candidate",
+          "conclusion": "confirmed",
+          "new_observation": {
+            "test_id": "vulnerable-cross-user",
+            "category": "authorization",
+            "method": "GET",
+            "path": "/records/vulnerable/42",
+            "timestamp": "2026-10-27T07:30:51.939459+00:00",
+            "owner": {
+              "status": 200,
+              "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+              "body_bytes": 52,
+              "truncated": false,
+              "marker_present": true,
+              "security_headers": {
+                "content-type": "application/json",
+                "x-content-type-options": "nosniff"
+              }
+            },
+            "actor": {
+              "status": 200,
+              "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+              "body_bytes": 52,
+              "truncated": false,
+              "marker_present": true,
+              "security_headers": {
+                "content-type": "application/json",
+                "x-content-type-options": "nosniff"
+              }
+            },
+            "owner_precondition": true,
+            "expected_status": [
+              401,
+              403,
+              404
+            ],
+            "violation": true,
+            "actor_identity": "configured-synthetic-actor",
+            "duration_seconds": 0.211418250000861,
+            "limitations": "Expected policy and fixture ownership are supplied by the developer."
+          }
+        }
+      ],
+      "remediation": "Enforce the configured ownership/role/input policy at the server-side resource boundary.",
+      "regression": "Run `appsec-lab verify --finding <id> --authorize` after fixing scenario vulnerable-cross-user; actor must be denied.",
+      "limitations": [
+        "Conclusion depends on the explicitly configured synthetic users, records and expected policy.",
+        "Source reference identifies the route declaration/dispatch; it is not a complete execution-path trace."
+      ],
+      "provenance": "builtin"
+    }
+  ],
+  "checks": [
+    {
+      "id": "source:sql-construction",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:shell-command",
+      "category": "command_execution",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-deserialization",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:dynamic-eval",
+      "category": "input_data_flow",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:jwt-no-verify",
+      "category": "authentication",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:weak-crypto",
+      "category": "cryptography",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:debug-mode",
+      "category": "configuration",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-html",
+      "category": "frontend",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:potential-secret",
+      "category": "sensitive_data",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:sensitive-logging",
+      "category": "sensitive_logging",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:cors-wildcard",
+      "category": "cors",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:csrf-disabled",
+      "category": "csrf",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:ssrf-interface",
+      "category": "server_side_requests",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:unsafe-template",
+      "category": "template_rendering",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:upload-name",
+      "category": "file_upload",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:container-root",
+      "category": "infrastructure",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:privileged-container",
+      "category": "infrastructure",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "source:ai-tool-eval",
+      "category": "ai_security",
+      "status": "completed",
+      "reason": "Bounded syntactic rule; no whole-program data-flow proof",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "dependency-advisories",
+      "category": "dependencies",
+      "status": "blocked",
+      "reason": "No authorized offline advisory snapshot configured; no current vulnerability claims",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "runtime-health",
+      "category": "runtime",
+      "status": "completed",
+      "reason": "",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "backend": "macos",
+          "owned": true,
+          "port": 8765
+        }
+      ]
+    },
+    {
+      "id": "response:/health",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/health",
+      "duration_seconds": 0.05726733399933437,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "b342fc286d0216cc212e0d7ba234894e2e7283ddf14f959adf0fe7fd5924308a",
+          "body_bytes": 14,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cors:/health",
+      "category": "cors",
+      "status": "completed",
+      "reason": "",
+      "target": "/health",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "b342fc286d0216cc212e0d7ba234894e2e7283ddf14f959adf0fe7fd5924308a",
+          "body_bytes": 14,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/html-insecure",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/html-insecure",
+      "duration_seconds": 0.11034283399931155,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "91869435dd35d3008460ba74c9efaf2fee49a50c12da9de9d27cdb374f4926b6",
+          "body_bytes": 79,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "text/html",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cors:/html-insecure",
+      "category": "cors",
+      "status": "completed",
+      "reason": "",
+      "target": "/html-insecure",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "91869435dd35d3008460ba74c9efaf2fee49a50c12da9de9d27cdb374f4926b6",
+          "body_bytes": 79,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "text/html",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/html-secure",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/html-secure",
+      "duration_seconds": 0.11043795799923828,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "91869435dd35d3008460ba74c9efaf2fee49a50c12da9de9d27cdb374f4926b6",
+          "body_bytes": 79,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "text/html",
+            "x-content-type-options": "nosniff",
+            "content-security-policy": "default-src 'self'; frame-ancestors 'none'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cors:/html-secure",
+      "category": "cors",
+      "status": "completed",
+      "reason": "",
+      "target": "/html-secure",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "91869435dd35d3008460ba74c9efaf2fee49a50c12da9de9d27cdb374f4926b6",
+          "body_bytes": 79,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "text/html",
+            "x-content-type-options": "nosniff",
+            "content-security-policy": "default-src 'self'; frame-ancestors 'none'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/protected",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/protected",
+      "duration_seconds": 0.11109683299946482,
+      "observations": [
+        {
+          "status": 401,
+          "body_sha256": "261f7d57777ec45a642c4a33f29a3cfd3ece2a6c4f69ef874227bcde82e5c53c",
+          "body_bytes": 35,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/public",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/public",
+      "duration_seconds": 0.1099657919985475,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "489cafd23a092714db1fd8300e74e60a494868daa0cf1d221448e30baef3d4ea",
+          "body_bytes": 35,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cors:/public",
+      "category": "cors",
+      "status": "completed",
+      "reason": "",
+      "target": "/public",
+      "duration_seconds": 0.0,
+      "observations": [
+        {
+          "status": 200,
+          "body_sha256": "489cafd23a092714db1fd8300e74e60a494868daa0cf1d221448e30baef3d4ea",
+          "body_bytes": 35,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/records/secure/42",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/secure/42",
+      "duration_seconds": 0.10728745799860917,
+      "observations": [
+        {
+          "status": 403,
+          "body_sha256": "2815fee6edc3716bd6c85027399f06e03168706e7fcac786ecf0c66e6190843f",
+          "body_bytes": 21,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/records/vulnerable/42",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/vulnerable/42",
+      "duration_seconds": 0.10932725000020582,
+      "observations": [
+        {
+          "status": 401,
+          "body_sha256": "aa5e2bc488f47644b9e3874321b90608dadfedbbb8a51acb2bace5127800dca1",
+          "body_bytes": 24,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "response:/validate",
+      "category": "headers",
+      "status": "completed",
+      "reason": "",
+      "target": "/validate",
+      "duration_seconds": 0.11060704199917382,
+      "observations": [
+        {
+          "status": 400,
+          "body_sha256": "8f6e0239d2e7ebd59efea9b83437970ffe22261f89c410664febd2a097d063c5",
+          "body_bytes": 33,
+          "truncated": false,
+          "marker_present": false,
+          "security_headers": {
+            "content-type": "application/json",
+            "x-content-type-options": "nosniff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vulnerable-cross-user",
+      "category": "authorization",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/vulnerable/42",
+      "duration_seconds": 0.2191947909996088,
+      "observations": [
+        {
+          "test_id": "vulnerable-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/vulnerable/42",
+          "timestamp": "2026-10-27T07:30:51.073197+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+            "body_bytes": 52,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "actor": {
+            "status": 200,
+            "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+            "body_bytes": 52,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": true,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.2191947909996088,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "secure-cross-user",
+      "category": "authorization",
+      "status": "completed",
+      "reason": "",
+      "target": "/records/secure/42",
+      "duration_seconds": 0.22108583299996099,
+      "observations": [
+        {
+          "test_id": "secure-cross-user",
+          "category": "authorization",
+          "method": "GET",
+          "path": "/records/secure/42",
+          "timestamp": "2026-10-27T07:30:51.294443+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "b4393615868dacc38e3eca28bce69ffedef145a2d1df6a0a702f8d592e24f3b1",
+            "body_bytes": 52,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "actor": {
+            "status": 403,
+            "body_sha256": "2815fee6edc3716bd6c85027399f06e03168706e7fcac786ecf0c66e6190843f",
+            "body_bytes": 21,
+            "truncated": false,
+            "marker_present": false,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "violation": false,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.22108583299996099,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "protected-anonymous",
+      "category": "authentication",
+      "status": "completed",
+      "reason": "",
+      "target": "/protected",
+      "duration_seconds": 0.21556062499803375,
+      "observations": [
+        {
+          "test_id": "protected-anonymous",
+          "category": "authentication",
+          "method": "GET",
+          "path": "/protected",
+          "timestamp": "2026-10-27T07:30:51.510026+00:00",
+          "owner": {
+            "status": 200,
+            "body_sha256": "71862c69a28b98c87c3348acaa195d20752f504b16577660fa3d81ba5e33e49b",
+            "body_bytes": 33,
+            "truncated": false,
+            "marker_present": true,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "actor": {
+            "status": 401,
+            "body_sha256": "261f7d57777ec45a642c4a33f29a3cfd3ece2a6c4f69ef874227bcde82e5c53c",
+            "body_bytes": 35,
+            "truncated": false,
+            "marker_present": false,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            401
+          ],
+          "violation": false,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.21556062499803375,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "invalid-input",
+      "category": "validation",
+      "status": "completed",
+      "reason": "",
+      "target": "/validate?id=appsec-lab-invalid",
+      "duration_seconds": 0.21350024999992456,
+      "observations": [
+        {
+          "test_id": "invalid-input",
+          "category": "validation",
+          "method": "GET",
+          "path": "/validate?id=appsec-lab-invalid",
+          "timestamp": "2026-10-27T07:30:51.723734+00:00",
+          "owner": {
+            "status": 400,
+            "body_sha256": "8f6e0239d2e7ebd59efea9b83437970ffe22261f89c410664febd2a097d063c5",
+            "body_bytes": 33,
+            "truncated": false,
+            "marker_present": false,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "actor": {
+            "status": 400,
+            "body_sha256": "8f6e0239d2e7ebd59efea9b83437970ffe22261f89c410664febd2a097d063c5",
+            "body_bytes": 33,
+            "truncated": false,
+            "marker_present": false,
+            "security_headers": {
+              "content-type": "application/json",
+              "x-content-type-options": "nosniff"
+            }
+          },
+          "owner_precondition": true,
+          "expected_status": [
+            400
+          ],
+          "violation": false,
+          "actor_identity": "configured-synthetic-actor",
+          "duration_seconds": 0.21350024999992456,
+          "limitations": "Expected policy and fixture ownership are supplied by the developer."
+        }
+      ]
+    },
+    {
+      "id": "coverage:session",
+      "category": "session",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:sensitive_response",
+      "category": "sensitive_response",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:error_handling",
+      "category": "error_handling",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:business_logic",
+      "category": "business_logic",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    },
+    {
+      "id": "coverage:tenant_isolation",
+      "category": "tenant_isolation",
+      "status": "not_tested",
+      "reason": "No applicable implemented check or configured synthetic scenario executed",
+      "target": "repository",
+      "duration_seconds": 0.0,
+      "observations": []
+    }
+  ],
+  "jobs": [
+    {
+      "id": "source:authentication",
+      "role": "authentication",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.0030771659985475708,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:authorization",
+      "role": "authorization",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.003862791996652959,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:api",
+      "role": "api",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002295875001436798,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:data_flow",
+      "role": "data_flow",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002361458002269501,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:business_logic",
+      "role": "business_logic",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002281542001583148,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:frontend",
+      "role": "frontend",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002292666002176702,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:infrastructure",
+      "role": "infrastructure",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.002277416999277193,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:sensitive_data",
+      "role": "sensitive_data",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.00223924999954761,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "source:ai_security",
+      "role": "ai_security",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.00261799999861978,
+      "error": null,
+      "strategy": "deterministic-worker"
+    },
+    {
+      "id": "dependencies",
+      "role": "supply_chain",
+      "state": "completed",
+      "attempts": 1,
+      "duration_seconds": 0.0014295000000856817,
+      "error": null,
+      "strategy": "deterministic-worker"
+    }
+  ],
+  "metrics": {
+    "source_files_inspected": 5,
+    "dependencies_identified": 0,
+    "services_identified": 1,
+    "services_started": 1,
+    "routes_discovered": 8,
+    "routes_tested": 8,
+    "http_requests": 25,
+    "browser_workflows": 0,
+    "dynamic_checks_completed": 16,
+    "worker_assignments_completed": 10,
+    "candidate_findings": 0,
+    "confirmed_findings": 1,
+    "false_positives": 0,
+    "blocked_checks": 1,
+    "not_tested_checks": 5,
+    "runtime_startup_failed": false,
+    "cleanup_completed": true,
+    "model_tokens_reserved": 0,
+    "model_cost_upper_bound_usd": 0
+  },
+  "limitations": [
+    "Recognition does not imply complete analysis or runtime support.",
+    "Environment files and private-key files are excluded, never loaded into the app.",
+    "Syntactic source checks remain candidates; manual data-flow and deployment review is required.",
+    "Deterministic workers and verification are not independent AI reviewers.",
+    "No current advisory coverage without a supplied offline snapshot or a successful optional scanner.",
+    "State-changing scenarios rely on explicitly configured disposable synthetic fixtures.",
+    "Browser automation, full business-logic inference, CVSS calculation, mobile emulation and automatic Compose provisioning are not implemented.",
+    "macOS uses a per-port host-loopback sandbox, not a private network namespace. Aggregate RSS/process/storage limits are monitored; Docker provides stronger resource isolation. Daemonizing startup programs are unsupported."
+  ]
+}

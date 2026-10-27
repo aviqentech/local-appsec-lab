@@ -1,0 +1,84 @@
+[
+  {
+    "fixture": "javascript-api",
+    "passed": true,
+    "confirmed": [
+      "boundary:vulnerable-cross-user"
+    ],
+    "metrics": {
+      "source_files_inspected": 5,
+      "dependencies_identified": 0,
+      "services_identified": 1,
+      "services_started": 1,
+      "routes_discovered": 8,
+      "routes_tested": 8,
+      "http_requests": 25,
+      "browser_workflows": 0,
+      "dynamic_checks_completed": 16,
+      "worker_assignments_completed": 10,
+      "candidate_findings": 0,
+      "confirmed_findings": 1,
+      "false_positives": 0,
+      "blocked_checks": 1,
+      "not_tested_checks": 5,
+      "runtime_startup_failed": false,
+      "cleanup_completed": true,
+      "model_tokens_reserved": 0,
+      "model_cost_upper_bound_usd": 0
+    }
+  },
+  {
+    "fixture": "python-api",
+    "passed": true,
+    "confirmed": [
+      "boundary:vulnerable-cross-user"
+    ],
+    "metrics": {
+      "source_files_inspected": 3,
+      "dependencies_identified": 1,
+      "services_identified": 1,
+      "services_started": 1,
+      "routes_discovered": 5,
+      "routes_tested": 5,
+      "http_requests": 19,
+      "browser_workflows": 0,
+      "dynamic_checks_completed": 10,
+      "worker_assignments_completed": 10,
+      "candidate_findings": 0,
+      "confirmed_findings": 1,
+      "false_positives": 0,
+      "blocked_checks": 1,
+      "not_tested_checks": 5,
+      "runtime_startup_failed": false,
+      "cleanup_completed": true,
+      "model_tokens_reserved": 0,
+      "model_cost_upper_bound_usd": 0
+    }
+  },
+  {
+    "fixture": "negative-controls",
+    "passed": true,
+    "confirmed": [],
+    "metrics": {
+      "source_files_inspected": 1,
+      "dependencies_identified": 0,
+      "services_identified": 0,
+      "services_started": 0,
+      "routes_discovered": 0,
+      "routes_tested": 0,
+      "http_requests": 0,
+      "browser_workflows": 0,
+      "dynamic_checks_completed": 0,
+      "worker_assignments_completed": 10,
+      "candidate_findings": 0,
+      "confirmed_findings": 0,
+      "false_positives": 0,
+      "blocked_checks": 1,
+      "not_tested_checks": 8,
+      "runtime_startup_failed": false,
+      "cleanup_completed": true,
+      "model_tokens_reserved": 0,
+      "model_cost_upper_bound_usd": 0
+    }
+  }
+]

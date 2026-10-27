@@ -1,0 +1,111 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "repository": {
+      "title": "Repository",
+      "type": "string"
+    },
+    "repository_fingerprint": {
+      "title": "Repository Fingerprint",
+      "type": "string"
+    },
+    "plan_digest": {
+      "title": "Plan Digest",
+      "type": "string"
+    },
+    "user": {
+      "title": "User",
+      "type": "string"
+    },
+    "acknowledgment": {
+      "const": "I authorize local execution and bounded testing",
+      "title": "Acknowledgment",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "review",
+        "local-passive",
+        "local-active"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "service_identities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Service Identities",
+      "type": "array"
+    },
+    "addresses": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Addresses",
+      "type": "array"
+    },
+    "ports": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Ports",
+      "type": "array"
+    },
+    "categories": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "limits": {
+      "additionalProperties": true,
+      "title": "Limits",
+      "type": "object"
+    },
+    "expires_at": {
+      "title": "Expires At",
+      "type": "number"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "existing_manifest_digest": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Existing Manifest Digest"
+    }
+  },
+  "required": [
+    "repository",
+    "repository_fingerprint",
+    "plan_digest",
+    "user",
+    "acknowledgment",
+    "mode",
+    "service_identities",
+    "ports",
+    "categories",
+    "limits",
+    "expires_at",
+    "run_id"
+  ],
+  "title": "Approval",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

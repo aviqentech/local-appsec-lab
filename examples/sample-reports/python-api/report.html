@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-appsec-report'; base-uri 'none'; form-action 'none'"><title>Local AppSec Lab assessment</title><style>
+:root{color-scheme:light dark;font:16px/1.6 system-ui;background:#101725;color:#e6edf7}body{max-width:1100px;margin:auto;padding:40px 24px}h1{font-size:2.8rem;line-height:1.15}.eyebrow,.tag{color:#7ee0c2;font-size:.85rem;letter-spacing:.06em}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.metrics div,article{background:#192438;border:1px solid #33435e;border-radius:12px;padding:22px;margin:14px 0}.metrics strong{display:block;font-size:2rem}.metrics span{font-size:.85rem;color:#bdcbe0}h2{font-size:1.25rem}dd{margin:0 0 12px}dt{color:#9cb0ce}pre{overflow:auto;max-height:450px;background:#0a111e;padding:16px;font-size:.8rem}table{border-collapse:collapse;width:100%;font-size:.85rem}td,th{text-align:left;border-bottom:1px solid #33435e;padding:10px}.scroll{overflow-x:auto}select{padding:8px;border-radius:6px;background:#192438;color:#fff}[hidden]{display:none}footer{color:#9cb0ce;margin-top:30px}
+</style><header><p class="eyebrow">LOCAL EVIDENCE · EXPLICIT SCOPE</p><h1>Local AppSec Lab</h1><p>Application security assessment · local-active · partial</p><p>/assessed-project<br>Run f8fb3fceeac74f9794e8a796d08d2fcb · 2026-10-27T07:30:52.602130+00:00 · 2.1s<br>deterministic-workers</p></header><section class="metrics"><div><strong>3</strong><span>source files inspected</span></div><div><strong>1</strong><span>dependencies identified</span></div><div><strong>1</strong><span>services identified</span></div><div><strong>1</strong><span>services started</span></div><div><strong>5</strong><span>routes discovered</span></div><div><strong>5</strong><span>routes tested</span></div><div><strong>19</strong><span>http requests</span></div><div><strong>0</strong><span>browser workflows</span></div><div><strong>10</strong><span>dynamic checks completed</span></div><div><strong>10</strong><span>worker assignments completed</span></div><div><strong>0</strong><span>candidate findings</span></div><div><strong>1</strong><span>confirmed findings</span></div><div><strong>0</strong><span>false positives</span></div><div><strong>1</strong><span>blocked checks</span></div><div><strong>5</strong><span>not tested checks</span></div><div><strong>False</strong><span>runtime startup failed</span></div><div><strong>True</strong><span>cleanup completed</span></div><div><strong>0</strong><span>model tokens reserved</span></div><div><strong>0</strong><span>model cost upper bound usd</span></div></section><h2>Findings</h2><p><span class="tag">critical: 0 &nbsp;</span><span class="tag">high: 1 &nbsp;</span><span class="tag">medium: 0 &nbsp;</span><span class="tag">low: 0 &nbsp;</span><span class="tag">informational: 0 &nbsp;</span></p><label>Filter status <select id="filter"><option value="all">All findings</option><option>confirmed</option><option>candidate</option><option>informational</option><option>blocked</option><option>not_reproduced</option></select></label><main><article data-state="confirmed" data-severity="high"><p class="tag">HIGH · confirmed · LAB-1f0dcbd0e32a6026</p><h2>Synthetic access policy violated: vulnerable-cross-user</h2><p>The owner baseline succeeded and the disallowed synthetic request received an unexpected response.</p><dl><dt>Location</dt><dd>app.py:28</dd><dt>Root cause</dt><dd>Exact source-level cause is not established by the available evidence.</dd><dt>Expected</dt><dd>Actor response status in [401, 403, 404]; protected record inaccessible.</dd><dt>Observed</dt><dd>Actor received the configured synthetic resource or disallowed response.</dd><dt>Remediation</dt><dd>Enforce the configured ownership/role/input policy at the server-side resource boundary.</dd><dt>Regression</dt><dd>Run `appsec-lab verify --finding &lt;id&gt; --authorize` after fixing scenario vulnerable-cross-user; actor must be denied.</dd><dt>Limitations</dt><dd>Conclusion depends on the explicitly configured synthetic users, records and expected policy.; Source reference identifies the route declaration/dispatch; it is not a complete execution-path trace.</dd></dl><details><summary>Evidence and independent verification</summary><pre>{
+  &quot;evidence&quot;: [
+    {
+      &quot;test_id&quot;: &quot;vulnerable-cross-user&quot;,
+      &quot;category&quot;: &quot;authorization&quot;,
+      &quot;method&quot;: &quot;GET&quot;,
+      &quot;path&quot;: &quot;/records/vulnerable/42&quot;,
+      &quot;timestamp&quot;: &quot;2026-10-27T07:30:53.727899+00:00&quot;,
+      &quot;owner&quot;: {
+        &quot;status&quot;: 200,
+        &quot;body_sha256&quot;: &quot;2b2acbb0d18af214049cb9b2b0301b5d3e83ee737947054522dc226b17d9a8da&quot;,
+        &quot;body_bytes&quot;: 37,
+        &quot;truncated&quot;: false,
+        &quot;marker_present&quot;: true,
+        &quot;security_headers&quot;: {
+          &quot;content-type&quot;: &quot;application/json&quot;,
+          &quot;x-content-type-options&quot;: &quot;nosniff&quot;
+        }
+      },
+      &quot;actor&quot;: {
+        &quot;status&quot;: 200,
+        &quot;body_sha256&quot;: &quot;2b2acbb0d18af214049cb9b2b0301b5d3e83ee737947054522dc226b17d9a8da&quot;,
+        &quot;body_bytes&quot;: 37,
+        &quot;truncated&quot;: false,
+        &quot;marker_present&quot;: true,
+        &quot;security_headers&quot;: {
+          &quot;content-type&quot;: &quot;application/json&quot;,
+          &quot;x-content-type-options&quot;: &quot;nosniff&quot;
+        }
+      },
+      &quot;owner_precondition&quot;: true,
+      &quot;expected_status&quot;: [
+        401,
+        403,
+        404
+      ],
+      &quot;violation&quot;: true,
+      &quot;actor_identity&quot;: &quot;configured-synthetic-actor&quot;,
+      &quot;duration_seconds&quot;: 0.22012025000003632,
+      &quot;limitations&quot;: &quot;Expected policy and fixture ownership are supplied by the developer.&quot;
+    }
+  ],
+  &quot;verification&quot;: [
+    {
+      &quot;reviewer&quot;: &quot;independent-deterministic-verifier&quot;,
+      &quot;timestamp&quot;: &quot;2026-10-27T07:30:54.370712+00:00&quot;,
+      &quot;previous_state&quot;: &quot;candidate&quot;,
+      &quot;conclusion&quot;: &quot;confirmed&quot;,
+      &quot;new_observation&quot;: {
+        &quot;test_id&quot;: &quot;vulnerable-cross-user&quot;,
+        &quot;category&quot;: &quot;authorization&quot;,
+        &quot;method&quot;: &quot;GET&quot;,
+        &quot;path&quot;: &quot;/records/vulnerable/42&quot;,
+        &quot;timestamp&quot;: &quot;2026-10-27T07:30:54.588394+00:00&quot;,
+        &quot;owner&quot;: {
+          &quot;status&quot;: 200,
+          &quot;body_sha256&quot;: &quot;2b2acbb0d18af214049cb9b2b0301b5d3e83ee737947054522dc226b17d9a8da&quot;,
+          &quot;body_bytes&quot;: 37,
+          &quot;truncated&quot;: false,
+          &quot;marker_present&quot;: true,
+          &quot;security_headers&quot;: {
+            &quot;content-type&quot;: &quot;application/json&quot;,
+            &quot;x-content-type-options&quot;: &quot;nosniff&quot;
+          }
+        },
+        &quot;actor&quot;: {
+          &quot;status&quot;: 200,
+          &quot;body_sha256&quot;: &quot;2b2acbb0d18af214049cb9b2b0301b5d3e83ee737947054522dc226b17d9a8da&quot;,
+          &quot;body_bytes&quot;: 37,
+          &quot;truncated&quot;: false,
+          &quot;marker_present&quot;: true,
+          &quot;security_headers&quot;: {
+            &quot;content-type&quot;: &quot;application/json&quot;,
+            &quot;x-content-type-options&quot;: &quot;nosniff&quot;
+          }
+        },
+        &quot;owner_precondition&quot;: true,
+        &quot;expected_status&quot;: [
+          401,
+          403,
+          404
+        ],
+        &quot;violation&quot;: true,
+        &quot;actor_identity&quot;: &quot;configured-synthetic-actor&quot;,
+        &quot;duration_seconds&quot;: 0.21770250000190572,
+        &quot;limitations&quot;: &quot;Expected policy and fixture ownership are supplied by the developer.&quot;
+      }
+    }
+  ]
+}</pre></details></article></main><h2>Test coverage</h2><div class="scroll"><table><thead><tr><th>Test</th><th>Category</th><th>Status</th><th>Target</th><th>Reason</th></tr></thead><tbody><tr><td>source:sql-construction</td><td>input_data_flow</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:shell-command</td><td>command_execution</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:unsafe-deserialization</td><td>input_data_flow</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:dynamic-eval</td><td>input_data_flow</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:jwt-no-verify</td><td>authentication</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:weak-crypto</td><td>cryptography</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:debug-mode</td><td>configuration</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:unsafe-html</td><td>frontend</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:potential-secret</td><td>sensitive_data</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:sensitive-logging</td><td>sensitive_logging</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:cors-wildcard</td><td>cors</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:csrf-disabled</td><td>csrf</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:ssrf-interface</td><td>server_side_requests</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:unsafe-template</td><td>template_rendering</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:upload-name</td><td>file_upload</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:container-root</td><td>infrastructure</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:privileged-container</td><td>infrastructure</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>source:ai-tool-eval</td><td>ai_security</td><td>completed</td><td>repository</td><td>Bounded syntactic rule; no whole-program data-flow proof</td></tr><tr><td>dependency-advisories</td><td>dependencies</td><td>blocked</td><td>repository</td><td>No authorized offline advisory snapshot configured; no current vulnerability claims</td></tr><tr><td>runtime-health</td><td>runtime</td><td>completed</td><td>repository</td><td></td></tr><tr><td>response:/health</td><td>headers</td><td>completed</td><td>/health</td><td></td></tr><tr><td>cors:/health</td><td>cors</td><td>completed</td><td>/health</td><td></td></tr><tr><td>response:/protected</td><td>headers</td><td>completed</td><td>/protected</td><td></td></tr><tr><td>response:/records/secure/42</td><td>headers</td><td>completed</td><td>/records/secure/42</td><td></td></tr><tr><td>response:/records/vulnerable/42</td><td>headers</td><td>completed</td><td>/records/vulnerable/42</td><td></td></tr><tr><td>response:/validate</td><td>headers</td><td>completed</td><td>/validate</td><td></td></tr><tr><td>vulnerable-cross-user</td><td>authorization</td><td>completed</td><td>/records/vulnerable/42</td><td></td></tr><tr><td>secure-cross-user</td><td>authorization</td><td>completed</td><td>/records/secure/42</td><td></td></tr><tr><td>protected-anonymous</td><td>authentication</td><td>completed</td><td>/protected</td><td></td></tr><tr><td>invalid-input</td><td>validation</td><td>completed</td><td>/validate?id=appsec-lab-invalid</td><td></td></tr><tr><td>coverage:session</td><td>session</td><td>not_tested</td><td>repository</td><td>No applicable implemented check or configured synthetic scenario executed</td></tr><tr><td>coverage:sensitive_response</td><td>sensitive_response</td><td>not_tested</td><td>repository</td><td>No applicable implemented check or configured synthetic scenario executed</td></tr><tr><td>coverage:error_handling</td><td>error_handling</td><td>not_tested</td><td>repository</td><td>No applicable implemented check or configured synthetic scenario executed</td></tr><tr><td>coverage:business_logic</td><td>business_logic</td><td>not_tested</td><td>repository</td><td>No applicable implemented check or configured synthetic scenario executed</td></tr><tr><td>coverage:tenant_isolation</td><td>tenant_isolation</td><td>not_tested</td><td>repository</td><td>No applicable implemented check or configured synthetic scenario executed</td></tr></tbody></table></div><h2>Limitations</h2><ul><li>Recognition does not imply complete analysis or runtime support.</li><li>Environment files and private-key files are excluded, never loaded into the app.</li><li>Syntactic source checks remain candidates; manual data-flow and deployment review is required.</li><li>Deterministic workers and verification are not independent AI reviewers.</li><li>No current advisory coverage without a supplied offline snapshot or a successful optional scanner.</li><li>State-changing scenarios rely on explicitly configured disposable synthetic fixtures.</li><li>Browser automation, full business-logic inference, CVSS calculation, mobile emulation and automatic Compose provisioning are not implemented.</li><li>macOS uses a per-port host-loopback sandbox, not a private network namespace. Aggregate RSS/process/storage limits are monitored; Docker provides stronger resource isolation. Daemonizing startup programs are unsupported.</li></ul><footer>No findings does not establish security or complete coverage. This report works offline and contains no external resources.</footer><script nonce="appsec-report">document.getElementById('filter').addEventListener('change',function(){document.querySelectorAll('article').forEach(a=>a.hidden=this.value!=='all'&&a.dataset.state!==this.value)})</script></html>

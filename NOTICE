@@ -1,0 +1,6 @@
+Local AppSec Lab
+Copyright 2026 Local AppSec Lab contributors
+
+Dependencies retain their own licenses. No proprietary scanner source is bundled.
+The bundled SARIF JSON schema, if present, comes from SchemaStore (Apache-2.0).
+See THIRD_PARTY_NOTICES.md for source and attribution.

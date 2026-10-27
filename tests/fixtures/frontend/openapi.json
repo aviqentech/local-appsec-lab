@@ -1,0 +1,1 @@
+{"openapi": "3.0.3", "paths": {"/html-insecure": {"get": {}}, "/html-secure": {"get": {}}, "/protected": {"get": {}}}}

@@ -1,0 +1,10 @@
+name: Bug report
+description: Report a reproducible non-sensitive defect
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction using synthetic data
+      description: Include version/platform and sanitized commands. Never include credentials or private findings.
+    validations:
+      required: true
