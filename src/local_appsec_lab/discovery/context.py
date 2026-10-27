@@ -159,6 +159,14 @@ class Markup(HTMLParser):
         self.resources: list[str] = []
         self.signals: list[dict] = []
         self.script_kind: str | None = None
+        self.malformed = False
+
+    def parse_html_declaration(self, i: int) -> int:
+        # Older CPython raises on non-CDATA marked sections; patched releases skip
+        # them as bogus comments. Flag them here so coverage is reported either way.
+        if self.rawdata.startswith("<![", i) and not self.rawdata.startswith("<![CDATA[", i):
+            self.malformed = True
+        return super().parse_html_declaration(i)
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
@@ -328,6 +336,8 @@ def enrich(texts: dict[str, str], inventory: list[str], services: list[dict]) ->
                 parser.close()
             except (ValueError, AssertionError):
                 # HTMLParser can reject malformed marked declarations. Keep partial hints explicit.
+                parser.malformed = True
+            if parser.malformed:
                 unparsed_markup.append(source)
             signals = parser.signals
             local = []
