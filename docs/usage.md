@@ -30,12 +30,12 @@ appsec-lab config validate --project /path/to/application
 | Mode | Behavior | Consent |
 |---|---|---|
 | `review` | Reads source; no application execution | No execution consent |
-| `local-passive` | Starts one reviewed service; reads approved local responses | Fresh `--authorize` |
-| `local-active` | Adds configured synthetic owner/actor and validation scenarios | Fresh `--authorize` |
+| `local-passive` | Starts one reviewed service; reads approved local responses | Fresh `--authorize` with the `plan_digest` from `plan` |
+| `local-active` | Adds configured synthetic owner/actor and validation scenarios | Fresh `--authorize` with the `plan_digest` from `plan` |
 
 ```sh
-appsec-lab scan --project /path/to/application --mode local-passive --authorize
-appsec-lab scan --project /path/to/application --mode local-active --authorize
+appsec-lab scan --project /path/to/application --mode local-passive --authorize --plan-digest PLAN_DIGEST
+appsec-lab scan --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
 ```
 
 Review the startup command, service directory, runtime image, synthetic data, port and budgets first. Configuration cannot grant consent. Approval binds source/config/root/mode/run/service/categories/limits and expiry. Changes require a fresh run. No public targets, redirects, unapproved ports, brute force or arbitrary exploit workflows are supported.
@@ -51,7 +51,7 @@ Have Node available and a working Seatbelt backend:
 ```sh
 appsec-lab config validate --project tests/fixtures/javascript-api
 appsec-lab plan --project tests/fixtures/javascript-api
-appsec-lab scan --project tests/fixtures/javascript-api --mode local-active --authorize
+appsec-lab scan --project tests/fixtures/javascript-api --mode local-active --authorize --plan-digest PLAN_DIGEST
 ```
 
 ### Docker on Linux / Windows / macOS
@@ -79,7 +79,7 @@ Then validate, inspect and authorize it:
 ```sh
 appsec-lab config validate --project tests/fixtures/javascript-api --config docker-demo.yaml
 appsec-lab plan --project tests/fixtures/javascript-api --config docker-demo.yaml
-appsec-lab scan --project tests/fixtures/javascript-api --config docker-demo.yaml --mode local-active --authorize
+appsec-lab scan --project tests/fixtures/javascript-api --config docker-demo.yaml --mode local-active --authorize --plan-digest PLAN_DIGEST
 ```
 
 Use `.\.venv\Scripts\appsec-lab.exe` on Windows when unactivated. This is the intended Windows setup; execution through Docker Desktop on native Windows remains unverified. Linux and macOS Docker assessments passed.
@@ -105,7 +105,7 @@ appsec-lab report --project /path/to/application --run latest --format all --sha
 Use the `run_id` from a scan and a finding ID from its JSON report:
 
 ```sh
-appsec-lab verify --project /path/to/application --run RUN_ID --finding LAB_ID --authorize
+appsec-lab verify --project /path/to/application --run RUN_ID --finding LAB_ID --authorize --plan-digest PLAN_DIGEST
 appsec-lab compare --project /path/to/application OLD_RUN_ID NEW_RUN_ID
 ```
 

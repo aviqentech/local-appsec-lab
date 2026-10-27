@@ -11,14 +11,20 @@ from pydantic import Field
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.errors import AuthorizationError
 from local_appsec_lab.models import Mode, Model, digest
-from local_appsec_lab.utilities.files import files, read_text
+from local_appsec_lab.utilities.files import files, read_bytes
 
 
 def fingerprint(root: Path, output: str = ".appsec-lab") -> str:
     parts = []
     for path in files(root, excluded_paths=[output]):
-        parts.append((path, hashlib.sha256(read_text(root, path).encode()).hexdigest()))
+        # Hash raw bytes: decoding would map distinct invalid UTF-8 sequences alike.
+        parts.append((path, hashlib.sha256(read_bytes(root, path)).hexdigest()))
     return digest([str(root.resolve()), parts])
+
+
+def plan_digest(config: Config) -> str:
+    """Digest of the effective configuration, printed by `plan` for explicit approval."""
+    return digest(config.model_dump())
 
 
 class Approval(Model):
@@ -45,11 +51,7 @@ class Approval(Model):
             root, config.output
         ):
             raise AuthorizationError("Repository changed since authorization")
-        if (
-            self.plan_digest != digest(config.model_dump())
-            or self.run_id != run_id
-            or self.mode != mode
-        ):
+        if self.plan_digest != plan_digest(config) or self.run_id != run_id or self.mode != mode:
             raise AuthorizationError("Approval does not match this plan, mode, or run")
         if config.execution.port not in self.ports:
             raise AuthorizationError("Port is outside the approval")
@@ -63,6 +65,7 @@ def authorize(
     run_id: str,
     acknowledged: bool,
     existing_digest: str | None = None,
+    reviewed_plan: str | None = None,
 ) -> Approval | None:
     root, workspace = root.resolve(strict=True), workspace.resolve(strict=True)
     if not root.is_dir() or not root.is_relative_to(workspace):
@@ -72,6 +75,12 @@ def authorize(
     if not acknowledged:
         raise AuthorizationError(
             "Local execution/testing requires --authorize; inspect 'plan' first"
+        )
+    # Repository configuration overrides user configuration, so the acknowledgment
+    # must name the exact plan reviewed: backend, image, endpoints and scenarios.
+    if reviewed_plan != plan_digest(config):
+        raise AuthorizationError(
+            "Configuration differs from the reviewed plan; pass the --plan-digest printed by 'plan'"
         )
     if config.execution.existing_url and existing_digest != digest(
         {
@@ -91,7 +100,7 @@ def authorize(
     return Approval(
         repository=str(root),
         repository_fingerprint=fingerprint(root, config.output),
-        plan_digest=digest(config.model_dump()),
+        plan_digest=plan_digest(config),
         user=getpass.getuser(),
         acknowledgment="I authorize local execution and bounded testing",
         mode=mode,

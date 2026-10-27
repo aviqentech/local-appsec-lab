@@ -15,6 +15,18 @@ import sys
 import threading
 
 
+def headers(pairs):
+    # Keep repeated headers; a plain dict would drop all but the last Set-Cookie.
+    merged = {}
+    for key, value in pairs:
+        key = key.lower()
+        if key in merged:
+            merged[key] += ("\n" if key == "set-cookie" else ", ") + value
+        else:
+            merged[key] = value
+    return merged
+
+
 def main():
     # The app shares this network namespace, but must not read or forge the
     # observer's pipes through /proc/<pid>/fd even when its numeric UID matches.
@@ -89,7 +101,7 @@ def main():
                         json.dumps(
                             {
                                 "status": response.status,
-                                "headers": dict(response.getheaders()),
+                                "headers": headers(response.getheaders()),
                                 "body": base64.b64encode(content).decode(),
                             }
                         ),

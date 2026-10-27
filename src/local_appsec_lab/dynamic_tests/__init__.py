@@ -142,12 +142,13 @@ def run(
                         limitations=["Deployment reverse-proxy headers may differ."],
                     )
                 )
-            cookies = response.headers.get("set-cookie", "")
+            cookies = response.headers.get("set-cookie", "").lower().splitlines()
             if cookies:
+                # A flag counts only when every cookie sets it.
                 flags = {
-                    "httponly": "httponly" in cookies.lower(),
-                    "samesite": "samesite=" in cookies.lower(),
-                    "secure": "; secure" in cookies.lower(),
+                    "httponly": all("httponly" in c for c in cookies),
+                    "samesite": all("samesite=" in c for c in cookies),
+                    "secure": all("; secure" in c for c in cookies),
                 }
                 checks.append(
                     Check(

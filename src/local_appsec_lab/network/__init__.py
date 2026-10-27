@@ -55,6 +55,8 @@ def safe_path(path: str) -> str:
     if (
         not path.startswith("/")
         or path.startswith("//")
+        # Spaces and DEL are invalid on the request line; http.client rejects them.
+        or any(ord(c) <= 32 or ord(c) == 127 for c in path)
         or "://" in decoded
         or "\\" in decoded
         or any(ord(c) < 32 for c in decoded)
@@ -63,6 +65,18 @@ def safe_path(path: str) -> str:
     ):
         raise ScopeError("Unsafe request path")
     return path
+
+
+def merge_headers(pairs) -> dict[str, str]:
+    """Lower-case header names, keeping every repeated value (Set-Cookie one per line)."""
+    merged: dict[str, str] = {}
+    for key, value in pairs:
+        key = key.lower()
+        if key in merged:
+            merged[key] += ("\n" if key == "set-cookie" else ", ") + value
+        else:
+            merged[key] = value
+    return merged
 
 
 class Budget:
@@ -221,16 +235,19 @@ class Client:
         timer.daemon = True
         timer.start()
         try:
-            connection.request(
-                method,
-                path,
-                body=data,
-                headers={
-                    "User-Agent": "Local-AppSec-Lab/0.1",
-                    **({"Content-Type": "application/json"} if data else {}),
-                    **(headers or {}),
-                },
-            )
+            try:
+                connection.request(
+                    method,
+                    path,
+                    body=data,
+                    headers={
+                        "User-Agent": "Local-AppSec-Lab/0.1",
+                        **({"Content-Type": "application/json"} if data else {}),
+                        **(headers or {}),
+                    },
+                )
+            except (http.client.InvalidURL, ValueError) as exc:
+                raise ScopeError("Request rejected by the HTTP client") from exc
             response = connection.getresponse()
             content = response.read(self.budget.limits.response_bytes + 1)
             if expired.is_set():
@@ -240,7 +257,7 @@ class Client:
                 raise ScopeError("Redirect refused; configure the final local endpoint explicitly")
             return Response(
                 response.status,
-                {k.lower(): v[:4096] for k, v in response.getheaders()},
+                {k: v[:4096] for k, v in merge_headers(response.getheaders()).items()},
                 content[: self.budget.limits.response_bytes],
                 len(content) > self.budget.limits.response_bytes,
             )

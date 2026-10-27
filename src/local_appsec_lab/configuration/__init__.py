@@ -316,7 +316,10 @@ def merge(base: dict, override: dict) -> dict:
 
 def load(root: Path, config_path: str | None = None, overrides: dict | None = None) -> Config:
     try:
-        user_path = Path.home() / ".config" / "local-appsec-lab" / "config.yaml"
+        # Resolve operator-chosen locations: read_text refuses every symlink on its
+        # path, including system ones such as macOS /tmp or a relocated home.
+        root = root.resolve(strict=True)
+        user_path = Path.home().resolve() / ".config" / "local-appsec-lab" / "config.yaml"
         data = {}
         if user_path.is_file() and not user_path.is_symlink():
             data = safe_yaml(read_text(user_path.parent, user_path.name)) or {}

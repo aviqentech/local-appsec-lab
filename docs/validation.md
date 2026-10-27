@@ -106,7 +106,7 @@ A private copy of the Node fixture was scanned with the documented Docker demo c
 ```sh
 docker build -t local-appsec-lab-test:0.1.0 -f tests/compatibility/runtime.Dockerfile tests/compatibility
 cp examples/configuration/docker-synthetic.yaml tests/fixtures/javascript-api/appsec-lab.local.yaml
-appsec-lab scan --project tests/fixtures/javascript-api --config appsec-lab.local.yaml --mode local-active --authorize
+appsec-lab scan --project tests/fixtures/javascript-api --config appsec-lab.local.yaml --mode local-active --authorize --plan-digest PLAN_DIGEST
 ```
 
 The [new Compose sample reports](../examples/sample-reports/0.2-compose/report.md) come from an actual disposable PostgreSQL-backed run; JSON and SARIF validate against their published schemas. Repository/operator metadata is generalized, with measured findings preserved.

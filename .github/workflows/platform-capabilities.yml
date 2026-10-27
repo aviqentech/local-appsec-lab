@@ -43,6 +43,9 @@ jobs:
           }
           $result | ConvertTo-Json | Set-Content windows-engine-capability.json
           Get-Content windows-engine-capability.json
+          # An unavailable engine is a recorded result, not a failure; without this the
+          # failed `docker info` exit code becomes the step's exit code.
+          exit 0
       - uses: actions/upload-artifact@v4
         with:
           name: windows-engine-capability

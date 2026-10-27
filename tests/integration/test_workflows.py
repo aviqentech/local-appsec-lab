@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from local_appsec_lab.authorization import plan_digest
 from local_appsec_lab.configuration import Config, StatefulWorkflow
 from local_appsec_lab.dynamic_tests.fuzz import cases
 from local_appsec_lab.dynamic_tests.workflows import observe
@@ -119,7 +120,7 @@ def test_real_stateful_and_fuzz_controls(fixture_project, free_port):
             },
         ],
     )
-    report, _ = scan(root, root, config, "local-active", True)
+    report, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     assert report.metrics["cleanup_completed"] and report.metrics["services_started"] == 1
     assert [f.rule for f in report.findings if f.state == "confirmed"] == [
         "workflow:vulnerable:release"

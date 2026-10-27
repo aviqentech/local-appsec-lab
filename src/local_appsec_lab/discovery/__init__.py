@@ -83,6 +83,7 @@ ROUTE = re.compile(
 
 
 def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
+    root = root.resolve(strict=True)
     inventory = files(root, excluded_paths=[output])
     languages: dict[str, list[str]] = {}
     frameworks: dict[str, list[str]] = {}

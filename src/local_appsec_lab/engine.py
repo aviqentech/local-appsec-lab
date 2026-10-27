@@ -14,7 +14,7 @@ from pathlib import Path
 
 from local_appsec_lab import __version__
 from local_appsec_lab.agents import HTTPProvider, ROLES, assignments, validate_results
-from local_appsec_lab.authorization import authorize
+from local_appsec_lab.authorization import authorize, plan_digest
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.discovery import inspect
 from local_appsec_lab.discovery.source_links import attach_sources
@@ -50,6 +50,7 @@ def state_path(root: Path, config: Config) -> Path:
 
 
 def plan(root: Path, config: Config) -> dict:
+    root = root.resolve(strict=True)
     inventory = inspect(root, config.output)
     try:
         if config.execution.compose_file:
@@ -83,6 +84,7 @@ def plan(root: Path, config: Config) -> dict:
         )
     return {
         "schema_version": 1,
+        "plan_digest": plan_digest(config),
         "repository": str(root.resolve()),
         "architecture": inventory,
         "startup": runtime,
@@ -215,10 +217,14 @@ def scan(
     native_host: str | None = None,
     native_model: str | None = None,
     native_auth_dir: Path | None = None,
+    reviewed_plan: str | None = None,
 ) -> tuple[Report, dict]:
     started, clock = now(), time.monotonic()
+    root = root.resolve(strict=True)
     run_id = uuid.uuid4().hex
-    approval = authorize(root, workspace, config, mode, run_id, acknowledged, existing_digest)
+    approval = authorize(
+        root, workspace, config, mode, run_id, acknowledged, existing_digest, reviewed_plan
+    )
     if mode == "review" and config.scenarios and reverify and reverify.rule.startswith("boundary:"):
         raise AuthorizationError("Dynamic finding verification requires an authorized dynamic mode")
     if config.ai.strategy == "http" and not allow_model:

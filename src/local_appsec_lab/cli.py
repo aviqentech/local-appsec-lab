@@ -72,6 +72,10 @@ def parser() -> argparse.ArgumentParser:
                 help="Acknowledge local execution and bounded testing for this run",
             )
             command.add_argument(
+                "--plan-digest",
+                help="Digest printed by plan; binds --authorize to the reviewed configuration",
+            )
+            command.add_argument(
                 "--existing-manifest-digest",
                 help="Explicit approval of the existing service manifest printed by plan",
             )
@@ -322,6 +326,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.native_host,
                 args.native_model,
                 args.native_auth_dir,
+                args.plan_digest,
             )
             result = {
                 "run_id": report.run_id,
