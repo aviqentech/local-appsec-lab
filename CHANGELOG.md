@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add a complete command/workflow reference, bundled offline with the skill;
+  document every command, model/runtime choices, project setup, consent, finding
+  states, measured coverage, unsupported behavior and troubleshooting. Correct
+  stale browser/scanner coverage and local-only transmission claims.
+
 - Add project component classification, request-aware plan routing, and component
   outcome tables in reports. Update the portable skill to coordinate independent
   scopes and shared runtime groups, retaining source-only and blocked reasons.

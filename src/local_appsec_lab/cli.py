@@ -88,7 +88,7 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument(
                 "--allow-model-requests",
                 action="store_true",
-                help="Allow selected redacted source to be sent to the configured HTTPS model endpoint",
+                help="Allow selected redacted source to reach the configured native host or HTTPS model endpoint",
             )
             command.add_argument("--model-price-per-million", type=float, default=0)
             command.add_argument(

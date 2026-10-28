@@ -20,6 +20,18 @@ that helper using a Python 3.11+ environment with the package dependencies insta
 The installer bundles the engine here; the recorded Python environment must remain
 available with its dependencies.
 
+Use the bundled [command reference](references/cli-reference.md) for supported
+commands, complete source/live/AI workflows, consent flags, setup requirements,
+limits, report semantics and troubleshooting. Check installed command help before
+using a newer option. Skill installation, project initialization, provider login,
+dependency preparation and live execution are different operations.
+
+For first-time setup, initialize the exact requested project scope and explain
+the generated YAML path, selected budgets and remaining runtime prerequisites.
+Use `init --native-host codex|claude|cursor|gemini` when native review is selected;
+preserve existing YAML and validate edits. Do not silently ignore incompatible
+model flags or assume a child scope inherits parent configuration.
+
 Start by understanding the selected project and the user's requested assessment.
 Run `appsec-lab inspect` and use its `components` map to separate application
 startup candidates, static frontends, supporting services, libraries/unknown
@@ -70,7 +82,11 @@ they cannot supply arbitrary commands, destinations or mutation payloads.
 
 Open the generated HTML or Markdown report. Report confirmed findings separately
 from candidates and informational observations. Include blocked and untested
-coverage. `verify --finding ID --run RUN --authorize --plan-digest PLAN_DIGEST` repeats a synthetic boundary
+coverage and actual model calls, service starts, HTTP requests and browser workflow
+counts. Source-supported AI findings are not runtime-confirmed; reviewer rejection
+does not currently remove the candidate from engine counts. Explain this distinction
+instead of interpreting zero confirmed findings as zero issues.
+`verify --finding ID --run RUN --authorize --plan-digest PLAN_DIGEST` repeats a synthetic boundary
 check with fresh authorization; absence alone does not close an issue. Never
 modify application code during the default scan. `fix` prepares a private diff;
 applying or rolling back requires the user's explicit approval of the concrete

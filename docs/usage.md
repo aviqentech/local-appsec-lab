@@ -1,5 +1,8 @@
 # Usage
 
+For every command and complete source/AI/live/container workflows, start with the
+[command reference](command-reference.md). This page provides additional usage details.
+
 ## Command conventions
 
 Use the Python environment where you installed the engine. `python -m local_appsec_lab` is equivalent to `appsec-lab`. On Windows without activation, use the environment's full executable path. All commands except help/version emit JSON. Scan commands report paths rather than opening a browser.
@@ -189,7 +192,7 @@ Use the same `--config` for later commands when the assessment used a custom con
 
 The deterministic path needs neither a model nor scanner binaries. Optional HTTPS model use requires an explicitly reviewed endpoint, positive token/cost budgets, conservative pricing and separate `--allow-model-requests` consent. A trusted `--model-key-env NAME` flag selects a credential; repository config cannot select an ambient credential. Model calls may transmit selected redacted context. See [configuration](configuration.md) and [integrations](integrations.md).
 
-Optional Semgrep/OSV-Scanner/Trivy binaries and offline data must be provisioned explicitly. Their intended contracts are implemented, but successful real-tool integration has not been validated. ZAP/browser references do not imply implemented execution.
+Optional Semgrep/OSV-Scanner/Trivy binaries and offline data must be provisioned explicitly. Tested tool versions and offline positive/negative controls are recorded in [validation](validation.md); other versions/platforms are not implied. Chromium workflows are implemented with their documented prepared runtime and explicit configuration. ZAP is a methodology reference, not an implemented scanner adapter.
 
 ## Cleanup and cancellation
 
