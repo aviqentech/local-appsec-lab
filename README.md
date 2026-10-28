@@ -75,6 +75,17 @@ Three modes control how far a run goes:
 | `local-active` | Adds synthetic owner/actor, validation, workflow and fuzz scenarios | `--authorize --plan-digest` |
 
 
+## Guide contents
+
+- [Choose an assessment](#choose-an-assessment)
+- [Installation and prerequisites](#-install)
+- [Initialization, configuration and AI budgets](#-quick-start)
+- [Live API, container and browser workflows](#live-api-container-and-browser-workflows)
+- [Every command](#complete-command-catalog)
+- [Agent skill installation](#-ai-workers-and-agent-skill)
+- [Automatic behavior and limitations](#what-is-and-is-not-automatic)
+- [Detailed command reference](docs/command-reference.md)
+
 ## Choose an assessment
 
 | Goal | What to use | What actually executes |
@@ -269,6 +280,112 @@ Generate a full template with `appsec-lab init`. All fields are in the [configur
 | `130` | Cancelled |
 
 A zero exit status never means the application is secure. Read the report's coverage too. More in [usage](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/usage.md).
+
+## Live API, container and browser workflows
+
+These workflows execute application code. Use a disposable local environment and
+review the actual profile before authorizing it. `--native-host` only selects AI;
+`execution.backend: docker` selects a container runtime. Neither supplies the
+application's dependencies or expected user permissions.
+
+### First verify real container/API execution with the supplied demo
+
+From this repository's source checkout, with Docker running, explicitly prepare
+the trusted synthetic test image. The build downloads its declared dependencies:
+
+```sh
+docker build -t local-appsec-lab-test:0.1.0 \
+  -f tests/compatibility/runtime.Dockerfile tests/compatibility
+```
+
+Copy the supplied configuration (`Copy-Item` instead of `cp` on Windows), then
+validate and plan:
+
+```sh
+cp examples/configuration/docker-synthetic.yaml tests/fixtures/javascript-api/docker-demo.yaml
+appsec-lab config validate --project tests/fixtures/javascript-api --config docker-demo.yaml
+appsec-lab plan --project tests/fixtures/javascript-api --config docker-demo.yaml --mode local-active
+```
+
+Read the plan and replace `PLAN_DIGEST` with the value it printed:
+
+```sh
+appsec-lab scan --project tests/fixtures/javascript-api --config docker-demo.yaml \
+  --mode local-active --authorize --plan-digest PLAN_DIGEST
+appsec-lab report --project tests/fixtures/javascript-api --config docker-demo.yaml --format html
+appsec-lab clean --project tests/fixtures/javascript-api --config docker-demo.yaml
+```
+
+The demo already defines synthetic owner/actor identities and vulnerable/protected
+controls. It should record service startup and HTTP requests. A confirmed finding
+can exit `1`; other missing coverage can still make the report partial. This
+fixture configuration is not a setup file for an arbitrary application.
+
+### Use your own application
+
+Edit that application's generated `appsec-lab.yaml` to specify a prepared image,
+actual startup command, service directory, port and health path. For databases,
+select a supported `execution.compose_file` and application `execution.service`;
+configure disposable seeds/migrations where needed. Keep referenced configuration
+inside the selected project. Existing development Compose files can require
+changes to satisfy the constrained runtime; the engine does not run arbitrary
+`docker compose up` semantics.
+
+Once the runtime profile and synthetic tests are configured:
+
+```sh
+appsec-lab config validate --project /path/to/application
+appsec-lab plan --project /path/to/application --mode local-active
+appsec-lab scan --project /path/to/application --mode local-active \
+  --authorize --plan-digest PLAN_DIGEST
+```
+
+For response-only tests, choose `local-passive` on plan and scan. To combine
+native AI with either live mode, configure `ai.strategy: native` and positive
+budgets, then append `--native-host codex --allow-model-requests` to scan. Use
+`claude`, `cursor` or `gemini` with their supported authentication instead.
+Regenerate the plan after configuration changes.
+
+### Add browser testing explicitly
+
+Prepare an image containing compatible Playwright/Chromium, Python and your
+application dependencies. Enable browser testing and supply workflows matching
+the actual frontend, for example:
+
+```yaml
+browser: true
+browser_workflows:
+  - id: homepage-check
+    path: /
+    steps:
+      - action: expect_text
+        selector: h1
+        value: Your expected heading
+```
+
+This illustrates a page assertion, not comprehensive security coverage. Replace
+the selector/text with real expectations and configure separate security policies
+for authentication, authorization or state changes. Mutation workflows need
+explicit synthetic/disposable data and supported rollback. Run the reviewed live
+profile; verify `browser_workflows` is nonzero in the results.
+
+### Confirm what actually ran
+
+| Report metric/outcome | Interpretation |
+|---|---|
+| `model_calls > 0` | Models were called; this does not prove any application execution |
+| `services_started > 0` | Owned runtime services started; an approved existing instance is counted differently |
+| `http_requests > 0` | HTTP requests occurred; inspect which checks completed |
+| `routes_discovered` | Source inventory only, not API test coverage |
+| `browser_workflows > 0` | Configured browser workflows executed; inspect their check outcomes |
+| Component `source_only` | Runtime execution was not selected/applicable for that component |
+| Component `not_selected` / `blocked` | Current profile omitted it or prerequisites prevented execution |
+| Zero confirmed findings | May still include source-supported candidates and untested surfaces |
+
+If Docker cannot be reached, start the intended engine and check its context.
+If startup is ambiguous, select the correct profile/scope. If advisory coverage is
+blocked, configure data or explicitly refresh it. More AI tokens do not fix these
+runtime or coverage gaps.
 
 ## Complete command catalog
 
