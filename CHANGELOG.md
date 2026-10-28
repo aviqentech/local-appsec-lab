@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Size native init budgets from eligible text inventory, report the chosen limits
+  and editable YAML path, explain every AI/limits field in generated comments,
+  and document equivalent setup for all four supported native hosts.
+
 - Put project initialization first in the quick start. Generate commented,
   project-aware configuration and readiness guidance; `init --native-host` selects
   native review with starter budgets without sending source or authorizing execution.

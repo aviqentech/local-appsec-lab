@@ -67,16 +67,20 @@ def test_malicious_readme_is_inert(fixture_project):
     assert report["metrics"]["http_requests"] == 0 and report["metrics"]["services_started"] == 0
 
 
-def test_native_init_configures_review_without_running_source(tmp_path):
+@pytest.mark.parametrize("host", ["codex", "claude", "cursor", "gemini"])
+def test_native_init_configures_review_without_running_source(tmp_path, host):
     (tmp_path / "package.json").write_text("{}")
     (tmp_path / "server.js").write_text('require("fs").writeFileSync("EXECUTED", "yes")')
-    result = cli(tmp_path, "init", "--native-host", "codex")
+    result = cli(tmp_path, "init", "--native-host", host)
     assert result.returncode == 0, result.stderr
     output = json.loads(result.stdout)
     config_text = (tmp_path / "appsec-lab.yaml").read_text()
     config = yaml.safe_load(config_text)
     assert config["ai"]["strategy"] == "native"
     assert config["limits"]["model_tokens"] > 0
+    assert output["configured_settings"]["limits"] == config["limits"]
+    assert output["configured_settings"]["file"] == str(tmp_path / "appsec-lab.yaml")
+    assert output["next_steps"][-1]["command"][-2:] == [host, "--allow-model-requests"]
     assert config["execution"]["command"] == ["node", "server.js"]
     assert "# Project configuration:" in config_text
     assert not output["authorized"] and not output["live_testing"]["ready"]

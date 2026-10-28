@@ -147,6 +147,37 @@ source or starts the application. Without a host selection, it configures
 deterministic review. An existing file must be edited; rerunning `init` does not
 overwrite it. See [AI configuration](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md#ai-workers).
 
+Choose the host you use; the initialization flow supports all four:
+
+| Host | Initialize this project |
+|---|---|
+| Codex | `appsec-lab init --project api --native-host codex` |
+| Claude Code | `appsec-lab init --project api --native-host claude` |
+| Cursor | `appsec-lab init --project api --native-host cursor` |
+| Gemini CLI | `appsec-lab init --project api --native-host gemini` |
+
+Use the same host on `scan`, with `--allow-model-requests`. Each CLI requires its
+own supported authentication; generating configuration does not verify login.
+Other agent hosts can use the portable skill/host-result exchange, but are not
+additional automatic `--native-host` providers.
+
+Native initialization sizes starter budgets from eligible text files and bytes:
+
+| Project size | Text inventory | Model tokens | Model calls | Duration (seconds) |
+|---|---|---:|---:|---:|
+| Small | At most 100 files and 1 MB | 200,000 | 12 | 300 |
+| Medium | Above small; at most 500 files and 10 MB | 500,000 | 24 | 600 |
+| Large | More than 500 files or 10 MB | 1,000,000 | 32 | 900 |
+| Unknown | Discovery could not complete | 200,000 | 12 | 300 |
+
+MB here means 1,000,000 bytes. Binary assets and excluded build output do not count.
+`ai.context_bytes` starts at 6000 per specialist assignment for every size.
+Init prints `configured_settings` with the exact file path, all AI/limit values,
+sizing inputs and edit instructions. Edit that file to fit your needs, then
+validate and review the plan again. Every AI and limits field has a YAML comment.
+These are scheduling budgets, not a coverage guarantee or an enforceable native
+provider spending cap. Deterministic initialization keeps model work disabled.
+
 **Scan a monorepo service?** Initialize that exact directory, for example
 `appsec-lab init --project api --native-host codex`. Scans of `api` or `ui/src`
 do not inherit a configuration created at the repository root. Narrow source

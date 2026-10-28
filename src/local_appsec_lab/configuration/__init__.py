@@ -357,6 +357,42 @@ def template(config: Config | None = None) -> str:
     }
     for key, comment in comments.items():
         text = text.replace("\n" + key + ":", "\n# " + comment + "\n" + key + ":")
+    field_comments = {
+        "ai": {
+            "strategy": "native runs authenticated Codex/Claude/Cursor/Gemini workers; deterministic uses source rules only.",
+            "context_bytes": "Maximum redacted source-context bytes per specialist assignment; not a token count (1000–32000).",
+            "endpoint": "Reviewed HTTPS endpoint for strategy: http; leave null for native hosts.",
+            "model": "HTTP provider model; native workers use the CLI --native-model selection instead.",
+        },
+        "limits": {
+            "duration_seconds": "Run scheduling/execution time budget in seconds (5–3600); cleanup may take additional time.",
+            "max_requests": "Maximum HTTP requests in a run, including controls and verification (1–1000).",
+            "requests_per_second": "Maximum request rate to the approved local target (greater than 0, at most 10).",
+            "response_bytes": "Maximum bytes read from one HTTP response (256–1048576).",
+            "log_bytes": "Maximum captured runtime log bytes (1024–1048576).",
+            "storage_mb": "Scratch/runtime storage budget in MB (8–512); separate from the fixed source inventory cap.",
+            "memory_mb": "Sandbox memory budget in MB (128–2048), where the selected backend supports it.",
+            "processes": "Sandbox process count limit (4–128), where supported by the backend.",
+            "cpus": "Sandbox CPU allocation (greater than 0, at most 4), where supported by the backend.",
+            "max_concurrent": "Maximum concurrently scheduled jobs (1–4).",
+            "retries": "Additional retries for failed supported operations (0–2).",
+            "model_tokens": "Total model-token reservation budget (0–1000000); 0 disables model work. Native vendor caps are not uniformly enforceable.",
+            "model_calls": "Maximum model calls across specialists, verification and remediation (1–64). More calls may increase billed usage.",
+            "model_cost_usd": "HTTP model cost upper-bound budget in USD (0–20); not an enforceable native subscription spending cap.",
+            "max_findings": "Maximum collected findings per run (10–2000).",
+        },
+    }
+    lines = []
+    section = ""
+    for line in text.splitlines():
+        if line and not line.startswith((" ", "#", "-")):
+            section = line.split(":", 1)[0]
+        if line.startswith("  ") and not line.startswith("    "):
+            field = line.strip().split(":", 1)[0]
+            if comment := field_comments.get(section, {}).get(field):
+                lines.append("  # " + comment)
+        lines.append(line)
+    text = "\n".join(lines) + "\n"
     return (
         "# Project configuration: edit this file, then run appsec-lab config validate and plan.\n"
         "# Applies to this --project directory only; child project scans do not inherit it.\n"
