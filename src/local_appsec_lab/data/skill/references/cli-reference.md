@@ -46,6 +46,9 @@ Configuration precedence is supported CLI overrides, project YAML, user-global
 configuration, then built-in defaults. A custom `--config` selects that project's
 file instead of its default `appsec-lab.yaml`; it is not an additional project
 file merged on top. Child `--project` directories do not inherit parent YAML.
+Use the actual project/component location; there is no required folder named api
+or ui. Quote paths containing spaces. Use `--project .` only when already working
+in the intended project directory.
 Keep the same project/config when reading reports or cleaning that run's state.
 
 Only `init` creates configuration. Edit the generated file, then validate and
@@ -62,7 +65,7 @@ uniform hard enforcement of native vendor spending/token usage.
 All commands except help/version emit JSON. Assessment reports are separate
 JSON, Markdown, HTML and SARIF files. HTML is written locally, not automatically
 opened. Paths in examples such as `/path/to/application`, `PLAN_DIGEST`, `RUN_ID`,
-`LAB_ID` and `FIX_ID` must be replaced; they are not working defaults.
+`LAB_ID`, `FIX_ID` and `PATH` must be replaced; they are not working defaults.
 
 ## Every application command
 

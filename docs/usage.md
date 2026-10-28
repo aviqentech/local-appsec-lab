@@ -76,7 +76,9 @@ edited: set `ai.strategy: native`, positive `limits.model_tokens` and a bounded
 with configuration guidance instead of silently running deterministic review.
 
 Each `--project` loads that directory's configuration; it does not search parent
-directories. Initialize `api` and `ui/src` separately when scanning those scopes.
+directories. Initialize each actual component directory separately when scanning
+that scope, using `--project "/path/to/repository/component"`. Replace the path
+with the location identified by inspection; do not assume particular folder names.
 Use `appsec-lab config validate --project PATH` after edits. Generated Next.js
 `.next` output is excluded from inventory; the bounded file/storage limits still
 apply to the remaining files.
