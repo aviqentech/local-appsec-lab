@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Put project initialization first in the quick start. Generate commented,
+  project-aware configuration and readiness guidance; `init --native-host` selects
+  native review with starter budgets without sending source or authorizing execution.
+- Reject ignored/conflicting model scan flags and exclude generated Next.js
+  `.next` output from source inventory.
+
 ## 0.2.3 — 2026-10-27
 
 Released from PR #4, source `615dfeb7f2333cb87cdc8cefa449ef43afd8fd0c`.

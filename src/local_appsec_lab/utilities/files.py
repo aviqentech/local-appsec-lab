@@ -15,6 +15,7 @@ EXCLUDED = {
     ".venv",
     "venv",
     "node_modules",
+    ".next",
     ".appsec-lab",
     "dist",
     "build",

@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from local_appsec_lab import __version__
-from local_appsec_lab.configuration import CONFIG_FILE, load, template
+from local_appsec_lab.configuration import CONFIG_FILE, load
 from local_appsec_lab.engine import clean, doctor, exit_code, plan, scan, state_path
 from local_appsec_lab.errors import ConfigError, LabError
 from local_appsec_lab.findings import RunStore
@@ -65,6 +65,12 @@ def parser() -> argparse.ArgumentParser:
     ]:
         command = commands.add_parser(name)
         common(command)
+        if name == "init":
+            command.add_argument(
+                "--native-host",
+                choices=["codex", "claude", "cursor", "gemini"],
+                help="Configure native AI review with explicit starter budgets; does not send source or authorize execution",
+            )
         if name in {"scan", "verify"}:
             command.add_argument(
                 "--authorize",
@@ -185,15 +191,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         command, code = args.command, 0
         if command == "init":
-            destination = inside(root, Path(CONFIG_FILE))
-            if destination.exists():
-                raise ConfigError("Configuration already exists; no files overwritten")
-            destination.write_text(template())
-            ignore = inside(root, Path(".gitignore"))
-            existing = ignore.read_text() if ignore.exists() else ""
-            if ".appsec-lab/" not in existing:
-                ignore.write_text(existing + "\n# Private security assessments\n.appsec-lab/\n")
-            result = {"configuration": str(destination), "authorized": False}
+            from local_appsec_lab.initialization import initialize
+
+            result = initialize(root, args.native_host)
         elif command == "config":
             result = {
                 "valid": True,

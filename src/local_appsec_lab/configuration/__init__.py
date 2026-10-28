@@ -346,8 +346,23 @@ def load(root: Path, config_path: str | None = None, overrides: dict | None = No
         ) from exc
 
 
-def template() -> str:
+def template(config: Config | None = None) -> str:
+    text = yaml.safe_dump((config or Config()).model_dump(), sort_keys=False)
+    comments = {
+        "execution": "Review detected startup, service directory, port and health_path. Requires a prepared sandbox runtime.",
+        "limits": "Native AI needs positive model_tokens and model_calls. Vendor usage caps are not uniformly enforceable.",
+        "ai": "deterministic = source rules; native = authenticated host workers. Native scans also need --native-host and --allow-model-requests.",
+        "scenarios": "Add synthetic owner/actor identities, expected policy and an inert marker for live API checks.",
+        "browser": "Set true only after preparing a Playwright/Chromium runtime and browser_workflows below.",
+    }
+    for key, comment in comments.items():
+        text = text.replace("\n" + key + ":", "\n# " + comment + "\n" + key + ":")
     return (
-        "# Execution and active testing require CLI authorization for each run.\n"
-        + yaml.safe_dump(Config().model_dump(), sort_keys=False)
+        "# Project configuration: edit this file, then run appsec-lab config validate and plan.\n"
+        "# Applies to this --project directory only; child project scans do not inherit it.\n"
+        "# Init never sends source, installs dependencies or starts the application.\n"
+        "# Source/model review: scan --mode review (model consent separately required).\n"
+        "# Live testing: review plan, then scan --mode local-active --authorize --plan-digest DIGEST.\n"
+        "# Guide: https://github.com/aviqentech/local-appsec-lab/blob/main/docs/configuration.md\n"
+        + text
     )

@@ -9,6 +9,7 @@ Use the Python environment where you installed the engine. `python -m local_apps
 ## Inspect and review an application
 
 ```sh
+appsec-lab init --project /path/to/application
 appsec-lab inspect --project /path/to/application
 appsec-lab plan --project /path/to/application
 appsec-lab scan --project /path/to/application --mode review
@@ -56,6 +57,26 @@ appsec-lab config validate --project /path/to/application
 ```
 
 `init` refuses to overwrite an existing configuration. Keep `.appsec-lab/` ignored by version control; it can contain sensitive local evidence and run history.
+
+Initialization creates a commented `appsec-lab.yaml` in the selected project,
+detects unambiguous supported startup commands, and prints next commands and
+remaining live-test prerequisites. It does not execute application code, install
+dependencies, authenticate providers or send model requests. Generated startup,
+port and health settings must be reviewed before execution.
+
+For native AI review, use `appsec-lab init --project /path/to/application
+--native-host codex` (or `claude`, `cursor`, `gemini`). This selects the native
+strategy and explicit starter token/call budgets. Then run review with the same
+`--native-host` and `--allow-model-requests`. Existing configurations must be
+edited: set `ai.strategy: native`, positive `limits.model_tokens` and a bounded
+`limits.model_calls`, validate and plan again. Conflicting model flags now fail
+with configuration guidance instead of silently running deterministic review.
+
+Each `--project` loads that directory's configuration; it does not search parent
+directories. Initialize `api` and `ui/src` separately when scanning those scopes.
+Use `appsec-lab config validate --project PATH` after edits. Generated Next.js
+`.next` output is excluded from inventory; the bounded file/storage limits still
+apply to the remaining files.
 
 ## Choose a mode
 

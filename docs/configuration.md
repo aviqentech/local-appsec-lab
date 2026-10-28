@@ -1,5 +1,22 @@
 # Configuration and budgets
 
+Start with `appsec-lab init --project PATH`. It creates a commented
+`PATH/appsec-lab.yaml` and prints detected startup hints, remaining prerequisites
+and next commands. For native AI defaults, use
+`appsec-lab init --project PATH --native-host codex` (also accepts `claude`,
+`cursor`, `gemini`). Init never overwrites an existing file or grants execution
+or model consent. Edit the file directly, then run:
+
+```sh
+appsec-lab config validate --project PATH
+appsec-lab plan --project PATH
+```
+
+Configuration is scoped to the selected project directory, not inherited from
+parent directories. Initialize each service scope you scan. Generated startup
+commands need review; databases, synthetic user policies and browser workflows
+cannot be inferred reliably and remain explicit setup tasks.
+
 The authoritative machine-readable definition is [config.schema.json](../schemas/config.schema.json). Unknown keys, unsupported values, YAML aliases and invalid ranges fail validation. `appsec-lab config validate` checks configuration without starting an application.
 
 ## Files and precedence

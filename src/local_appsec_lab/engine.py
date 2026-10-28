@@ -21,6 +21,7 @@ from local_appsec_lab.discovery.source_links import attach_sources
 from local_appsec_lab.dynamic_tests import run as dynamic_scan
 from local_appsec_lab.dynamic_tests.catalog import catalog
 from local_appsec_lab.errors import (
+    ConfigError,
     AuthorizationError,
     BudgetExceeded,
     LabError,
@@ -221,6 +222,16 @@ def scan(
 ) -> tuple[Report, dict]:
     started, clock = now(), time.monotonic()
     root = root.resolve(strict=True)
+    if native_host and config.ai.strategy != "native":
+        raise ConfigError(
+            "--native-host requires ai.strategy: native in the selected project's configuration. "
+            "Edit appsec-lab.yaml and set a positive limits.model_tokens budget; parent configs are not inherited."
+        )
+    if allow_model and config.ai.strategy == "deterministic":
+        raise ConfigError(
+            "--allow-model-requests would be ignored with ai.strategy: deterministic. "
+            "Configure ai.strategy: native or http with positive model budgets."
+        )
     run_id = uuid.uuid4().hex
     approval = authorize(
         root, workspace, config, mode, run_id, acknowledged, existing_digest, reviewed_plan

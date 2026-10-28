@@ -58,6 +58,7 @@
 
 | Step | Command | What happens |
 |:---:|---|---|
+| 0 | `init` | Creates a commented project configuration, detects supported startup hints and explains remaining AI/live-test setup |
 | 1 | `inspect` | Inventories files, languages, frameworks, routes, dependencies and security-sensitive code |
 | 2 | `plan` | Shows the startup command, sandbox, port, synthetic users, test categories and budgets, plus a `plan_digest` |
 | 3 | `scan` | Runs source review, scanners and AI specialists; in local modes, starts the app and runs scoped tests |
@@ -114,13 +115,50 @@ Use the explicit Windows executable in later examples when the environment is no
 Point it at a repository you are authorized to test:
 
 ```sh
+appsec-lab init    --project /path/to/application
 appsec-lab inspect --project /path/to/application
 appsec-lab plan    --project /path/to/application
 appsec-lab scan    --project /path/to/application --mode review
 appsec-lab report  --project /path/to/application --run latest --format html
 ```
 
+`init` creates **`/path/to/application/appsec-lab.yaml`** and prints its location,
+detected startup hints, remaining prerequisites and next commands. Edit that file
+to change the startup command, budgets, AI strategy, API scenarios or browser
+workflows. It preserves existing configuration; after editing, run:
+
+```sh
+appsec-lab config validate --project /path/to/application
+appsec-lab plan --project /path/to/application
+```
+
+**Want AI review?** Initialize with your authenticated host selection instead of
+the default `init` above:
+
+```sh
+appsec-lab init --project /path/to/application --native-host codex
+appsec-lab scan --project /path/to/application --mode review \
+  --native-host codex --allow-model-requests
+```
+
+This sets `ai.strategy: native` and explicit starter model budgets. Substitute
+`claude`, `cursor` or `gemini` as appropriate. Initialization never logs in, sends
+source or starts the application. Without a host selection, it configures
+deterministic review. An existing file must be edited; rerunning `init` does not
+overwrite it. See [AI configuration](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md#ai-workers).
+
+**Scan a monorepo service?** Initialize that exact directory, for example
+`appsec-lab init --project api --native-host codex`. Scans of `api` or `ui/src`
+do not inherit a configuration created at the repository root. Narrow source
+scopes also omit parent deployment files and dependency manifests.
+
 To test the running app, add a startup command and synthetic scenarios to `appsec-lab.yaml`, review the plan, then authorize with the `plan_digest` it printed. The scan is refused if the effective configuration changed since you reviewed it:
+
+Init can fill an unambiguous supported startup command, but port/health settings,
+runtime dependencies, disposable databases and intended user permissions need
+review. Browser testing additionally requires `browser: true`, configured
+`browser_workflows` and a prepared Playwright/Chromium runtime. Init reports this
+remaining setup; it does not claim that live testing is ready.
 
 ```sh
 appsec-lab scan  --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
