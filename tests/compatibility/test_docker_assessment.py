@@ -40,6 +40,10 @@ def test_container_active_assessment(runtime_image, fixture_project, free_port, 
     result, _ = scan(root, root, config, "local-active", True, reviewed_plan=plan_digest(config))
     assert result.metrics["services_started"] == 1
     assert result.metrics["http_requests"] >= 10
+    coverage = result.architecture["assessment"]
+    assert coverage["measured_http_requests"] == result.metrics["http_requests"]
+    target = next(c for c in coverage["components"] if c["execution_target"])
+    assert target["runtime_action"] == "started"
     confirmed = [finding for finding in result.findings if finding.state == "confirmed"]
     assert len(confirmed) == 1 and confirmed[0].rule == "boundary:vulnerable-cross-user"
     assert confirmed[0].verification[-1]["new_observation"]["violation"]

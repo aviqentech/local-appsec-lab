@@ -119,6 +119,25 @@ def markdown(report: Report) -> str:
         "",
     ]
     lines.extend(f"- {esc(key)}: {esc(value)}" for key, value in report.metrics.items())
+    component_rows = report.architecture.get("assessment", {}).get("components", [])
+    if component_rows:
+        lines.extend(
+            [
+                "",
+                "## Component coverage",
+                "",
+                "Startup classification is a source hint. Test completion is measured separately above.",
+                "",
+                "| Component | Kind | Runtime action | Reason |",
+                "|---|---|---|---|",
+            ]
+        )
+        for row in component_rows:
+            lines.append(
+                "| "
+                + " | ".join(esc(row[key]) for key in ("id", "kind", "runtime_action", "reason"))
+                + " |"
+            )
     lines.extend(["", "## Findings", ""])
     for f in report.findings:
         lines.extend(
@@ -207,10 +226,26 @@ def html_report(report: Report) -> str:
         f"<div><strong>{esc(v)}</strong><span>{esc(k.replace('_', ' '))}</span></div>"
         for k, v in report.metrics.items()
     )
+    component_rows = report.architecture.get("assessment", {}).get("components", [])
+    component_table = ""
+    if component_rows:
+        component_table = (
+            "<h2>Component coverage</h2><table><tr><th>Component</th><th>Kind</th><th>Runtime action</th><th>Reason</th></tr>"
+            + "".join(
+                "<tr>"
+                + "".join(
+                    "<td>" + esc(row[key]) + "</td>"
+                    for key in ("id", "kind", "runtime_action", "reason")
+                )
+                + "</tr>"
+                for row in component_rows
+            )
+            + "</table>"
+        )
     limitations = "".join(f"<li>{esc(x)}</li>" for x in report.limitations)
     return f"""<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-appsec-report'; base-uri 'none'; form-action 'none'"><title>{esc(report.product)} assessment</title><style>
 :root{{color-scheme:light dark;font:16px/1.6 system-ui;background:#101725;color:#e6edf7}}body{{max-width:1100px;margin:auto;padding:40px 24px}}h1{{font-size:2.8rem;line-height:1.15}}.eyebrow,.tag{{color:#7ee0c2;font-size:.85rem;letter-spacing:.06em}}.metrics{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}}.metrics div,article{{background:#192438;border:1px solid #33435e;border-radius:12px;padding:22px;margin:14px 0}}.metrics strong{{display:block;font-size:2rem}}.metrics span{{font-size:.85rem;color:#bdcbe0}}h2{{font-size:1.25rem}}dd{{margin:0 0 12px}}dt{{color:#9cb0ce}}pre{{overflow:auto;max-height:450px;background:#0a111e;padding:16px;font-size:.8rem}}table{{border-collapse:collapse;width:100%;font-size:.85rem}}td,th{{text-align:left;border-bottom:1px solid #33435e;padding:10px}}.scroll{{overflow-x:auto}}select{{padding:8px;border-radius:6px;background:#192438;color:#fff}}[hidden]{{display:none}}footer{{color:#9cb0ce;margin-top:30px}}
-</style><header><p class="eyebrow">LOCAL EVIDENCE · EXPLICIT SCOPE</p><h1>{esc(report.product)}</h1><p>Application security assessment · {report.mode} · {report.status}</p><p>{esc(report.repository)}<br>Run {report.run_id} · {esc(report.started)} · {report.duration_seconds:.1f}s<br>{esc(report.execution_strategy)}</p></header><section class="metrics">{metrics}</section><h2>Findings</h2><p>{severity_counts}</p><label>Filter status <select id="filter"><option value="all">All findings</option><option>confirmed</option><option>candidate</option><option>informational</option><option>blocked</option><option>not_reproduced</option></select></label><main>{"".join(cards)}</main><h2>Test coverage</h2><div class="scroll"><table><thead><tr><th>Test</th><th>Category</th><th>Status</th><th>Target</th><th>Reason</th></tr></thead><tbody>{rows}</tbody></table></div><h2>Limitations</h2><ul>{limitations}</ul><footer>No findings does not establish security or complete coverage. This report works offline and contains no external resources.</footer><script nonce="appsec-report">document.getElementById('filter').addEventListener('change',function(){{document.querySelectorAll('article').forEach(a=>a.hidden=this.value!=='all'&&a.dataset.state!==this.value)}})</script></html>"""
+</style><header><p class="eyebrow">LOCAL EVIDENCE · EXPLICIT SCOPE</p><h1>{esc(report.product)}</h1><p>Application security assessment · {report.mode} · {report.status}</p><p>{esc(report.repository)}<br>Run {report.run_id} · {esc(report.started)} · {report.duration_seconds:.1f}s<br>{esc(report.execution_strategy)}</p></header><section class="metrics">{metrics}</section><h2>Findings</h2><p>{component_table}{severity_counts}</p><label>Filter status <select id="filter"><option value="all">All findings</option><option>confirmed</option><option>candidate</option><option>informational</option><option>blocked</option><option>not_reproduced</option></select></label><main>{"".join(cards)}</main><h2>Test coverage</h2><div class="scroll"><table><thead><tr><th>Test</th><th>Category</th><th>Status</th><th>Target</th><th>Reason</th></tr></thead><tbody>{rows}</tbody></table></div><h2>Limitations</h2><ul>{limitations}</ul><footer>No findings does not establish security or complete coverage. This report works offline and contains no external resources.</footer><script nonce="appsec-report">document.getElementById('filter').addEventListener('change',function(){{document.querySelectorAll('article').forEach(a=>a.hidden=this.value!=='all'&&a.dataset.state!==this.value)}})</script></html>"""
 
 
 def render(report: Report, output: Path, formats: list[str] | None = None) -> dict[str, str]:

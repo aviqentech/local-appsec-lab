@@ -111,6 +111,13 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument(
                 "--host-results", help="Repository-relative JSON results of native host assignments"
             )
+        if name == "plan":
+            command.add_argument(
+                "--mode",
+                choices=["review", "local-passive", "local-active"],
+                default="local-active",
+                help="Describe component actions for the requested scan mode; does not execute",
+            )
         if name == "scan":
             command.add_argument("--setup-dependencies", action="store_true")
             command.add_argument(
@@ -283,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
                     entry.unlink()
                 result["removed"] = len(entries)
         elif command == "plan":
-            result = plan(root, config)
+            result = plan(root, config, args.mode)
         elif command == "clean":
             result = {"resources": clean(root, config)}
         elif command in {"scan", "verify"}:

@@ -54,6 +54,10 @@ def initialize(root: Path, native_host: str | None = None) -> dict:
             "languages": sorted(inventory["languages"]),
             "frameworks": sorted(inventory["frameworks"]),
             "services": [s["id"] for s in inventory["services"]],
+            "components": [
+                {k: c[k] for k in ("id", "project", "kind", "runtime_candidate", "reason")}
+                for c in inventory["components"]
+            ],
         }
         try:
             command, directory = resolve_command(config, inventory)

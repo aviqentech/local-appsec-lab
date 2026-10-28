@@ -112,6 +112,21 @@ Use the explicit Windows executable in later examples when the environment is no
 
 ## 🚀 Quick start
 
+Start with project understanding: `inspect` divides the inventory into application
+startup candidates, frontends, supporting services, libraries/unknown code,
+infrastructure, docs and assets. `init` includes that map in its setup guidance.
+`plan --mode review|local-passive|local-active` explains the action for each part:
+source-only, selected for execution, not selected, or blocked with a reason.
+Discovery does not prove a service can start.
+
+When using the skill, ask for the outcome, for example: “Assess this project:
+review all relevant source, run the supported API services in disposable
+containers, and test configured browser workflows; explain anything blocked.”
+The skill coordinates separate service scopes and shared Compose groups. Each
+CLI scan still executes one selected profile/group; it does not automatically
+launch every discovered script. Reports include component coverage and measured
+starts/HTTP requests, keeping source-only work distinct from actual live tests.
+
 Point it at a repository you are authorized to test:
 
 ```sh

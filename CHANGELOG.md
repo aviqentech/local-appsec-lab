@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add project component classification, request-aware plan routing, and component
+  outcome tables in reports. Update the portable skill to coordinate independent
+  scopes and shared runtime groups, retaining source-only and blocked reasons.
+
 - Size native init budgets from eligible text inventory, report the chosen limits
   and editable YAML path, explain every AI/limits field in generated comments,
   and document equivalent setup for all four supported native hosts.

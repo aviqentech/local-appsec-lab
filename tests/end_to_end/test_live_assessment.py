@@ -25,6 +25,12 @@ def test_real_application_full_workflow(runtime_ready, fixture_project, free_por
     )
     assert result.metrics["services_started"] == 1
     assert result.metrics["http_requests"] >= 10
+    routing = result.architecture["assessment"]
+    assert routing["measured_http_requests"] == result.metrics["http_requests"]
+    assert (
+        next(c for c in routing["components"] if c["execution_target"])["runtime_action"]
+        == "started"
+    )
     confirmed = [f for f in result.findings if f.state == "confirmed"]
     assert len(confirmed) == 1 and confirmed[0].rule == "boundary:vulnerable-cross-user"
     assert not any(f.rule == "boundary:secure-cross-user" for f in result.findings)

@@ -80,6 +80,25 @@ apply to the remaining files.
 
 ## Choose a mode
 
+Inspect the `components` map before choosing scopes. Each component includes its
+type, file ownership, source evidence, startup candidates, dependencies and the
+reason for its classification. Runtime candidates still need prerequisite and
+policy review. Supporting databases are dependencies, not standalone HTTP targets.
+
+`appsec-lab plan --project PATH --mode local-active` adds an `assessment` matrix
+showing per-component actions for that requested mode. Use `--mode review` for
+source-only plans. A scan's JSON, Markdown and HTML reports include the component
+outcomes and aggregate measured HTTP requests. “Not selected” means the current
+runtime profile did not cover that component; it does not mean that component is
+safe or cannot run.
+
+The portable skill coordinates independent component scans using each scope's
+configuration and plan, retaining parent infrastructure/dependency review. A CLI
+scan runs one selected service/profile or one constrained Compose group, not an
+automatic batch of all discovered apps. If a requested component cannot start,
+the skill continues other independent authorized work and reports the blocked
+component and exact missing prerequisites.
+
 | Mode | Behavior | Consent |
 |---|---|---|
 | `review` | Reads source; no application execution | No execution consent |
