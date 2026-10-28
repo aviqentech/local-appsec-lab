@@ -1,5 +1,8 @@
 # Troubleshooting
 
+See the complete [exit-code table and precedence rules](usage.md#exit-codes).
+Codes 3 and 4 mean different failures; code 2 can also be a command usage error.
+
 Start with `appsec-lab --version`, `appsec-lab doctor`, and `appsec-lab config validate --project /path/to/application`. Keep the CLI's JSON error, exit code and sanitized platform/version details when reporting a defect. Never include tokens, private reports, production data or unredacted source in public issues.
 
 | Symptom | What to check |
