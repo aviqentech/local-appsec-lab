@@ -27,7 +27,7 @@
 **Local AppSec Lab** is an open-source application security engine and portable Agent Skill from [AVIQEN](https://github.com/aviqentech). It supports source review and explicitly configured local API/browser testing. The default scan reads source; it does not start your application. Live modes start a reviewed runtime when prerequisites are ready and run applicable configured checks. Deterministic review needs no model subscription or API key. Optional model calls transmit selected redacted context; advisory lookups transmit package coordinates after separate consent.
 
 > [!IMPORTANT]
-> **Version 0.2.3 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
+> **Version 0.2.4 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
 
 ## ✨ Why Local AppSec Lab
 

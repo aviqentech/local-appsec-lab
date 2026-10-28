@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.4 — 2026-10-28
+
+Released from PR #5, source `f95947fc61042a56321a0c591143b67fa6724880`.
+
 - Add a complete command/workflow reference, bundled offline with the skill;
   document every command, model/runtime choices, project setup, consent, finding
   states, measured coverage, unsupported behavior and troubleshooting. Correct
