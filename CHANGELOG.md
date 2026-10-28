@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.5 — 2026-10-28
+
+Released from PR #6, source `12c3855cef39a3f362be8940611ebfdc8b9bc61b`.
+
 ## 0.2.4 — 2026-10-28
 
 Released from PR #5, source `f95947fc61042a56321a0c591143b67fa6724880`.
