@@ -21,6 +21,9 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     expected = {}
+    expected[ROOT / "skill/local-appsec-lab/references/cli-reference.md"] = (
+        ROOT / "docs/command-reference.md"
+    ).read_bytes()
     for model, name in [
         (Config, "config"),
         (Approval, "scope"),

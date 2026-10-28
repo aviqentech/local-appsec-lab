@@ -24,7 +24,7 @@
 
 ---
 
-**Local AppSec Lab** is an open-source application security engine and portable Agent Skill from [AVIQEN](https://github.com/aviqentech). It reviews your source, starts your app in a sandbox, tests it with synthetic users, and reports only what it can back with evidence. Your code stays on your machine. Deterministic assessments need no model subscription or API key.
+**Local AppSec Lab** is an open-source application security engine and portable Agent Skill from [AVIQEN](https://github.com/aviqentech). It supports source review and explicitly configured local API/browser testing. The default scan reads source; it does not start your application. Live modes start a reviewed runtime when prerequisites are ready and run applicable configured checks. Deterministic review needs no model subscription or API key. Optional model calls transmit selected redacted context; advisory lookups transmit package coordinates after separate consent.
 
 > [!IMPORTANT]
 > **Version 0.2.3 is experimental.** Assess repositories you own or are authorized to test. Findings carry evidence and coverage limits; a scan cannot certify an application as secure.
@@ -35,7 +35,7 @@
   <tr>
     <td width="50%" valign="top">
       <h3>🏠 Local first</h3>
-      Source analysis, sandboxed runtime and reports all happen on your machine. Nothing is uploaded unless you separately allow redacted context to reach a model you chose.
+      Source analysis, sandboxed runtime and reports all happen on your machine. Model context and advisory package coordinates leave the machine only through explicitly permitted integrations. Application runtime egress is restricted.
     </td>
     <td width="50%" valign="top">
       <h3>🔬 Evidence, not guesses</h3>
@@ -45,7 +45,7 @@
   <tr>
     <td width="50%" valign="top">
       <h3>🧪 Tests the real app</h3>
-      Starts your service in Docker, macOS Seatbelt or bubblewrap and runs synthetic owner/actor access checks, stateful workflows, bounded fuzzing and isolated Chromium flows.
+      Configured live modes can start supported Python/Node services in a prepared sandbox. API policies, database fixtures and Chromium workflows require project-specific setup.
     </td>
     <td width="50%" valign="top">
       <h3>🔐 You stay in control</h3>
@@ -58,9 +58,10 @@
 
 | Step | Command | What happens |
 |:---:|---|---|
+| 0 | `init` | Creates a commented project configuration, detects supported startup hints and explains remaining AI/live-test setup |
 | 1 | `inspect` | Inventories files, languages, frameworks, routes, dependencies and security-sensitive code |
 | 2 | `plan` | Shows the startup command, sandbox, port, synthetic users, test categories and budgets, plus a `plan_digest` |
-| 3 | `scan` | Runs source review, scanners and AI specialists; in local modes, starts the app and runs scoped tests |
+| 3 | `scan` | Runs source checks; configured integrations/AI are optional; live modes start the approved profile and applicable tests |
 | 4 | `verify` | Repeats a synthetic boundary check after a fix; absence alone never closes an issue |
 | 5 | `report` | Writes JSON, SARIF, Markdown and offline HTML with evidence, coverage and limits |
 | 6 | `fix` | Prepares a private patch; applying or rolling it back needs separate authorization |
@@ -69,9 +70,41 @@ Three modes control how far a run goes:
 
 | Mode | Behavior | Consent |
 |---|---|---|
-| `review` | Reads source; never executes application code | None |
+| `review` | Reads source; never executes application code | No execution consent; AI/network integrations need separate consent |
 | `local-passive` | Starts one reviewed service and reads approved local responses | `--authorize --plan-digest` |
 | `local-active` | Adds synthetic owner/actor, validation, workflow and fuzz scenarios | `--authorize --plan-digest` |
+
+
+## Guide contents
+
+- [Choose an assessment](#choose-an-assessment)
+- [Installation and prerequisites](#-install)
+- [Initialization, configuration and AI budgets](#-quick-start)
+- [Live API, container and browser workflows](#live-api-container-and-browser-workflows)
+- [Every command](#complete-command-catalog)
+- [Agent skill installation](#-ai-workers-and-agent-skill)
+- [Automatic behavior and limitations](#what-is-and-is-not-automatic)
+- [Detailed command reference](docs/command-reference.md)
+
+## Choose an assessment
+
+| Goal | What to use | What actually executes |
+|---|---|---|
+| Understand project structure | `inspect` | Source inventory and component classification |
+| Review source without AI | `scan --mode review`, deterministic YAML | Built-in checks and configured offline integrations |
+| Review source with AI | Native/HTTP strategy and explicit model flags | Bounded source-context model workers; no target application |
+| Read live API responses | `scan --mode local-passive` | Prepared reviewed runtime or explicitly approved existing instance, plus scoped HTTP checks |
+| Test access policies/workflows | `scan --mode local-active` | Same runtime, with configured synthetic identities, assertions and bounded inputs |
+| Test frontend/browser behavior | Live configuration plus `browser_workflows` | Prepared Playwright/Chromium Docker runtime and explicit workflow steps |
+| Review a monorepo | Component map and separate profiles/shared Compose group | Skill coordinates scopes; one CLI scan executes one selected profile/group |
+
+AI strategy, scan mode and backend are separate settings. AI permission does not
+start containers; selecting Docker does not generate API/browser test scenarios.
+There is no standalone `start`, `attack`, `test-all` or `docker up` command.
+
+Read the [complete command and workflow reference](docs/command-reference.md) for
+every command, option, prerequisites, model/provider choices, consent boundaries,
+report states and troubleshooting. It is also bundled with the portable skill.
 
 ## 📦 Install
 
@@ -111,19 +144,103 @@ Use the explicit Windows executable in later examples when the environment is no
 
 ## 🚀 Quick start
 
+Start with project understanding: `inspect` divides the inventory into application
+startup candidates, frontends, supporting services, libraries/unknown code,
+infrastructure, docs and assets. `init` includes that map in its setup guidance.
+`plan --mode review|local-passive|local-active` explains the action for each part:
+source-only, selected for execution, not selected, or blocked with a reason.
+Discovery does not prove a service can start.
+
+When using the skill, ask for the outcome, for example: “Assess this project:
+review all relevant source, run the supported API services in disposable
+containers, and test configured browser workflows; explain anything blocked.”
+The skill coordinates separate service scopes and shared Compose groups. Each
+CLI scan still executes one selected profile/group; it does not automatically
+launch every discovered script. Reports include component coverage and measured
+starts/HTTP requests, keeping source-only work distinct from actual live tests.
+
 Point it at a repository you are authorized to test:
 
 ```sh
+appsec-lab init    --project /path/to/application
 appsec-lab inspect --project /path/to/application
-appsec-lab plan    --project /path/to/application
+appsec-lab plan    --project /path/to/application --mode review
 appsec-lab scan    --project /path/to/application --mode review
 appsec-lab report  --project /path/to/application --run latest --format html
 ```
 
-To test the running app, add a startup command and synthetic scenarios to `appsec-lab.yaml`, review the plan, then authorize with the `plan_digest` it printed. The scan is refused if the effective configuration changed since you reviewed it:
+`init` creates **`/path/to/application/appsec-lab.yaml`** and prints its location,
+detected startup hints, remaining prerequisites and next commands. Edit that file
+to change the startup command, budgets, AI strategy, API scenarios or browser
+workflows. It preserves existing configuration; after editing, run:
 
 ```sh
-appsec-lab scan  --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
+appsec-lab config validate --project /path/to/application
+appsec-lab plan --project /path/to/application
+```
+
+**Want AI review?** Initialize with your authenticated host selection instead of
+the default `init` above:
+
+```sh
+appsec-lab init --project /path/to/application --native-host codex
+appsec-lab scan --project /path/to/application --mode review \
+  --native-host codex --allow-model-requests
+```
+
+This sets `ai.strategy: native` and explicit starter model budgets. Substitute
+`claude`, `cursor` or `gemini` as appropriate. Initialization never logs in, sends
+source or starts the application. Without a host selection, it configures
+deterministic review. An existing file must be edited; rerunning `init` does not
+overwrite it. See [AI configuration](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md#ai-workers).
+
+Choose the host you use; the initialization flow supports all four:
+
+| Host | Initialize this project |
+|---|---|
+| Codex | `appsec-lab init --project api --native-host codex` |
+| Claude Code | `appsec-lab init --project api --native-host claude` |
+| Cursor | `appsec-lab init --project api --native-host cursor` |
+| Gemini CLI | `appsec-lab init --project api --native-host gemini` |
+
+Use the same host on `scan`, with `--allow-model-requests`. Each CLI requires its
+own supported authentication; generating configuration does not verify login.
+Other agent hosts can use the portable skill/host-result exchange, but are not
+additional automatic `--native-host` providers.
+
+Native initialization sizes starter budgets from eligible text files and bytes:
+
+| Project size | Text inventory | Model tokens | Model calls | Duration (seconds) |
+|---|---|---:|---:|---:|
+| Small | At most 100 files and 1 MB | 200,000 | 12 | 300 |
+| Medium | Above small; at most 500 files and 10 MB | 500,000 | 24 | 600 |
+| Large | More than 500 files or 10 MB | 1,000,000 | 32 | 900 |
+| Unknown | Discovery could not complete | 200,000 | 12 | 300 |
+
+MB here means 1,000,000 bytes. Binary assets and excluded build output do not count.
+`ai.context_bytes` starts at 6000 per specialist assignment for every size.
+Init prints `configured_settings` with the exact file path, all AI/limit values,
+sizing inputs and edit instructions. Edit that file to fit your needs, then
+validate and review the plan again. Every AI and limits field has a YAML comment.
+These are scheduling budgets, not a coverage guarantee or an enforceable native
+provider spending cap. Deterministic initialization keeps model work disabled.
+
+**Scan a monorepo service?** Initialize that exact directory, for example
+`appsec-lab init --project api --native-host codex`. Scans of `api` or `ui/src`
+do not inherit a configuration created at the repository root. Narrow source
+scopes also omit parent deployment files and dependency manifests.
+
+To test the running app, add a startup command and synthetic scenarios to `appsec-lab.yaml`, review the plan, then authorize with the `plan_digest` it printed. The scan is refused if the effective configuration changed since you reviewed it:
+
+Init can fill an unambiguous supported startup command, but port/health settings,
+runtime dependencies, disposable databases and intended user permissions need
+review. Browser testing additionally requires `browser: true`, configured
+`browser_workflows` and a prepared Playwright/Chromium runtime. Init reports this
+remaining setup; it does not claim that live testing is ready.
+
+```sh
+appsec-lab plan --project /path/to/application --mode local-active
+appsec-lab scan --project /path/to/application --mode local-active --authorize --plan-digest PLAN_DIGEST
 appsec-lab clean --project /path/to/application
 ```
 
@@ -163,6 +280,143 @@ Generate a full template with `appsec-lab init`. All fields are in the [configur
 | `130` | Cancelled |
 
 A zero exit status never means the application is secure. Read the report's coverage too. More in [usage](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/usage.md).
+
+## Live API, container and browser workflows
+
+These workflows execute application code. Use a disposable local environment and
+review the actual profile before authorizing it. `--native-host` only selects AI;
+`execution.backend: docker` selects a container runtime. Neither supplies the
+application's dependencies or expected user permissions.
+
+### First verify real container/API execution with the supplied demo
+
+From this repository's source checkout, with Docker running, explicitly prepare
+the trusted synthetic test image. The build downloads its declared dependencies:
+
+```sh
+docker build -t local-appsec-lab-test:0.1.0 \
+  -f tests/compatibility/runtime.Dockerfile tests/compatibility
+```
+
+Copy the supplied configuration (`Copy-Item` instead of `cp` on Windows), then
+validate and plan:
+
+```sh
+cp examples/configuration/docker-synthetic.yaml tests/fixtures/javascript-api/docker-demo.yaml
+appsec-lab config validate --project tests/fixtures/javascript-api --config docker-demo.yaml
+appsec-lab plan --project tests/fixtures/javascript-api --config docker-demo.yaml --mode local-active
+```
+
+Read the plan and replace `PLAN_DIGEST` with the value it printed:
+
+```sh
+appsec-lab scan --project tests/fixtures/javascript-api --config docker-demo.yaml \
+  --mode local-active --authorize --plan-digest PLAN_DIGEST
+appsec-lab report --project tests/fixtures/javascript-api --config docker-demo.yaml --format html
+appsec-lab clean --project tests/fixtures/javascript-api --config docker-demo.yaml
+```
+
+The demo already defines synthetic owner/actor identities and vulnerable/protected
+controls. It should record service startup and HTTP requests. A confirmed finding
+can exit `1`; other missing coverage can still make the report partial. This
+fixture configuration is not a setup file for an arbitrary application.
+
+### Use your own application
+
+Edit that application's generated `appsec-lab.yaml` to specify a prepared image,
+actual startup command, service directory, port and health path. For databases,
+select a supported `execution.compose_file` and application `execution.service`;
+configure disposable seeds/migrations where needed. Keep referenced configuration
+inside the selected project. Existing development Compose files can require
+changes to satisfy the constrained runtime; the engine does not run arbitrary
+`docker compose up` semantics.
+
+Once the runtime profile and synthetic tests are configured:
+
+```sh
+appsec-lab config validate --project /path/to/application
+appsec-lab plan --project /path/to/application --mode local-active
+appsec-lab scan --project /path/to/application --mode local-active \
+  --authorize --plan-digest PLAN_DIGEST
+```
+
+For response-only tests, choose `local-passive` on plan and scan. To combine
+native AI with either live mode, configure `ai.strategy: native` and positive
+budgets, then append `--native-host codex --allow-model-requests` to scan. Use
+`claude`, `cursor` or `gemini` with their supported authentication instead.
+Regenerate the plan after configuration changes.
+
+### Add browser testing explicitly
+
+Prepare an image containing compatible Playwright/Chromium, Python and your
+application dependencies. Enable browser testing and supply workflows matching
+the actual frontend, for example:
+
+```yaml
+browser: true
+browser_workflows:
+  - id: homepage-check
+    path: /
+    steps:
+      - action: expect_text
+        selector: h1
+        value: Your expected heading
+```
+
+This illustrates a page assertion, not comprehensive security coverage. Replace
+the selector/text with real expectations and configure separate security policies
+for authentication, authorization or state changes. Mutation workflows need
+explicit synthetic/disposable data and supported rollback. Run the reviewed live
+profile; verify `browser_workflows` is nonzero in the results.
+
+### Confirm what actually ran
+
+| Report metric/outcome | Interpretation |
+|---|---|
+| `model_calls > 0` | Models were called; this does not prove any application execution |
+| `services_started > 0` | Owned runtime services started; an approved existing instance is counted differently |
+| `http_requests > 0` | HTTP requests occurred; inspect which checks completed |
+| `routes_discovered` | Source inventory only, not API test coverage |
+| `browser_workflows > 0` | Configured browser workflows executed; inspect their check outcomes |
+| Component `source_only` | Runtime execution was not selected/applicable for that component |
+| Component `not_selected` / `blocked` | Current profile omitted it or prerequisites prevented execution |
+| Zero confirmed findings | May still include source-supported candidates and untested surfaces |
+
+If Docker cannot be reached, start the intended engine and check its context.
+If startup is ambiguous, select the correct profile/scope. If advisory coverage is
+blocked, configure data or explicitly refresh it. More AI tokens do not fix these
+runtime or coverage gaps.
+
+## Complete command catalog
+
+| Command | Use | Requirements, side effects and limits |
+|---|---|---|
+| `doctor` | Check local environment, isolation and tool availability | Capability probes; does not prove your application will start |
+| `init` | Generate commented YAML, component hints, budgets and next steps | Writes YAML and `.gitignore` exclusion; no target execution, login, downloads or model requests |
+| `inspect` | Inventory files, frameworks, routes, components, dependencies and references | Source recognition only; discovered routes are not tested routes |
+| `plan` | Show startup, component actions, budgets, prerequisites and digest | No application startup; `--mode` defaults to `local-active` for planning only |
+| `scan` | Perform selected assessment | Defaults to `review`; live/AI/scanner features require their configuration and consent |
+| `config validate` | Validate YAML/schema | Does not check credentials, install dependencies or prove runtime readiness |
+| `status` | Show latest run status | Uses the selected project's state; not a machine-wide Docker/process monitor |
+| `runs` | List assessment runs | Local history only |
+| `report` | Render an existing run | `--run latest` default; `--format json|markdown|html|sarif|all`; `--shareable` generalizes local metadata but still needs content review |
+| `verify` | Create a fresh run for one finding | `--finding LAB_ID`; defaults to latest run and preserves its mode; live findings need fresh execution approval/digest |
+| `compare OLD_RUN NEW_RUN` | Compare findings between runs | Changed coverage and missing findings do not prove remediation |
+| `clean` | Recover/stop exact resources owned by assessments | Preserves reports/history; not a generic container cleanup command |
+| `setup` | Prepare supported locked Python/npm dependencies | Needs `--authorize --allow-network`, reviewed lockfile and prepared Docker image; not app startup or arbitrary build execution |
+| `advisories status` | Inspect configured/default advisory snapshot status | No download or live vulnerability lookup |
+| `advisories update` | Refresh OSV results for exact recognized package versions | `--allow-network`; package coordinates leave the machine; not every manifest/dependency is necessarily resolved |
+| `tools update osv-scanner` | Refresh supported offline OSV ecosystem data | `--allow-network --ecosystem PyPI` (repeat ecosystem as needed); does not install scanner binary |
+| `tools update trivy` | Refresh supported Trivy database data | `--allow-network`; does not install Trivy or scan arbitrary images |
+| `cache status` / `cache clear` | Inspect/remove deterministic analysis cache entries | Does not delete reports or guarantee complete rescanning of every external integration; no cached AI verdict/runtime confirmation |
+| `skills doctor` | Show skill target locations | Does not install/update the portable skill or authenticate hosts |
+| `cvss --vector VECTOR` | Calculate severity from explicit supported CVSS v4 vector | Does not infer missing impact metrics or prove exploitability |
+| `fix` | Prepare a private remediation bundle for a finding | No application-source edit during preparation; supported automatic rewrite is narrow; reviewed replacements use `--replacement FILE` |
+| `fix --apply FIX_ID` / `fix --rollback FIX_ID` | Apply/undo a reviewed bundle | Requires `--authorize-fix`; may change application source; content/scope checks still apply |
+
+Use `appsec-lab COMMAND --help` for the installed version. Common options are
+`--project`, `--workspace` and project-relative `--config`. Defaults and complete
+examples are in the [command reference](docs/command-reference.md).
 
 ## 🤖 AI workers and agent skill
 
@@ -211,9 +465,43 @@ appsec-lab scan --project /path/to/application --mode review \
 
 Exact measured results and open prerequisites are in [validation](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/validation.md).
 
+## What is and is not automatic
+
+**Implemented for supported configurations:** component discovery; bounded source
+and Python data-flow checks; optional native/HTTP AI specialists and verification;
+configured offline scanners/advisory refresh; owned Python/Node runtime startup;
+constrained Compose/database execution; explicit synthetic API/browser workflows;
+evidence reports, comparison, cleanup and limited reviewed remediation.
+
+**Requires project-specific preparation:** trusted runtime images, dependencies,
+ports and health endpoints, disposable databases/seeds, synthetic identities and
+expected access policies, browser selectors/workflows, host login and optional
+scanner/data provisioning. Init explains known startup candidates and remaining
+requirements; it does not complete every application's environment setup.
+
+**Not provided:** automatic execution of arbitrary application stacks or project
+Compose semantics; unrestricted AI tools; automatic production credentials or
+business-policy inference; public/remote target scanning; destructive testing;
+comprehensive automatic browser journeys; universal whole-program proof or
+universal auto-fixing. ZAP and mobile execution are not implemented adapters.
+
+**Reporting caveat:** source findings normally remain candidates. AI verdicts
+`supported`, `rejected` and `needs_context` are recorded independently and currently
+do not automatically alter candidate state/counts. Zero engine-confirmed findings
+can include source-supported issues. Discovered routes and model calls are not
+live API/browser coverage: inspect `services_started`, `http_requests`,
+`routes_tested`, `browser_workflows` and blocked/not-tested checks.
+
+For a [complete synthetic Docker walkthrough](docs/command-reference.md#working-synthetic-docker-example),
+use the source checkout's fixture and prepared test image. This demonstrates actual
+container/API execution without pretending that its configuration fits your app.
+See [advanced workflows](docs/advanced-usage.md) for constrained Compose, browser,
+stateful and dependency setup. See [validation](docs/validation.md) for tested
+platforms/host versions and unresolved prerequisites.
+
 ## 🛡️ Safety model
 
-- **Authorization is per run.** `--authorize` binds the repository fingerprint, plan digest, mode, port, categories, budgets and expiry. Changed source or configuration is rejected.
+- **Authorization is per run.** `--authorize` binds the repository fingerprint, plan digest, mode, port, categories, budgets and expiry. Configuration must match the reviewed plan; source changes after run authorization are rejected.
 - **Loopback only.** Requests go to explicit `127.0.0.1` / `::1` on the approved port; redirects, proxies, encoded or mapped addresses and other hosts are refused.
 - **Synthetic data only.** State-changing tests need disposable synthetic data and an explicit rollback.
 - **Untrusted output.** Model and scanner output can't run commands; the parent checks categories, source spans and evidence, and model findings stay candidates until verified.
@@ -225,6 +513,10 @@ Exact measured results and open prerequisites are in [validation](https://github
 Read the full [security model](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/security-model.md).
 
 ## 📚 Documentation
+
+Start with the [complete command/workflow reference](docs/command-reference.md)
+and [configuration guide](docs/configuration.md). This README describes the current
+source branch; compare installed `--version`/`--help` before using newly added options.
 
 | Get started | Go deeper | Project |
 |---|---|---|

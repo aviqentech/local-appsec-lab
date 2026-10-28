@@ -17,10 +17,12 @@ from local_appsec_lab.agents import HTTPProvider, ROLES, assignments, validate_r
 from local_appsec_lab.authorization import authorize, plan_digest
 from local_appsec_lab.configuration import Config
 from local_appsec_lab.discovery import inspect
+from local_appsec_lab.discovery.components import assessment
 from local_appsec_lab.discovery.source_links import attach_sources
 from local_appsec_lab.dynamic_tests import run as dynamic_scan
 from local_appsec_lab.dynamic_tests.catalog import catalog
 from local_appsec_lab.errors import (
+    ConfigError,
     AuthorizationError,
     BudgetExceeded,
     LabError,
@@ -49,11 +51,16 @@ def state_path(root: Path, config: Config) -> Path:
     return inside(root, Path(config.output))
 
 
-def plan(root: Path, config: Config) -> dict:
-    root = root.resolve(strict=True)
-    inventory = inspect(root, config.output)
+def startup_summary(root: Path, config: Config, inventory: dict) -> dict:
     try:
-        if config.execution.compose_file:
+        if config.execution.existing_url:
+            runtime = {
+                "supported": bool(config.execution.existing_identity),
+                "service": config.execution.service or ".",
+                "backend": "existing",
+                "reason": "Existing service requires explicit manifest approval and matching health identity",
+            }
+        elif config.execution.compose_file:
             from local_appsec_lab.runtime.compose import definition
 
             services, selected = definition(root, config)
@@ -71,8 +78,15 @@ def plan(root: Path, config: Config) -> dict:
         else:
             command, service = resolve_command(config, inventory)
             runtime = {"command": command, "service": service, "supported": True}
-    except RuntimeFailure as exc:
+    except LabError as exc:
         runtime = {"supported": False, "reason": str(exc)}
+    return runtime
+
+
+def plan(root: Path, config: Config, mode: str = "local-active") -> dict:
+    root = root.resolve(strict=True)
+    inventory = inspect(root, config.output)
+    runtime = startup_summary(root, config, inventory)
     existing = None
     if config.execution.existing_url:
         existing = digest(
@@ -87,6 +101,7 @@ def plan(root: Path, config: Config) -> dict:
         "plan_digest": plan_digest(config),
         "repository": str(root.resolve()),
         "architecture": inventory,
+        "assessment": assessment(inventory, config, mode, runtime),
         "startup": runtime,
         "backend": config.execution.backend,
         "permissions": [
@@ -221,6 +236,16 @@ def scan(
 ) -> tuple[Report, dict]:
     started, clock = now(), time.monotonic()
     root = root.resolve(strict=True)
+    if native_host and config.ai.strategy != "native":
+        raise ConfigError(
+            "--native-host requires ai.strategy: native in the selected project's configuration. "
+            "Edit appsec-lab.yaml and set a positive limits.model_tokens budget; parent configs are not inherited."
+        )
+    if allow_model and config.ai.strategy == "deterministic":
+        raise ConfigError(
+            "--allow-model-requests would be ignored with ai.strategy: deterministic. "
+            "Configure ai.strategy: native or http with positive model budgets."
+        )
     run_id = uuid.uuid4().hex
     approval = authorize(
         root, workspace, config, mode, run_id, acknowledged, existing_digest, reviewed_plan
@@ -698,6 +723,27 @@ def scan(
         limitations.append(
             "macOS is for reviewed source only: numeric process-argument sysctls can expose same-user host process metadata/environment despite Seatbelt. Use Docker for untrusted code. It uses a per-port host-loopback sandbox, not a private network namespace. Aggregate RSS/process/storage limits are monitored; Docker provides stronger resource isolation. Daemonizing startup programs are unsupported."
         )
+    inventory["assessment"] = assessment(
+        inventory,
+        config,
+        mode,
+        startup_summary(root, config, inventory),
+        started=runtime.started,
+        requests=budget.requests,
+        completed=True,
+    )
+    if mode != "review":
+        for component in inventory["assessment"]["components"]:
+            if component["runtime_action"] == "not_selected":
+                checks.append(
+                    Check(
+                        id="component:" + component["id"],
+                        category="component_runtime",
+                        status="not_tested",
+                        target=component["id"],
+                        reason=component["reason"],
+                    )
+                )
     metrics = {
         "source_files_inspected": len(inventory["files"]),
         "dependencies_identified": len(inventory["dependencies"]),

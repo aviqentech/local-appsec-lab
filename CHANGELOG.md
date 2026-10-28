@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Add a complete command/workflow reference, bundled offline with the skill;
+  document every command, model/runtime choices, project setup, consent, finding
+  states, measured coverage, unsupported behavior and troubleshooting. Correct
+  stale browser/scanner coverage and local-only transmission claims.
+
+- Add project component classification, request-aware plan routing, and component
+  outcome tables in reports. Update the portable skill to coordinate independent
+  scopes and shared runtime groups, retaining source-only and blocked reasons.
+
+- Size native init budgets from eligible text inventory, report the chosen limits
+  and editable YAML path, explain every AI/limits field in generated comments,
+  and document equivalent setup for all four supported native hosts.
+
+- Put project initialization first in the quick start. Generate commented,
+  project-aware configuration and readiness guidance; `init --native-host` selects
+  native review with starter budgets without sending source or authorizing execution.
+- Reject ignored/conflicting model scan flags and exclude generated Next.js
+  `.next` output from source inventory.
+
 ## 0.2.3 — 2026-10-27
 
 Released from PR #4, source `615dfeb7f2333cb87cdc8cefa449ef43afd8fd0c`.

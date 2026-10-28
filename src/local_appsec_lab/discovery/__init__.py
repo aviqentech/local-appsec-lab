@@ -13,6 +13,7 @@ from local_appsec_lab.utilities.files import files, read_bytes
 from local_appsec_lab.utilities.yaml import safe_yaml
 
 from .context import CODE_SUFFIXES, enrich, text_content
+from .components import components
 
 LANGUAGES = {
     ".js": "JavaScript",
@@ -283,7 +284,7 @@ def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
     context = enrich(texts, inventory, services)
     routes.extend(context.pop("static_routes"))
     infra.extend(context.pop("infrastructure"))
-    return {
+    result = {
         **context,
         "files": inventory,
         "binary_files": binary_files,
@@ -305,3 +306,6 @@ def inspect(root: Path, output: str = ".appsec-lab") -> dict[str, Any]:
             "Environment files and private-key files are excluded, never loaded into the app.",
         ],
     }
+
+    result["components"] = components(result)
+    return result

@@ -1,5 +1,41 @@
 # Configuration and budgets
 
+Start with `appsec-lab init --project PATH`. It creates a commented
+`PATH/appsec-lab.yaml` and prints detected startup hints, remaining prerequisites
+and next commands. For native AI defaults, use
+`appsec-lab init --project PATH --native-host codex` (also accepts `claude`,
+`cursor`, `gemini`). Init never overwrites an existing file or grants execution
+or model consent. Edit the file directly, then run:
+
+```sh
+appsec-lab config validate --project PATH
+appsec-lab plan --project PATH
+```
+
+Configuration is scoped to the selected project directory, not inherited from
+parent directories. Initialize each service scope you scan. Generated startup
+commands need review; databases, synthetic user policies and browser workflows
+cannot be inferred reliably and remain explicit setup tasks.
+
+Native init selects size-based starter budgets using eligible text inventory
+(binary assets and excluded generated output do not count):
+
+| Size | Condition | `model_tokens` | `model_calls` | `duration_seconds` |
+|---|---|---:|---:|---:|
+| Small | ≤100 files and ≤1,000,000 bytes | 200000 | 12 | 300 |
+| Medium | Above small; ≤500 files and ≤10,000,000 bytes | 500000 | 24 | 600 |
+| Large | >500 files or >10,000,000 bytes | 1000000 | 32 | 900 |
+| Unknown | Incomplete discovery | 200000 | 12 | 300 |
+
+`context_bytes` starts at 6000. This limits the redacted context bytes in each
+specialist assignment, not total scan tokens. `configured_settings` in init's
+JSON output reports the absolute YAML path, actual `ai`/`limits`, size inputs and
+whether native sizing was applied. Change those sections in the printed file,
+then validate and plan again. Generated comments explain every AI/limits field,
+units and bounds. Existing files are not resized or overwritten by a later init.
+Larger budgets do not guarantee full coverage. Native vendor token/cost caps are
+not uniformly enforceable; these are local scheduling/reservation limits.
+
 The authoritative machine-readable definition is [config.schema.json](../schemas/config.schema.json). Unknown keys, unsupported values, YAML aliases and invalid ranges fail validation. `appsec-lab config validate` checks configuration without starting an application.
 
 ## Files and precedence

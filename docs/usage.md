@@ -1,5 +1,8 @@
 # Usage
 
+For every command and complete source/AI/live/container workflows, start with the
+[command reference](command-reference.md). This page provides additional usage details.
+
 ## Command conventions
 
 Use the Python environment where you installed the engine. `python -m local_appsec_lab` is equivalent to `appsec-lab`. On Windows without activation, use the environment's full executable path. All commands except help/version emit JSON. Scan commands report paths rather than opening a browser.
@@ -9,6 +12,7 @@ Use the Python environment where you installed the engine. `python -m local_apps
 ## Inspect and review an application
 
 ```sh
+appsec-lab init --project /path/to/application
 appsec-lab inspect --project /path/to/application
 appsec-lab plan --project /path/to/application
 appsec-lab scan --project /path/to/application --mode review
@@ -57,7 +61,46 @@ appsec-lab config validate --project /path/to/application
 
 `init` refuses to overwrite an existing configuration. Keep `.appsec-lab/` ignored by version control; it can contain sensitive local evidence and run history.
 
+Initialization creates a commented `appsec-lab.yaml` in the selected project,
+detects unambiguous supported startup commands, and prints next commands and
+remaining live-test prerequisites. It does not execute application code, install
+dependencies, authenticate providers or send model requests. Generated startup,
+port and health settings must be reviewed before execution.
+
+For native AI review, use `appsec-lab init --project /path/to/application
+--native-host codex` (or `claude`, `cursor`, `gemini`). This selects the native
+strategy and explicit starter token/call budgets. Then run review with the same
+`--native-host` and `--allow-model-requests`. Existing configurations must be
+edited: set `ai.strategy: native`, positive `limits.model_tokens` and a bounded
+`limits.model_calls`, validate and plan again. Conflicting model flags now fail
+with configuration guidance instead of silently running deterministic review.
+
+Each `--project` loads that directory's configuration; it does not search parent
+directories. Initialize `api` and `ui/src` separately when scanning those scopes.
+Use `appsec-lab config validate --project PATH` after edits. Generated Next.js
+`.next` output is excluded from inventory; the bounded file/storage limits still
+apply to the remaining files.
+
 ## Choose a mode
+
+Inspect the `components` map before choosing scopes. Each component includes its
+type, file ownership, source evidence, startup candidates, dependencies and the
+reason for its classification. Runtime candidates still need prerequisite and
+policy review. Supporting databases are dependencies, not standalone HTTP targets.
+
+`appsec-lab plan --project PATH --mode local-active` adds an `assessment` matrix
+showing per-component actions for that requested mode. Use `--mode review` for
+source-only plans. A scan's JSON, Markdown and HTML reports include the component
+outcomes and aggregate measured HTTP requests. “Not selected” means the current
+runtime profile did not cover that component; it does not mean that component is
+safe or cannot run.
+
+The portable skill coordinates independent component scans using each scope's
+configuration and plan, retaining parent infrastructure/dependency review. A CLI
+scan runs one selected service/profile or one constrained Compose group, not an
+automatic batch of all discovered apps. If a requested component cannot start,
+the skill continues other independent authorized work and reports the blocked
+component and exact missing prerequisites.
 
 | Mode | Behavior | Consent |
 |---|---|---|
@@ -149,7 +192,7 @@ Use the same `--config` for later commands when the assessment used a custom con
 
 The deterministic path needs neither a model nor scanner binaries. Optional HTTPS model use requires an explicitly reviewed endpoint, positive token/cost budgets, conservative pricing and separate `--allow-model-requests` consent. A trusted `--model-key-env NAME` flag selects a credential; repository config cannot select an ambient credential. Model calls may transmit selected redacted context. See [configuration](configuration.md) and [integrations](integrations.md).
 
-Optional Semgrep/OSV-Scanner/Trivy binaries and offline data must be provisioned explicitly. Their intended contracts are implemented, but successful real-tool integration has not been validated. ZAP/browser references do not imply implemented execution.
+Optional Semgrep/OSV-Scanner/Trivy binaries and offline data must be provisioned explicitly. Tested tool versions and offline positive/negative controls are recorded in [validation](validation.md); other versions/platforms are not implied. Chromium workflows are implemented with their documented prepared runtime and explicit configuration. ZAP is a methodology reference, not an implemented scanner adapter.
 
 ## Cleanup and cancellation
 
