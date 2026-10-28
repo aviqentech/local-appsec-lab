@@ -1,6 +1,8 @@
 # Project understanding and component routing
 
-Inspect the requested root before choosing scan scopes. Use the component map,
+Inspect the requested root before choosing scan scopes. Use actual locations
+from the user and inventory; do not assume folders named api, backend, ui or src
+exist. Documentation paths are placeholders, not discovered target directories. Use the component map,
 manifest evidence, routes and dependency graph to understand the actual stack.
 The map is conservative: a manifest or startup string is a candidate, not proof
 that dependencies, health settings or a disposable runtime are ready. Confirm

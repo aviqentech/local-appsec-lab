@@ -194,14 +194,16 @@ source or starts the application. Without a host selection, it configures
 deterministic review. An existing file must be edited; rerunning `init` does not
 overwrite it. See [AI configuration](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/advanced-usage.md#ai-workers).
 
-Choose the host you use; the initialization flow supports all four:
+Choose the host you use; the initialization flow supports all four. Replace
+`/path/to/application` with the actual location of the project you want to assess.
+Keep the path quoted, especially when it contains spaces:
 
-| Host | Initialize this project |
+| Host | Initialize your project (replace the path) |
 |---|---|
-| Codex | `appsec-lab init --project api --native-host codex` |
-| Claude Code | `appsec-lab init --project api --native-host claude` |
-| Cursor | `appsec-lab init --project api --native-host cursor` |
-| Gemini CLI | `appsec-lab init --project api --native-host gemini` |
+| Codex | `appsec-lab init --project "/path/to/application" --native-host codex` |
+| Claude Code | `appsec-lab init --project "/path/to/application" --native-host claude` |
+| Cursor | `appsec-lab init --project "/path/to/application" --native-host cursor` |
+| Gemini CLI | `appsec-lab init --project "/path/to/application" --native-host gemini` |
 
 Use the same host on `scan`, with `--allow-model-requests`. Each CLI requires its
 own supported authentication; generating configuration does not verify login.
@@ -225,10 +227,11 @@ validate and review the plan again. Every AI and limits field has a YAML comment
 These are scheduling budgets, not a coverage guarantee or an enforceable native
 provider spending cap. Deterministic initialization keeps model work disabled.
 
-**Scan a monorepo service?** Initialize that exact directory, for example
-`appsec-lab init --project api --native-host codex`. Scans of `api` or `ui/src`
-do not inherit a configuration created at the repository root. Narrow source
-scopes also omit parent deployment files and dependency manifests.
+**Scan part of a monorepo?** Use the actual component location, for example
+`appsec-lab init --project "/path/to/repository/component" --native-host codex`.
+Replace that path with a directory identified by project inspection; folder names
+are project-specific. Component scans do not inherit repository-root configuration.
+Narrow scopes also omit parent deployment files and dependency manifests.
 
 To test the running app, add a startup command and synthetic scenarios to `appsec-lab.yaml`, review the plan, then authorize with the `plan_digest` it printed. The scan is refused if the effective configuration changed since you reviewed it:
 
@@ -270,14 +273,24 @@ Generate a full template with `appsec-lab init`. All fields are in the [configur
 
 ### Exit codes
 
-| Code | Meaning |
-|:---:|---|
-| `0` | Completed without a confirmed finding at or above the `fail_on` threshold |
-| `1` | A confirmed finding meets the threshold |
-| `2` | Partial coverage or exhausted budget; check blocked and untested checks |
-| `3` / `4` | Invalid configuration or path / authorization or scope rejection |
-| `5` | Application startup failure |
-| `130` | Cancelled |
+| Code | Meaning | What to do |
+|---|---|---|
+| `0` | Command succeeded; an assessment has no confirmed finding meeting `fail_on` and is not partial | Read coverage and candidates; this is not a security clearance |
+| `1` | A confirmed finding meets the configured severity threshold | Review evidence and remediate; the same report may still contain coverage gaps |
+| `2` | Assessment is partial, a budget/rollback limit was hit, or argument parsing failed | For a report, inspect blocked/not-tested checks; for usage errors, read stderr and command help |
+| `3` | Invalid configuration, project path or supported argument combination | Correct the YAML/path/options, validate configuration and regenerate the plan |
+| `4` | Execution authorization or scope was rejected | Review the exact project, mode, plan digest and existing-instance approval; do not bypass scope controls |
+| `5` | Application startup/readiness failed | Check the Docker daemon, prepared image, dependencies, startup command, port, health endpoint and runtime diagnostics |
+| `6` | A dependency failure was returned directly by the command | Check explicitly provisioned packages, scanner binaries/data and the reported prerequisite |
+| `70` | Unexpected internal error | Keep sanitized version/error details and report the defect; do not publish secrets or private reports |
+| `130` | Run interrupted/cancelled | Inspect final status and run `clean` with the same project/config after interruption |
+
+For scan/verify reports, exit selection is: cancellation → threshold-triggering
+confirmed finding → startup failure → partial coverage → success. An exit `1`
+can therefore accompany a partial report. Caught worker/dependency failures can
+appear as blocked checks and exit `2`; not every missing dependency produces `6`.
+Argument-parser errors also use `2` and may print usage rather than report JSON.
+Always read the report status and coverage alongside the exit code.
 
 A zero exit status never means the application is secure. Read the report's coverage too. More in [usage](https://github.com/aviqentech/local-appsec-lab/blob/main/docs/usage.md).
 

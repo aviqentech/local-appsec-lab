@@ -46,6 +46,9 @@ Configuration precedence is supported CLI overrides, project YAML, user-global
 configuration, then built-in defaults. A custom `--config` selects that project's
 file instead of its default `appsec-lab.yaml`; it is not an additional project
 file merged on top. Child `--project` directories do not inherit parent YAML.
+Use the actual project/component location; there is no required folder named api
+or ui. Quote paths containing spaces. Use `--project .` only when already working
+in the intended project directory.
 Keep the same project/config when reading reports or cleaning that run's state.
 
 Only `init` creates configuration. Edit the generated file, then validate and
@@ -62,7 +65,7 @@ uniform hard enforcement of native vendor spending/token usage.
 All commands except help/version emit JSON. Assessment reports are separate
 JSON, Markdown, HTML and SARIF files. HTML is written locally, not automatically
 opened. Paths in examples such as `/path/to/application`, `PLAN_DIGEST`, `RUN_ID`,
-`LAB_ID` and `FIX_ID` must be replaced; they are not working defaults.
+`LAB_ID`, `FIX_ID` and `PATH` must be replaced; they are not working defaults.
 
 ## Every application command
 
@@ -381,17 +384,24 @@ all sensitive content has been removed.
 | Plan rejected | Regenerate/review after configuration changes and use the new digest |
 | Partial coverage | Read blocked/not-tested checks; do not report a complete security clearance |
 
-| Exit | Meaning |
-|---|---|
-| 0 | Selected work completed without a threshold-triggering confirmed finding |
-| 1 | Confirmed finding meets configured severity threshold |
-| 2 | Partial coverage or exhausted budget; argument-parser usage errors can also exit 2 |
-| 3 | Invalid configuration/path |
-| 4 | Authorization/scope rejection |
-| 5 | Startup failure |
-| 6 | Dependency failure for applicable direct failures |
-| 70 | Unexpected internal error |
-| 130 | Cancellation |
+| Code | Meaning | What to do |
+|---|---|---|
+| `0` | Command succeeded; an assessment has no confirmed finding meeting `fail_on` and is not partial | Read coverage and candidates; this is not a security clearance |
+| `1` | A confirmed finding meets the configured severity threshold | Review evidence and remediate; the same report may still contain coverage gaps |
+| `2` | Assessment is partial, a budget/rollback limit was hit, or argument parsing failed | For a report, inspect blocked/not-tested checks; for usage errors, read stderr and command help |
+| `3` | Invalid configuration, project path or supported argument combination | Correct the YAML/path/options, validate configuration and regenerate the plan |
+| `4` | Execution authorization or scope was rejected | Review the exact project, mode, plan digest and existing-instance approval; do not bypass scope controls |
+| `5` | Application startup/readiness failed | Check the Docker daemon, prepared image, dependencies, startup command, port, health endpoint and runtime diagnostics |
+| `6` | A dependency failure was returned directly by the command | Check explicitly provisioned packages, scanner binaries/data and the reported prerequisite |
+| `70` | Unexpected internal error | Keep sanitized version/error details and report the defect; do not publish secrets or private reports |
+| `130` | Run interrupted/cancelled | Inspect final status and run `clean` with the same project/config after interruption |
+
+For scan/verify reports, exit selection is: cancellation → threshold-triggering
+confirmed finding → startup failure → partial coverage → success. An exit `1`
+can therefore accompany a partial report. Caught worker/dependency failures can
+appear as blocked checks and exit `2`; not every missing dependency produces `6`.
+Argument-parser errors also use `2` and may print usage rather than report JSON.
+Always read the report status and coverage alongside the exit code.
 
 `scan --fail-on informational|low|medium|high|critical` selects the confirmed-finding
 threshold; it does not suppress blocked coverage. Always read status, metrics and
